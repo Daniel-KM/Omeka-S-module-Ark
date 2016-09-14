@@ -28,8 +28,8 @@ class Noid extends AbstractName
 
         $noid = $this->_openDatabase(\Noid::DB_WRITE);
         if (empty($noid)) {
-            $message = __('Cannot open database: %s', \Noid::errmsg(null, 1) ?: __('No database'));
-            _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
+            $message = sprintf($this->translate('Cannot open database: %s'), \Noid::errmsg(null, 1) ?: $this->translate('No database'));
+            $this->_log('[Ark&Noid] ' . $message, Zend_Log::ERR);
             return;
         }
 
@@ -49,9 +49,9 @@ class Noid extends AbstractName
 
         $ark = \Noid::mint($noid, $contact);
         if (strlen($ark) == '') {
-            $message = __('Cannot create an Ark for %s #%d: %s',
+            $message = sprintf($this->translate('Cannot create an Ark for %s #%d: %s'),
                 get_class($record), $record->id(), Noid::errmsg($noid));
-            _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
+            $this->_log('[Ark&Noid] ' . $message, Zend_Log::ERR);
             \Noid::dbclose($noid);
             return;
         }
@@ -60,18 +60,18 @@ class Noid extends AbstractName
         $locations = implode('|', $recordUrls);
         $result = \Noid::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
         if (empty($result)) {
-            $message = __('Ark set, but not bound [%s, %s #%d]: %s',
+            $message = sprintf($this->translate('Ark set, but not bound [%s, %s #%d]: %s'),
                 $ark, get_class($record), $record->id(), \Noid::errmsg($noid));
-            _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
+            $this->_log('[Ark&Noid] ' . $message, Zend_Log::ERR);
         }
 
         // Save the reverse bind on Omeka id to find it instantly, as a "note".
         // If needed, other urls can be find in a second step via the ark.
         $result = \Noid::note($noid, $contact, 'locations/' . $recordUrl, $ark);
         if (empty($result)) {
-            $message = __('Ark set, but no reverse bind [%s, %s #%d]: %s',
+            $message = sprintf($this->translate('Ark set, but no reverse bind [%s, %s #%d]: %s'),
                 $ark, get_class($record), $record->id(), \Noid::errmsg($noid));
-            _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
+            $this->_log('[Ark&Noid] ' . $message, Zend_Log::ERR);
         }
 
         \Noid::dbclose($noid);
@@ -103,7 +103,7 @@ class Noid extends AbstractName
 
         $total = \Noid::parse_template($template, $prefix, $mask, $gen_type, $message);
         if (empty($total)) {
-            $this->_errorMessage = __('Template unparsable: %s', $message);
+            $this->_errorMessage = sprintf($this->translate('Template unparsable: %s'), $message);
             return false;
         }
 

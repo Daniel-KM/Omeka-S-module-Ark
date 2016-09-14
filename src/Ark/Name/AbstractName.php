@@ -82,7 +82,7 @@ abstract class AbstractName
 
         // Check the result.
         if (empty($ark)) {
-            $message = __('No Ark created: check your format "%s" [%s #%d].',
+            $message = sprintf($this->translate('No Ark created: check your format "%s" [%s #%d].'),
                 get_class($this), get_class($this->_record), $this->_record->id);
             $this->_log('[Ark&Noid] ' . $message);
             return;
@@ -95,8 +95,8 @@ abstract class AbstractName
         }
         // Check ark (useful only for external process).
         elseif (!$this->_checkFullArk($ark)) {
-            $message = __('Ark "%s" is not correct: check your format "%s" and your processor [%s #%d].',
-                $ark, get_class($this), get_class($this->_record), $this->_record->id);
+            $message = sprintf($this->translate('Ark "%s" is not correct: check your format "%s" and your processor [%s].'),
+                               $ark, get_class($this), get_class($this->_record));
             $this->_log('[Ark&Noid] ' . $message);
             return;
         }
@@ -108,7 +108,7 @@ abstract class AbstractName
         // Check if the ark is single.
         if ($this->_arkExists($ark)) {
             if ($this->_isFullArk) {
-                $message = __('The proposed ark "%s" is not unique [%s #%d].',
+                $message = sprintf($this->translate('The proposed ark "%s" is not unique [%s #%d].'),
                     $ark, get_class($this->_record), $this->_record->id);
                 $this->_log('[Ark&Noid] ' . $message);
                 return;
@@ -134,9 +134,9 @@ abstract class AbstractName
      */
     protected function _processDuplicate($ark, $mainPart)
     {
-        $message = __('Unable to create a unique ark.')
-            . ' ' . __('Check parameters of the format "%s" [%s #%d].',
-                get_class($this), get_class($this->_record), $this->_record->id);
+        $message = $this->translate('Unable to create a unique ark.')
+            . ' ' . sprintf($this->translate('Check parameters of the format "%s" [%s #%d].'),
+                            get_class($this), get_class($this->_record), $this->_record->id);
         $this->_log('[Ark&Noid] ' . $message);
         return;
     }
@@ -243,7 +243,7 @@ abstract class AbstractName
         if ($length) {
             // Check if the string is longer to warn it in the log.
             if (strlen($string) > $length) {
-                $message = __('The Ark format "%s" requires a static length of %d characters, but the current ark is %d characters long [%s #%d].',
+                $message = sprintf($this->translate('The Ark format "%s" requires a static length of %d characters, but the current ark is %d characters long [%s #%d].'),
                     get_class($this), $length, strlen($string), get_class($this->_record), $this->_record->id);
                 $this->_log('[Ark&Noid] ' . $message);
                 return $string;
@@ -277,7 +277,7 @@ abstract class AbstractName
         $length = $this->_getParameter('length');
         if (strlen($salted) < $length) {
             // This can occurs too when the conversion creates a small number.
-            $message = __('The Ark format "%s" requires a static length of %d characters, but the hash creates a %d characters long [%s #%d].',
+            $message = sprintf($this->translate('The Ark format "%s" requires a static length of %d characters, but the hash creates a %d characters long [%s #%d].'),
                 get_class($this), $length, strlen($salted), get_class($this->_record), $this->_record->id);
             $this->_log('[Ark&Noid] ' . $message);
 
@@ -410,7 +410,7 @@ abstract class AbstractName
                          ->get('Omeka\AuthenticationService')->getIdentity();
 
         return empty($identity)
-            ? __('Unknown user')
+            ? $this->translate('Unknown user')
             : $identity->getName() . ' <' . $identity->getEmail() . '>';
     }
 
@@ -442,8 +442,13 @@ abstract class AbstractName
             }
             $status = proc_close($proc);
         } else {
-            throw new Ark_ArkException(__('Failed to execute command: %s.', $cmd));
+            throw new Ark_ArkException(sprintf($this->translate('Failed to execute command: %s.'), $cmd));
         }
+    }
+
+    protected function translate($args) {
+        $translator = $this->serviceLocator->get('MvcTranslator');
+        return $translator->translate($args);
     }
 
     protected function _log($msg, $level)

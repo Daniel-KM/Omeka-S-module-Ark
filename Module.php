@@ -392,7 +392,7 @@ where: http://example.com/ark:/99999/',
 
         $parameters = [
                        'protocol' => 'ark:',
-                       'naan' => '99999',
+                       'naan' => \Ark\Ark\ArkHelper::getNaan(),
                        'naa' => 'example.org',
                        'subnaa' => 'sub',
                        // Parameters for Noid.
