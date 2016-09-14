@@ -1,8 +1,13 @@
 <?php
+
+namespace Ark\View\Helper;
+
+use Zend\View\Helper\AbstractHelper;
+
 /**
  * Helper to get or create ark.
  */
-class Ark_View_Helper_Ark extends Zend_View_Helper_Abstract
+class Ark extends AbstractHelper
 {
     /**
      * Return the ark of a record.
@@ -13,7 +18,7 @@ class Ark_View_Helper_Ark extends Zend_View_Helper_Abstract
      * or route.
      * @return string The ark of the record, if any.
      */
-    public function ark($record, $type = 'text')
+    public function __invoke($record, $type = 'text')
     {
         $ark = $this->_getArk($record, $type == 'route');
         if (empty($ark)) {
@@ -22,12 +27,12 @@ class Ark_View_Helper_Ark extends Zend_View_Helper_Abstract
 
         switch ($type) {
             case 'link':
-                return sprintf('<a href="%s">%s</a>', absolute_url($ark), $ark);
+                return sprintf('<a href="%s">%s</a>', $ark, $ark);
             case 'absolute':
-                return absolute_url($ark);
+                return $ark;
             case 'name':
-                $protocol = get_option('ark_protocol');
-                $naan = get_option('ark_naan');
+                $protocol = 'ark:';
+                $naan = '99999';
                 return substr($ark, $naan ? strlen("$protocol/$naan/") : strlen("$protocol/"));
             case 'route':
             case 'text':
@@ -44,43 +49,42 @@ class Ark_View_Helper_Ark extends Zend_View_Helper_Abstract
      * @param boolean $asRoute Return as array or as string.
      * @return string|array|null The ark of the record, or null.
      */
-    private function _getArk($record, $asArray = false)
+    private function _getArk($resource, $asArray = false)
     {
-        $record = $this->_getRecord($record);
-        if (empty($record)) {
+        if (empty($resource)) {
             return;
         }
 
         $file = null;
-        if (get_class($record) == 'File') {
-            $file = $record;
-            $record = $file->getItem();
+        if ($resource->resourceName() == 'Media') {
+            $media = $resource;
+            $resource = $media->item();
         }
 
         // Unlike controller, the element texts are already loaded here, so this
         // avoids a direct query.
-        $identifiers = $record->getElementTexts('Dublin Core', 'Identifier');
-        $protocol = get_option('ark_protocol');
-        $naan = get_option('ark_naan');
+        $identifiers = $resource->value('dcterms:identifier', ['all' => true]);
+        $protocol = 'ark:';
+        $naan = '99999';
         $base = $naan ? "$protocol/$naan/" : "$protocol/";
         $ark = null;
         foreach ($identifiers as $identifier) {
-            if (strpos($identifier->text, $base) === 0) {
-                $ark = $identifier->text;
+            if (strpos($identifier->value(), $base) === 0) {
+                $ark = $identifier->value();
                 break;
             }
         }
 
         if ($ark) {
             if ($asArray) {
-                $ark = array(
+                $ark = [
                     'naan' => $naan,
                     'name' => substr($ark, strlen($base)),
-                );
+                ];
             }
 
-            if ($file) {
-                $qualifier = $this->_getQualifier($file);
+            if ($media) {
+                $qualifier = $this->_getQualifier($media);
                 if ($asArray) {
                     $ark['qualifier'] = $qualifier;
                 }
@@ -99,62 +103,12 @@ class Ark_View_Helper_Ark extends Zend_View_Helper_Abstract
      * @param AbstractRecord $record
      * @return string The qualifier.
      */
-    protected function _getQualifier($record)
+    protected function _getQualifier($resource)
     {
-        $formats = apply_filters('ark_format_qualifiers', array());
-
-        // Check the selected format (avoid issue for extra plugin class).
-        $format = get_option('ark_format_qualifier');
-        if (!isset($formats[$format])) {
-            throw new Ark_ArkException(__('Ark format for qualifier "%s" is missing.', $format));
-        }
-        $class = $formats[$format]['class'];
-        // TODO Check class (issue with Zend autoload).
-        // if (!class_exists($format)) {
-        //     throw new Ark_ArkException(__('Ark qualifier class "%s" is missing.', $class));
-        // }
-
-        $arkQualifier = new $class(array(
-            'record' => $record,
-            'format' => $format,
-        ));
-        return $arkQualifier->create($record);
-    }
-
-    /**
-     * Helper to check and get a record. If no record, return empty record.
-     *
-     * This allows record to be an object or an array, in particular for
-     * shortcodes.
-     *
-     * @return AbstractRecord|null.
-     */
-    private function _getRecord($record)
-    {
-        if (is_object($record)) {
-            return $record;
-        }
-
-        if (!is_array($record)) {
-            return;
-        }
-
-        if (isset($record['record_type']) && isset($record['record_id'])) {
-            $recordType = $record['record_type'];
-            $recordId = $record['record_id'];
-        }
-        elseif (count($record) == 1) {
-            $recordId = reset($record);
-            $recordType = key($record);
-        }
-        elseif (count($record) == 2) {
-            $recordType = array_shift($record);
-            $recordId = array_shift($record);
-        }
-        else {
-            return;
-        }
-
-        return get_record_by_id($recordType, $recordId);
+        $arkQualifier = new \Ark\Ark\Qualifier\Internal([
+            'record' => $resource,
+            'format' => 'omeka_id',
+        ]);
+        return $arkQualifier->create($resource);
     }
 }

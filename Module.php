@@ -5,6 +5,7 @@ use Omeka\Module\AbstractModule;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 use Zend\Mvc\Controller\AbstractController;
+use Zend\EventManager\SharedEventManagerInterface;
 use Ark\Form\ConfigForm;
 use Ark\Ark\Name\Noid;
 
@@ -44,23 +45,9 @@ class Module extends AbstractModule
         'ark_naan' => '99999',
         'ark_naa' => 'example.org',
         'ark_subnaa' => 'sub',
-        'ark_web_root' => WEB_ROOT,
         'ark_format_name' => 'noid',
         'ark_noid_database' => '',
         'ark_noid_template' => '.zek',
-        'ark_id_prefix' => '',
-        'ark_id_prefix_collection' => '',
-        'ark_id_prefix_item' => '',
-        'ark_id_suffix' => '',
-        'ark_id_suffix_collection' => '',
-        'ark_id_suffix_item' => '',
-        'ark_id_length' => 4,
-        'ark_id_pad' => '0',
-        'ark_id_salt' => 'RaNdOm SaLt',
-        'ark_id_previous_salts' => '',
-        'ark_id_alphabet' => 'alphanumeric_no_vowel',
-        'ark_id_control_key' => true,
-        'ark_command' => '',
         'ark_format_qualifier' => 'order',
         'ark_file_variants' => 'original fullsize thumbnail square_thumbnail',
         'ark_note' => '',
@@ -322,20 +309,28 @@ where: http://example.com/ark:/99999/',
         ));
     }
 
-    /**
-     * Create or check an ark when a collection is saved, with the id.
-     */
-    public function hookAfterSaveCollection($args)
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
-        $this->_addArk($args['record']);
-    }
-
-    /**
-     * Create or check an ark when an item is saved, with the id.
-     */
-    public function hookAfterSaveItem($args)
-    {
-        $this->_addArk($args['record']);
+        $sharedEventManager->attach(
+            'Omeka\Api\Adapter\ItemAdapter',
+            'api.create.post',
+            [$this, 'addArk']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Api\Adapter\ItemAdapter',
+            'api.update.post',
+            [$this, 'addArk']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Api\Adapter\ItemSetAdapter',
+            'api.create.post',
+            [$this, 'addArk']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Api\Adapter\ItemSetAdapter',
+            'api.update.post',
+            [$this, 'addArk']
+        );
     }
 
     /**
@@ -344,212 +339,46 @@ where: http://example.com/ark:/99999/',
      * @param Record $record
      * @return void
      */
-    protected function _addArk($record)
+    public function addArk($event)
     {
+        $serviceLocator = $this->getServiceLocator();
+        $viewHelpers = $serviceLocator->get('ViewHelperManager');
+        $arkHelper = $viewHelpers->get('ark');
+        $api = $serviceLocator->get('Omeka\ApiManager');
+
+        $request = $event->getParam('request');
+        $response = $event->getParam('response');
+        $requestResource = $request->getResource();
+
+        $resource = $response->getContent();
+        //$resource = $api->read($requestResource, $request->getId())->getContent();
+
         // Check if an ark exists (no automatic change or update), else create.
-        $ark = get_view()->ark($record);
+        $ark = $arkHelper($resource);
         if (empty($ark)) {
-            $format = get_option('ark_format_name');
-            $recordType = get_class($record);
+            $ark = $this->_getArkProcessor();
 
-            try {
-                $ark = $this->_getArkProcessor($format, $recordType);
-            } catch (Ark_ArkException $e) {
-                _log('[Ark&Noid] ' . __($e->getMessage()));
-                throw $e;
-            }
-
-            $ark = $ark->create($record);
+            $ark = $ark->create($resource);
             if ($ark) {
-                $element = $record->getElement('Dublin Core', 'Identifier');
+                $properties = $api->search('properties', [
+                    'term' => 'dcterms:identifier'
+                ])->getContent();
+                $propertyId = $properties[0]->id();
 
-                $elementText = new ElementText();
-                $elementText->element_id = $element->id;
-                $elementText->record_type = $recordType;
-                $elementText->record_id = $record->id;
-                $elementText->html = false;
-                $elementText->setText($ark);
-                $elementText->save();
+                $identifiers = $resource->value('dcterms:identifier', ['all' => true]);
+
+                $data = ['dcterms:identifier' => []];
+                foreach ($identifiers as $identifier) {
+                    $data['dcterms:identifier'][] = $identifier->jsonSerialize();
+                }
+                $data['dcterms:identifier'][] = [
+                    'type' => 'literal',
+                    'property_id' => $propertyId,
+                    '@value' => $ark,
+                ];
+                $api->update($requestResource, $resource->id(), $data, null, true);
             }
         }
-    }
-
-    /**
-     * Add the formats that are available for names.
-     *
-     * @param array $formatNames Array of formats for names.
-     * @return array Filtered formats array.
-    */
-    public function filterArkFormatNames($formatNames)
-    {
-        // Available default formats in the plugin.
-        $formatNames['noid'] = array(
-            'class' => 'Ark_Name_Noid',
-            'description' => __('Noid for php'),
-        );
-        $formatNames['omeka_id'] = array(
-            'class' => 'Ark_Name_OmekaId',
-            'description' => __('Omeka Id derivative'),
-        );
-        $formatNames['command'] = array(
-            'class' => 'Ark_Name_Command',
-            'description' => __('Command, like noid for perl'),
-        );
-        return $formatNames;
-    }
-
-    /**
-     * Add the formats that are available for qualifiers.
-     *
-     * @param array $formatQualifiers Array of formats for qualifiers.
-     * @return array Filtered formats array.
-    */
-    public function filterArkFormatQualifiers($formatQualifiers)
-    {
-        // Available default formats in the plugin.
-        $formatQualifiers['omeka_id'] = array(
-            'class' => 'Ark_Qualifier_Internal',
-            'description' => __('Omeka Id'),
-        );
-        $formatQualifiers['order'] = array(
-            'class' => 'Ark_Qualifier_Internal',
-            'description' => __('Order'),
-        );
-        $formatQualifiers['filename'] = array(
-            'class' => 'Ark_Qualifier_Internal',
-            'description' => __('Omeka filename'),
-        );
-        $formatQualifiers['filename_without_extension'] = array(
-            'class' => 'Ark_Qualifier_Internal',
-            'description' => __('Omeka filename without extension'),
-        );
-        $formatQualifiers['original_filename'] = array(
-            'class' => 'Ark_Qualifier_Internal',
-            'description' => __('Original filename'),
-        );
-        $formatQualifiers['original_filename_without_extension'] = array(
-            'class' => 'Ark_Qualifier_Internal',
-            'description' => __('Original filename without extension'),
-        );
-        return $formatQualifiers;
-    }
-
-    /**
-     * Get the simple list of formats (name and description).
-     *
-     * @param string $filter Name of the filter.
-     * @return array Associative array of the name and description of formats.
-     */
-    protected function _getListOfFormats($filter)
-    {
-        $values = apply_filters($filter, array());
-        foreach ($values as $name => &$value) {
-            if (class_exists($value['class'])) {
-                $value = $value['description'];
-            }
-            else {
-                unset($values[$name]);
-            }
-        }
-        return $values;
-    }
-
-    /**
-     * Determine if a local base is used and already created (Noid for php).
-     *
-     * @return boolean
-     */
-    protected function _isDatabaseCreated()
-    {
-        $format = get_option('ark_format_name');
-        if ($format == 'noid') {
-            $database = get_option('ark_noid_database');
-            if (!empty($database)) {
-                $processor = $this->_getArkProcessor($format);
-                return $processor->isDatabaseCreated();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Filter for metadata.
-     *
-     * @param string $text
-     * @param array $args
-     * @return string
-     */
-    public function filterDisplayCollectionDublinCoreIdentifier($text, $args)
-    {
-        return $this->_displayArkIdentifier($text, $args);
-    }
-
-    /**
-     * Filter for metadata.
-     *
-     * @param string $text
-     * @param array $args
-     * @return string
-     */
-    public function filterDisplayItemDublinCoreIdentifier($text, $args)
-    {
-        return $this->_displayArkIdentifier($text, $args);
-    }
-
-    /**
-     * Filter the ark to display an url.
-     *
-     * @param string $text
-     * @param array $args
-     * @return string The filtered ark.
-     */
-    protected function _displayArkIdentifier($text, $args)
-    {
-        $arkDisplay = is_admin_theme()
-            ? get_option('ark_display_admin')
-            :  get_option('ark_display_public');
-
-        if (empty($arkDisplay)) {
-            return $text;
-        }
-
-        // Ark is the slowest check, so it's done later.
-        $ark = get_view()->ark($args['record']);
-        if ($text != $ark) {
-            return $text;
-        }
-
-        return sprintf($arkDisplay, $text);
-    }
-
-    /**
-     * Shortcode to display the ark of a record.
-     *
-     * @param array $args
-     * @param Omeka_View $view
-     * @return string
-     */
-    public function shortcodeArk($args, $view)
-    {
-        // Check required arguments
-        if (empty($args['record_id'])) {
-            return '';
-        }
-        $recordId = (integer) $args['record_id'];
-
-        $recordType = isset($args['record_type']) ? $args['record_type'] : 'Item';
-        $recordType = ucfirst(strtolower($recordType));
-
-        // Quick checks.
-        $record = get_record_by_id($recordType, $recordId);
-        if (!$record) {
-            return '';
-        }
-
-        // Get display values (link or text).
-        $display = isset($args['display']) ? $args['display'] : null;
-
-        return $view->ark($record, $display);
     }
 
     /**
@@ -577,8 +406,6 @@ where: http://example.com/ark:/99999/',
         $arkProcessor->setServiceLocator($this->getServiceLocator());
         return $arkProcessor;
     }
-
-
 
     public function getConfig() {
         return include __DIR__ . '/config/module.config.php';

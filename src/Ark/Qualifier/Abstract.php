@@ -1,12 +1,21 @@
 <?php
+
+namespace Ark\Ark\Qualifier;
+
 /**
  * Abstract class on which all other formats for qualifier are based.
  *
  * @package Ark
  */
-abstract class Ark_Qualifier_Abstract
+abstract class AbstractQualifier
 {
     protected $_parameters;
+    protected $api;
+
+    public function setApiManager($api)
+    {
+        $this->api = $api;
+    ]
 
     public function __construct($parameters = array())
     {

@@ -33,36 +33,7 @@ class Noid extends AbstractName
             return;
         }
 
-        // Default public url of Omeka.
-        set_theme_base_url('public');
-        $recordUrl = $record->getRecordUrl();
-        // TODO Routes should be loaded for background process, else exception.
-        try {
-            $recordUrl = absolute_url($recordUrl, 'id');
-        } catch (Exception $e) {
-            // An exception means a background process, so routes are not
-            // defined, so the web root uses the special option.
-            $webRoot = get_option('ark_web_root');
-            if (empty($webRoot)) {
-                $message = __('Unable to define a route for ark, because the option "ark_web_root" is not defined.');
-                if (!empty($this->_errorMessage)) {
-                    $message .= PHP_EOL . $this->_errorMessage;
-                }
-                throw new Ark_ArkException($message);
-            }
-            if (is_array($recordUrl)) {
-                $recordUrl = '/' . $recordUrl['controller'] . '/' . $recordUrl['action'] . '/' . $recordUrl['id'];
-            }
-            elseif (!is_string($recordUrl)) {
-                $message = __('Unable to define a route for ark: %s.', $e->getMessage());
-                if (!empty($this->_errorMessage)) {
-                    $message .= PHP_EOL . $this->_errorMessage;
-                }
-                throw new Ark_ArkException($message);
-            }
-            $recordUrl = $webRoot . $recordUrl;
-        }
-        revert_theme_base_url();
+        $recordUrl = $record->adminUrl();
 
         // Check if the url is already set (only the Omeka id: the other ids are
         // not automatic and can't be checked the same).
@@ -74,30 +45,12 @@ class Noid extends AbstractName
 
         $recordUrls[] = $recordUrl;
 
-        // Record url for Clean Url if any.
-        if (plugin_is_active('CleanUrl')) {
-            // Don't use the specific helper because the ark can be the default.
-            $cleanUrl = get_view()->getRecordFullIdentifier($record, true, 'public', true);
-            /*
-            require_once PLUGIN_DIR . DIRECTORY_SEPARATOR . 'CleanUrl'
-                . DIRECTORY_SEPARATOR . 'views'
-                . DIRECTORY_SEPARATOR . 'helpers'
-                . DIRECTORY_SEPARATOR . 'GetRecordFullIdentifier.php';
-            $helper = new CleanUrl_View_Helper_GetRecordFullIdentifier();
-            $helper->setView(get_view());
-            $cleanUrl = $helper->getRecordFullIdentifier($record, true, 'public', true);
-            */
-            if ($cleanUrl != $recordUrl) {
-                $recordUrls[] = $cleanUrl;
-            }
-        }
-
         $contact = $this->_getContact();
 
         $ark = \Noid::mint($noid, $contact);
         if (strlen($ark) == '') {
             $message = __('Cannot create an Ark for %s #%d: %s',
-                get_class($record), $record->id, Noid::errmsg($noid));
+                get_class($record), $record->id(), Noid::errmsg($noid));
             _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
             \Noid::dbclose($noid);
             return;
@@ -108,7 +61,7 @@ class Noid extends AbstractName
         $result = \Noid::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
         if (empty($result)) {
             $message = __('Ark set, but not bound [%s, %s #%d]: %s',
-                $ark, get_class($record), $record->id, \Noid::errmsg($noid));
+                $ark, get_class($record), $record->id(), \Noid::errmsg($noid));
             _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
         }
 
@@ -117,7 +70,7 @@ class Noid extends AbstractName
         $result = \Noid::note($noid, $contact, 'locations/' . $recordUrl, $ark);
         if (empty($result)) {
             $message = __('Ark set, but no reverse bind [%s, %s #%d]: %s',
-                $ark, get_class($record), $record->id, \Noid::errmsg($noid));
+                $ark, get_class($record), $record->id(), \Noid::errmsg($noid));
             _log('[Ark&Noid] ' . $message, Zend_Log::ERR);
         }
 

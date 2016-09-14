@@ -12,6 +12,16 @@ return [
 
         ],
     ],
+    'view_helpers' => [
+        'invokables' => [
+            'ark' => 'Ark\View\Helper\Ark',
+        ],
+    ],
+    'service_manager' => [
+        'factories' => [
+            'Ark\ArkHelper' => 'Ark\Service\ArkHelperFactory',
+        ],
+    ],
     'translator' => [
         'translation_file_patterns' => [
             [
