@@ -365,16 +365,14 @@ where: http://example.com/ark:/99999/',
                 ])->getContent();
                 $propertyId = $properties[0]->id();
 
-                $identifiers = $resource->value('dcterms:identifier', ['all' => true]);
-
-                $data = ['dcterms:identifier' => []];
-                foreach ($identifiers as $identifier) {
-                    $data['dcterms:identifier'][] = $identifier->jsonSerialize();
-                }
-                $data['dcterms:identifier'][] = [
-                    'type' => 'literal',
-                    'property_id' => $propertyId,
-                    '@value' => $ark,
+                $data = [
+                    'dcterms:identifier' => [
+                        [
+                            'type' => 'literal',
+                            'property_id' => $propertyId,
+                            '@value' => $ark,
+                        ],
+                    ],
                 ];
                 $api->update($requestResource, $resource->id(), $data, null, true);
             }
