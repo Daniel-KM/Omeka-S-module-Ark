@@ -1,11 +1,12 @@
 <?php
 namespace Ark;
 
-use Omeka\Module\AbstractModule;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\EventManager\SharedEventManagerInterface;
+use Omeka\Api\Representation\ResourceReference;
+use Omeka\Module\AbstractModule;
 use Ark\Form\ConfigForm;
 use Ark\Ark\Name\Noid;
 
@@ -278,6 +279,9 @@ where: http://example.com/ark:/99999/',
         $requestResource = $request->getResource();
 
         $resource = $response->getContent();
+        if ($resource instanceof ResourceReference) {
+            $resource = $resource->getRepresentation();
+        }
         //$resource = $api->read($requestResource, $request->getId())->getContent();
 
         // Check if an ark exists (no automatic change or update), else create.

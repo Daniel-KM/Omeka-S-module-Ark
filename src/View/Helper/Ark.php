@@ -3,6 +3,7 @@
 namespace Ark\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
  * Helper to get or create ark.
@@ -20,6 +21,10 @@ class Ark extends AbstractHelper
      */
     public function __invoke($record, $type = 'text')
     {
+        if (!$record instanceof AbstractResourceEntityRepresentation) {
+            return '';
+        }
+
         $ark = $this->_getArk($record, $type == 'route');
         if (empty($ark)) {
             return '';
