@@ -9,7 +9,7 @@ use Zend\EventManager\SharedEventManagerInterface;
 use Ark\Form\ConfigForm;
 use Ark\Ark\Name\Noid;
 
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'src/Ark/Name/Noid.php';
+require __DIR__ . '/vendor/autoload.php';
 
 /**
  * Ark
