@@ -10,6 +10,9 @@ class ArkHelperFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        return new ArkHelper($services->get('Omeka\ApiManager'));
+        $api = $services->get('Omeka\ApiManager');
+        $settings = $services->get('Omeka\Settings');
+
+        return new ArkHelper($api, $settings);
     }
 }

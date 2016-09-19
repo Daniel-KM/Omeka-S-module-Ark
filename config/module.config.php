@@ -5,10 +5,9 @@ return [
             'Ark\Form\ConfigForm' => 'Ark\Service\Form\ConfigFormFactory',
         ],
     ],
-
     'view_manager' => [
         'template_path_stack' => [
-            __DIR__ . '/../view/admin/',
+            __DIR__ . '/../view/',
 
         ],
     ],

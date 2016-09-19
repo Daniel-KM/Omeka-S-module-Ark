@@ -1,52 +1,44 @@
 <?php
+
 namespace Ark\Form;
 
-use Omeka\Form\Element\ResourceSelect;
-use Omeka\Form\Element\Ckeditor;
-use Zend\Form\Element;
 use Zend\Form\Form;
 use Zend\I18n\Translator\TranslatorAwareInterface;
 use Zend\I18n\Translator\TranslatorAwareTrait;
-use Omeka\Form\Element\PropertySelect;
 
 class ConfigForm extends Form implements TranslatorAwareInterface
 {
     use TranslatorAwareTrait;
 
-    protected $local_storage = '';
-    protected $formElementManager;
-
-    public function setLocalStorage($local_storage)
-    {
-        $this->local_storage = $local_storage;
-    }
-
-    public function setFormElementManager($formElementManager)
-    {
-        $this->formElementManager = $formElementManager;
-    }
+    protected $settings;
 
     public function setSettings($settings)
     {
         $this->settings = $settings;
     }
 
-    public function init() {
-        $this->setAttribute('id', 'config-form');
-
-
-
+    public function getSettings()
+    {
+        return $this->settings;
     }
 
-
-    protected function getSetting($name) {
-        return $this->settings->get($name);
+    public function init()
+    {
+        $this->add([
+            'name' => 'ark_naan',
+            'type' => 'Text',
+            'options' => [
+                'label' => 'NAAN',
+            ],
+            'attributes' => [
+                'value' => $this->getSettings()->get('ark_naan'),
+            ],
+        ]);
     }
 
-    protected function translate($args) {
+    protected function translate($message)
+    {
         $translator = $this->getTranslator();
-        return $translator->translate($args);
+        return $translator->translate($message);
     }
-
-
 }

@@ -2,18 +2,15 @@
 
 namespace Ark\Ark;
 
-class ArkHelper {
+class ArkHelper
+{
     protected $api;
+    protected $settings;
 
-
-    static public function getNaan() {
-        return '9999';
-    }
-
-
-    public function __construct($api)
+    public function __construct($api, $settings)
     {
         $this->api = $api;
+        $this->settings = $settings;
     }
 
     public function getRecordFromArk($ark)
@@ -23,7 +20,7 @@ class ArkHelper {
         }
 
         $protocol = 'ark:';
-        $naan = self::getNaan();
+        $naan = $this->settings->get('ark_naan');
         $base = $naan ? "$protocol/$naan/" : "$protocol/";
 
         if (is_string($ark)) {

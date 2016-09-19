@@ -74,11 +74,7 @@ where: http://example.com/ark:/99999/',
      */
     public function install(ServiceLocatorInterface $serviceLocator)
     {
-        $length = 32;
         $this->_installOptions($serviceLocator);
-        $processor = $this->_getArkProcessor();
-        if (!$processor->isDatabaseCreated())
-            $result = $processor->createDatabase();
     }
 
     protected function _installOptions($serviceLocator) {
@@ -110,9 +106,10 @@ where: http://example.com/ark:/99999/',
     {
         $forms = $this->getServiceLocator()->get('FormElementManager');
         $form = $forms->get(ConfigForm::class);
-        return $renderer->render('plugins/ark-config-form',
-                                 [ 'form'  => $form ]);
 
+        return $renderer->render('ark/config-form', [
+            'form' => $form,
+        ]);
     }
 
     /**
@@ -122,89 +119,19 @@ where: http://example.com/ark:/99999/',
      */
     public function handleConfigForm(AbstractController $controller)
     {
-        $post = $args['post'];
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $post = $controller->getRequest()->getPost();
 
-        // Fill the disabled fields to avoid notices.
-        $post['ark_protocol'] = isset($post['ark_protocol']) ? $post['ark_protocol'] : get_option($post['ark_protocol']);
-        $post['ark_naan'] = isset($post['ark_naan']) ? $post['ark_naan'] : get_option('ark_naan');
-        $post['ark_naa'] = isset($post['ark_naa']) ? $post['ark_naa'] : get_option('ark_naa');
-        $post['ark_subnaa'] = isset($post['ark_subnaa']) ? $post['ark_subnaa'] : get_option('ark_subnaa');
-        $post['ark_noid_database'] = isset($post['ark_noid_database']) ? $post['ark_noid_database'] : get_option('ark_noid_database');
-        $post['ark_noid_template'] = isset($post['ark_noid_template']) ? $post['ark_noid_template'] : get_option('ark_noid_template');
-
-        $post['ark_web_root'] = empty($post['ark_web_root']) ? $this->_options['ark_web_root'] : $post['ark_web_root'];
-
-        // Special check for prefix/suffix.
-        $format = $post['ark_format_name'];
-
-        // Check the parameters for the format.
-        $format = $post['ark_format_name'];
-        $parameters = array(
-            'protocol' => $post['ark_protocol'],
-            'naan' => $post['ark_naan'],
-            'naa' => $post['ark_naa'],
-            'subnaa' => $post['ark_subnaa'],
-            // Parameters for Noid.
-            'database' => $post['ark_noid_database'],
-            'template' => $post['ark_noid_template'],
-            // Parameters for Omeka Id.
-            'prefix' => $post['ark_id_prefix'] . $post['ark_id_prefix_collection'] . $post['ark_id_prefix_item'],
-            'suffix' => $post['ark_id_suffix'] . $post['ark_id_suffix_collection'] . $post['ark_id_suffix_item'],
-            'length' => $post['ark_id_length'],
-            'pad' => $post['ark_id_pad'],
-            'salt' => $post['ark_id_salt'],
-            'alphabet' => $post['ark_id_alphabet'],
-            'control_key' => $post['ark_id_control_key'],
-            // Parameters for Command.
-            'command' => $post['ark_command'],
-            // This value is used only to check if a zero may be prepended for
-            // collections with the Omeka Id format.
-            'identifix' => $post['ark_id_prefix_collection'] === $post['ark_id_prefix_item']
-                && $post['ark_id_suffix_collection'] === $post['ark_id_suffix_item'],
-        );
-
-        try {
-            $processor = $this->_getArkProcessor($format, null, $parameters);
-        } catch (Ark_ArkException $e) {
-            throw new Omeka_Validate_Exception($e->getMessage());
-        }
-
-        // Check if the database is created for the format Noid.
-        if ($post['ark_format_name'] == 'noid') {
-            if ($post['ark_create_database']) {
-                if ($processor->isDatabaseCreated()) {
-                    throw new Omeka_Validate_Exception(__('The database exists already: remove it manually or change the path to create a new one.'));
-                }
-
-                $result = $processor->createDatabase();
-                if ($result !== true) {
-                    throw new Omeka_Validate_Exception(__('The database cannot be created: %s', $result));
-                }
-            }
-            // Check if the database exists.
-            elseif (!$processor->isDatabaseCreated()) {
-                throw new Omeka_Validate_Exception(__('With format "Noid", the database should be created: check the box "Create the database".'));
-            }
-            // Nothing to do else: the database should be created.
-        }
-
-        // Save the previous salt if needed.
-        $salt = get_option('ark_id_salt');
-        $previousSalts = get_option('ark_id_previous_salts');
-
-        // Clean the file variants.
-        $post['ark_file_variants'] = preg_replace('/\s+/', ' ', trim($post['ark_file_variants']));
-
-        foreach ($this->_options as $optionKey => $optionValue) {
-            if (isset($post[$optionKey])) {
-                set_option($optionKey, $post[$optionKey]);
+        foreach (array_keys($this->_options) as $name) {
+            $value = $post->get($name);
+            if (isset($value)) {
+                $settings->set($name, $value);
             }
         }
 
-        // Save the previous salt if needed.
-        $newSalt = get_option('ark_id_salt');
-        if ($newSalt !== $salt && strlen($newSalt) > 0) {
-            set_option('ark_id_previous_salts', $previousSalts . PHP_EOL . $newSalt);
+        $processor = $this->_getArkProcessor();
+        if (!$processor->isDatabaseCreated()) {
+            $processor->createDatabase();
         }
     }
 
@@ -388,25 +315,25 @@ where: http://example.com/ark:/99999/',
      */
     protected function _getArkProcessor()
     {
-        $class = 'Ark\Ark\Name\Noid';
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
 
         $parameters = [
                        'protocol' => 'ark:',
-                       'naan' => \Ark\Ark\ArkHelper::getNaan(),
+                       'naan' => $settings->get('ark_naan'),
                        'naa' => 'example.org',
                        'subnaa' => 'sub',
                        // Parameters for Noid.
-                       'database' => OMEKA_PATH . '/files'.DIRECTORY_SEPARATOR . 'arkandnoid',
+                       'database' => OMEKA_PATH . '/files' . DIRECTORY_SEPARATOR . 'arkandnoid',
                        'template' => '.zek',
         ];
 
-        $arkProcessor = new $class($parameters);
+        $arkProcessor = new \Ark\Ark\Name\Noid($parameters);
         $arkProcessor->setServiceLocator($this->getServiceLocator());
         return $arkProcessor;
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         return include __DIR__ . '/config/module.config.php';
     }
-
 }

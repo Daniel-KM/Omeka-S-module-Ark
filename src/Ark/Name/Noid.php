@@ -5,9 +5,7 @@
  * @package Ark
  */
 namespace Ark\Ark\Name;
-use Ark\Ark\Name\AbstractName;
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'AbstractName.php';
-require_once dirname(__FILE__) . '/../../Noid4Php/lib/Noid.php';
+
 class Noid extends AbstractName
 {
     protected $_isFullArk = true;
