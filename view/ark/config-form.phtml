@@ -2,11 +2,18 @@
 <?php
     echo $this->translate('Ark allows to creates and manages unique, universel and persistent ark identifiers.') . '<br />';
     echo sprintf(
-        $this->translate('See %s and %sthe official help%s for more informations.'),
-        '<a href="https://github.com/Daniel-KM/ArkForOmeka">ReadMe</a>',
+        $this->translate('See %sthe official help%s for more informations.'),
         '<a href="https://confluence.ucop.edu/display/Curation/ARK">', '</a>'
     );
 ?>
 </p>
+
+<?php if ($this->ark()->isNoidDatabaseCreated()): ?>
+    <p>
+        <?php echo $this->translate('NOID database is already created, which means some settings are not modifiable.'); ?>
+        <br>
+        <?php echo sprintf($this->translate('To be able to modify them, you have to manually remove the database (located in %s).'), OMEKA_PATH . '/files/arkandnoid'); ?>
+    </p>
+<?php endif; ?>
 
 <?php echo $this->formCollection($form, false); ?>

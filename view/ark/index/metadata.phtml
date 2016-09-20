@@ -1,17 +1,16 @@
 <?php // This shoud returns a brief machine- and eye-readable metadata record (not the full Dublin Core).
-$title = metadata($record, array('Dublin Core', 'Title')) ?: __('[No Title]');
-$titleParts[] = strip_formatting($title);
-$titleParts[] = option('site_title');
+$title = $resource->value('dcterms:title', ['type' => 'literal']);
+if (empty($title)) {
+    $title = $this->translate('[No title]');
+}
+$creators = $resource->value('dcterms:creator', ['type' => 'literal', 'all' => true]);
+$publisher = $resource->value('dcterms:publisher', ['type' => 'literal']);
+$date = $resource->value('dcterms:date', ['type' => 'literal']);
+$description = $resource->value('dcterms:description', ['type' => 'literal']);
 
-$title = metadata($record, array('Dublin Core', 'Title'), array('no_escape' => true));
-$creators = metadata($record, array('Dublin Core', 'Creator'), array('no_escape' => true, 'all' => true));
-$publisher = metadata($record, array('Dublin Core', 'Publisher'), array('no_escape' => true));
-$date = metadata($record, array('Dublin Core', 'Date'), array('no_escape' => true));
-$itemType = get_class($record) == 'Item' ? metadata($record, 'item_type_name') : '';
-$description = metadata($record, array('Dublin Core', 'Description'), array('no_escape' => true, 'snippet' => 140));
-// TODO Cut at 80 characters and add fixed spaces at the start of each new line.
-function _oneCleanLine($string) {
-    return trim(preg_replace('/\s\s+/', ' ', strip_formatting($string)));
+function _oneCleanLine($string)
+{
+    return trim(preg_replace('/\s\s+/', ' ', $string));
 }
 ?>
 erc:
@@ -26,14 +25,11 @@ who:    <?php echo '(:unkn) anonymous' . PHP_EOL; ?>
 <?php endif; ?>
 what:   <?php echo ($title ?: '(:unas) value unassigned') . PHP_EOL; ?>
 when:   <?php echo ($date ?: '(:unav) value unavailable, possibly unknown') . PHP_EOL; ?>
-where:  <?php echo $absolute_ark . PHP_EOL; ?>
-<?php if ($itemType): ?>
-how:    <?php echo $itemType . PHP_EOL; ?>
-<?php endif; ?>
+where:  <?php echo $this->ark($resource)->getAbsoluteUrl() . PHP_EOL; ?>
 <?php if ($description): ?>
 about-how:    <?php echo _oneCleanLine($description) . PHP_EOL; ?>
 <?php endif; ?>
-<?php if ($note = get_option('ark_note')): ?>
+<?php if ($note = $this->setting('ark_note')): ?>
 note:   <?php echo _oneCleanLine($note) . PHP_EOL; ?>
 <?php endif; ?>
-<?php echo $policy; ?>
+<?php echo $policy ? $this->setting('ark_policy_statement') : '' ?>

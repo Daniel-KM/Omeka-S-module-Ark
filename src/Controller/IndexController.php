@@ -1,118 +1,77 @@
 <?php
-/**
- * The plugin controller for index pages.
- *
- * @package Ark
- */
-class Ark_IndexController extends Omeka_Controller_AbstractActionController
+
+namespace Ark\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Omeka\Mvc\Exception\NotFoundException;
+
+class IndexController extends AbstractActionController
 {
     /**
      * Route the url to the original record.
      */
     public function indexAction()
     {
-        $naan = $this->getParam('naan');
-        $naanArk = get_option('ark_naan');
+        $naan = $this->params('naan');
+        $name = $this->params('name');
+        $naanArk = $this->settings()->get('ark_naan');
 
         // Check are kept, because the file "routes.ini" may be used.
         if ($naan !== $naanArk) {
-            throw new Omeka_Controller_Exception_404;
+            throw new NotFoundException;
         }
 
-        // Check special name (empty, "?" or "??")).
-        $name = $this->getParam('name');
-        if (empty($name) || $name == '?' || $name == '??') {
-            return $this->forward('policy', 'index', 'ark', array(
-                'module' => 'Ark',
-                'controller' => 'index',
-                'action' => 'policy',
-                'naan' => $naan,
-            ));
-        }
+        $qualifier = $this->params('qualifier');
 
-        $qualifier = $this->getParam('qualifier');
-
-        $record = $this->view->getRecordFromArk(array(
+        $resource = $this->ark()->find([
             'naan' => $naan,
             'name' => $name,
             'qualifier' => $qualifier,
-        ), 'type and id');
-        if (empty($record)) {
-            throw new Omeka_Controller_Exception_404;
+        ]);
+        if (empty($resource)) {
+            throw new NotFoundException;
         }
-
-        $recordType = $record['record_type'];
-        $recordId = $record['record_id'];
 
         // Manage special uris.
-        $last = empty($_SERVER['REQUEST_URI'])
-            ? ''
-            : substr($_SERVER['REQUEST_URI'], strrpos($_SERVER['REQUEST_URI'], '/') + 1);
-        switch ($last) {
-            case '?':
-                return $this->forward('metadata', 'index', 'ark', array(
-                    'module' => 'Ark',
-                    'controller' => 'index',
-                    'action' => 'metadata',
-                    'type' => $recordType,
-                    'id' => $recordId,
-                ));
+        $uri = $_SERVER['REQUEST_URI'];
+        if (0 == substr_compare($uri, '?', -1)) {
+            $this->setPlainTextContentType();
+            $view = new ViewModel([ 'resource' => $resource ]);
+            $view->setTemplate('ark/index/metadata');
+            $view->setTerminal(true);
 
-            case '??':
-                return $this->forward('metadata', 'index', 'ark', array(
-                    'module' => 'Ark',
-                    'controller' => 'index',
-                    'action' => 'metadata',
-                    'type' => $recordType,
-                    'id' => $recordId,
-                    'policy' => true,
-                ));
+            if (0 == substr_compare($uri, '??', -2)) {
+                $view->setVariable('policy', true);
+            }
+
+            return $view;
         }
 
-        $variant = $this->getParam('variant');
-        // Only variants of files are managed.
-        if ($recordType == 'File' && !empty($variant)
-                && in_array($variant, explode(' ', get_option('ark_file_variants')))
-            ) {
-            $record = get_record_by_id($recordType, $recordId);
-            $url = $record->getWebPath($variant);
-            return $this->redirect($url);
+        if ($resource->resourceName() == 'media' && strpos($qualifier, '.') !== false) {
+            $variant = substr($qualifier, strpos($qualifier, '.') + 1);
+            $variants = ['large', 'medium', 'square'];
+            if ($variant === 'original') {
+                $url = $resource->originalUrl();
+            } elseif (in_array($variant, $variants)) {
+                $url = $resource->thumbnailUrl($variant);
+            }
+            if ($url) {
+                return $this->redirect()->toUrl($url);
+            }
         }
 
-        $controller = str_replace('_', '-', Inflector::tableize($recordType));
-        return $this->forward('show', $controller, 'default', array(
-            'module' => null,
-            'controller' => $controller,
+        $namespace = 'Omeka\Controller\Site';
+        $controllerName = ucfirst($resource->getControllerName());
+        $controllerClass = $namespace . '\\' . $controllerName;
+        return $this->forward()->dispatch($controllerClass, [
+            '__NAMESPACE__' => $namespace,
+            '__SITE__' => true,
+            'site-slug' => $this->params('site-slug'),
+            'controller' => $controllerClass,
             'action' => 'show',
-            'record_type' => $recordType,
-            'id' => $recordId,
-        ));
-    }
-
-    /**
-     * Returns a brief machine- and eye-readable metadata record.
-     *
-     * @todo Implements erc.
-     * @link http://dot.ucop.edu/specs/ercspec.html
-     */
-    public function metadataAction()
-    {
-        $type = $this->getParam('type');
-        $id = $this->getParam('id');
-
-        $record = get_record_by_id($type, $id);
-        if (empty($record)) {
-            throw new Omeka_Controller_Exception_404;
-        }
-
-        $this->view->record = $record;
-        $this->view->absolute_ark = $this->view->ark($record, 'absolute');
-        $this->view->policy = $this->getParam('policy')
-            ? get_option('ark_policy_statement')
-            : '';
-
-        $this->getResponse()
-            ->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
+            'id' => $resource->id(),
+        ]);
     }
 
     /**
@@ -120,29 +79,33 @@ class Ark_IndexController extends Omeka_Controller_AbstractActionController
      */
     public function policyAction()
     {
-        $naan = $this->getParam('naan');
-        $naanArk = get_option('ark_naan');
+        $naan = $this->params('naan');
+        $naanArk = $this->settings()->get('ark_naan');
 
         // Check are kept, because the file "routes.ini" may be used.
         if ($naan !== $naanArk) {
-            throw new Omeka_Controller_Exception_404;
+            throw new NotFoundException;
         }
 
-        $last = empty($_SERVER['REQUEST_URI'])
-            ? ''
-            : substr($_SERVER['REQUEST_URI'], strrpos($_SERVER['REQUEST_URI'], '/') + 1);
-        switch ($last) {
-            case '?':
-            case '??':
-                $this->getResponse()
-                    ->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
-                $this->view->policy = get_option('ark_policy_main');
-                $this->view->html = false;
-                break;
+        $view = new ViewModel;
+        $view->setVariable('policy', $this->settings()->get('ark_policy_main'));
 
-            default:
-                $this->view->policy = nl2br(get_option('ark_policy_main'));
-                $this->view->html = true;
+        $uri = $_SERVER['REQUEST_URI'];
+        if (0 == substr_compare($uri, '?', -1)) {
+            $this->setPlainTextContentType();
+            $view->setTemplate('ark/index/policy-txt');
+            $view->setTerminal(true);
+        } else {
+            $view->setTemplate('ark/index/policy-html');
         }
+
+        return $view;
+    }
+
+    protected function setPlainTextContentType()
+    {
+        $this->getResponse()
+            ->getHeaders()
+            ->addHeaderLine('Content-Type: text/plain; charset=UTF-8');
     }
 }
