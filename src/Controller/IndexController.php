@@ -34,8 +34,8 @@ class IndexController extends AbstractActionController
         }
 
         // Manage special uris.
-        $uri = $_SERVER['REQUEST_URI'];
-        if (0 == substr_compare($uri, '?', -1)) {
+        $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+        if (isset($uri) && 0 == substr_compare($uri, '?', -1)) {
             $this->setPlainTextContentType();
             $view = new ViewModel(['resource' => $resource]);
             $view->setTemplate('ark/index/metadata');

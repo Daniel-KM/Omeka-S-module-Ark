@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "8a32dc445e5b8a39a173ac689a66a799",
-    "content-hash": "d07de9b1049eefb4300172b58952cd07",
+    "hash": "dbb8438660f0ecde9dec67cbe1edee46",
+    "content-hash": "3a80e295bf91c748a49b433f085b4040",
     "packages": [
         {
             "name": "Daniel-KM/Noid4Php",
@@ -24,11 +24,49 @@
             }
         }
     ],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "biblibre/omeka-s-test-helper",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/biblibre/omeka-s-test-helper.git",
+                "reference": "5701cc73970a2d3864e78f46a3fa629d19110083"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/biblibre/omeka-s-test-helper/zipball/5701cc73970a2d3864e78f46a3fa629d19110083",
+                "reference": "5701cc73970a2d3864e78f46a3fa629d19110083",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OmekaTestHelper\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Test helpers for Omeka S",
+            "homepage": "https://github.com/biblibre/omeka-s-test-helper",
+            "keywords": [
+                "omeka",
+                "test"
+            ],
+            "time": "2016-09-15 18:19:18"
+        }
+    ],
     "aliases": [],
-    "minimum-stability": "stable",
-    "stability-flags": [],
-    "prefer-stable": false,
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "biblibre/omeka-s-test-helper": 20
+    },
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": []

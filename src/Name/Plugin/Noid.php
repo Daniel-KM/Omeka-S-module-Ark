@@ -31,18 +31,16 @@ class Noid implements PluginInterface
             return;
         }
 
-        $recordUrl = $resource->adminUrl();
-
         // Check if the url is already set (only the Omeka id: the other ids are
         // not automatic and can't be checked the same).
-        $ark = \Noid::get_note($noid, 'locations/' . $recordUrl);
+        $ark = \Noid::get_note($noid, 'locations/' . $resource->id());
         if ($ark) {
             \Noid::dbclose($noid);
 
             return $ark;
         }
 
-        $recordUrls[] = $recordUrl;
+        $resourceIds[] = $resource->id();
 
         $contact = $this->getContact();
 
@@ -57,7 +55,7 @@ class Noid implements PluginInterface
         }
 
         // Bind the ark and the record.
-        $locations = implode('|', $recordUrls);
+        $locations = implode('|', $resourceIds);
         $result = \Noid::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
         if (empty($result)) {
             $message = sprintf('Ark set, but not bound [%s, %s #%d]: %s',
@@ -67,7 +65,7 @@ class Noid implements PluginInterface
 
         // Save the reverse bind on Omeka id to find it instantly, as a "note".
         // If needed, other urls can be find in a second step via the ark.
-        $result = \Noid::note($noid, $contact, 'locations/' . $recordUrl, $ark);
+        $result = \Noid::note($noid, $contact, 'locations/' . $resource->id(), $ark);
         if (empty($result)) {
             $message = sprintf('Ark set, but no reverse bind [%s, %s #%d]: %s',
                 $ark, get_class($resource), $resource->id(), \Noid::errmsg($noid));
@@ -94,7 +92,7 @@ class Noid implements PluginInterface
     {
         $contact = $this->getContact();
 
-        $database = $this->databaseDir;
+        $database = $this->getDatabaseDir();
 
         $template = $this->settings->get('ark_noid_template');
         $naan = $this->settings->get('ark_naan');
@@ -115,7 +113,7 @@ class Noid implements PluginInterface
 
     protected function openDatabase($mode = \Noid::DB_RDONLY)
     {
-        $database = $this->databaseDir;
+        $database = $this->getDatabaseDir();
         if (empty($database) || !is_dir($database)) {
             return false;
         }
@@ -128,5 +126,10 @@ class Noid implements PluginInterface
     protected function getContact()
     {
         return $this->settings->get('administrator_email', 'Unknown user');
+    }
+
+    protected function getDatabaseDir()
+    {
+        return $this->databaseDir;
     }
 }

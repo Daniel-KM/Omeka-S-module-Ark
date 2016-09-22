@@ -12,8 +12,6 @@ use Omeka\Entity\Value;
 use Omeka\Module\AbstractModule;
 use Ark\Form\ConfigForm;
 
-require __DIR__ . '/vendor/autoload.php';
-
 /**
  * Ark.
  *
@@ -58,6 +56,8 @@ where: http://example.com/ark:/99999/',
 
     public function init(ModuleManager $moduleManager)
     {
+        require_once __DIR__ . '/vendor/autoload.php';
+
         $event = $moduleManager->getEvent();
         $container = $event->getParam('ServiceManager');
         $serviceListener = $container->get('ServiceListener');
@@ -207,6 +207,11 @@ where: http://example.com/ark:/99999/',
 
                 $values->add($value);
                 $entityManager->flush();
+
+                $apiAdapters = $this->getServiceLocator()->get('Omeka\ApiAdapterManager');
+                $adapter = $apiAdapters->get($resource->resourceName());
+                $resource = $adapter->getRepresentation($entity);
+                $response->setContent($resource);
             }
         }
     }

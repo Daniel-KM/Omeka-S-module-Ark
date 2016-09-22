@@ -1,6 +1,11 @@
 {
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "Daniel-KM/Noid4Php": "1.1.0"
+    },
+    "require-dev": {
+        "biblibre/omeka-s-test-helper": "dev-master"
     },
     "repositories": [
         {

@@ -8,17 +8,16 @@ $publisher = $resource->value('dcterms:publisher', ['type' => 'literal']);
 $date = $resource->value('dcterms:date', ['type' => 'literal']);
 $description = $resource->value('dcterms:description', ['type' => 'literal']);
 
-function _oneCleanLine($string)
-{
-    return trim(preg_replace('/\s\s+/', ' ', $string));
-}
 ?>
 erc:
+<?php if (!empty($creators)): ?>
 <?php foreach ($creators as $creator): ?>
-who:    <?php echo _oneCleanLine($creator) . PHP_EOL; ?>
+who:    <?php echo trim($creator) . PHP_EOL; ?>
 <?php endforeach; ?>
+<?php endif; ?>
+
 <?php if ($publisher): ?>
-who:    <?php echo _oneCleanLine($publisher) . PHP_EOL; ?>
+who:    <?php echo trim($publisher) . PHP_EOL; ?>
 <?php endif; ?>
 <?php if (empty($creators) && empty($publisher)): ?>
 who:    <?php echo '(:unkn) anonymous' . PHP_EOL; ?>
@@ -27,9 +26,9 @@ what:   <?php echo ($title ?: '(:unas) value unassigned') . PHP_EOL; ?>
 when:   <?php echo ($date ?: '(:unav) value unavailable, possibly unknown') . PHP_EOL; ?>
 where:  <?php echo $this->ark($resource)->getAbsoluteUrl() . PHP_EOL; ?>
 <?php if ($description): ?>
-about-how:    <?php echo _oneCleanLine($description) . PHP_EOL; ?>
+about-how:    <?php echo trim($description) . PHP_EOL; ?>
 <?php endif; ?>
 <?php if ($note = $this->setting('ark_note')): ?>
-note:   <?php echo _oneCleanLine($note) . PHP_EOL; ?>
+note:   <?php echo trim($note) . PHP_EOL; ?>
 <?php endif; ?>
-<?php echo $policy ? $this->setting('ark_policy_statement') : '' ?>
+<?php echo (isset($policy) && $policy) ? $this->setting('ark_policy_statement') : '' ?>
