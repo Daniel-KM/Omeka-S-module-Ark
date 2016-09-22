@@ -43,7 +43,7 @@ return [
                             'route' => '/ark:',
                             'defaults' => [
                                 '__NAMESPACE__' => 'Ark\Controller',
-                                'controller'    => 'Index',
+                                'controller' => 'Index',
                             ],
                         ],
                         'child_routes' => [

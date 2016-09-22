@@ -6,8 +6,6 @@ use Omeka\Api\Manager as ApiManager;
 
 /**
  * Change the format for Ark qualifier.
- *
- * @package Ark
  */
 class Internal implements PluginInterface
 {
@@ -27,7 +25,7 @@ class Internal implements PluginInterface
             return;
         }
 
-        $qualifier = (integer) $qualifier;
+        $qualifier = (int) $qualifier;
         if (empty($qualifier)) {
             return;
         }

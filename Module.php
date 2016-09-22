@@ -1,4 +1,5 @@
 <?php
+
 namespace Ark;
 
 use Zend\EventManager\SharedEventManagerInterface;
@@ -14,7 +15,7 @@ use Ark\Form\ConfigForm;
 require __DIR__ . '/vendor/autoload.php';
 
 /**
- * Ark
+ * Ark.
  *
  * Creates and manages unique, universel and persistent ark identifiers.
  *
@@ -24,12 +25,11 @@ require __DIR__ . '/vendor/autoload.php';
 
 /**
  * The Ark plugin.
- * @package Omeka\Plugins\Ark
  */
 class Module extends AbstractModule
 {
     /**
-     * @var array This plugin's options.
+     * @var array This plugin's options
      */
     protected $settings = [
         // 12345 means example and 99999 means test.
@@ -124,7 +124,7 @@ where: http://example.com/ark:/99999/',
     /**
      * Saves plugin configuration page.
      *
-     * @param array Options set in the config form.
+     * @param array Options set in the config form
      */
     public function handleConfigForm(AbstractController $controller)
     {

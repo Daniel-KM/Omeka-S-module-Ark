@@ -1,8 +1,6 @@
 <?php
 /**
  * Php Noid format for Ark name.
- *
- * @package Ark
  */
 namespace Ark\Name\Plugin;
 
@@ -29,6 +27,7 @@ class Noid implements PluginInterface
             $message = sprintf('Cannot open database: %s',
                 \Noid::errmsg(null, 1) ?: 'No database');
             error_log('[Ark&Noid] ' . $message);
+
             return;
         }
 
@@ -39,6 +38,7 @@ class Noid implements PluginInterface
         $ark = \Noid::get_note($noid, 'locations/' . $recordUrl);
         if ($ark) {
             \Noid::dbclose($noid);
+
             return $ark;
         }
 
@@ -52,6 +52,7 @@ class Noid implements PluginInterface
                 get_class($resource), $resource->id(), \Noid::errmsg($noid));
             error_log('[Ark&Noid] ' . $message);
             \Noid::dbclose($noid);
+
             return;
         }
 
@@ -85,6 +86,7 @@ class Noid implements PluginInterface
             return false;
         }
         \Noid::dbclose($noid);
+
         return true;
     }
 
@@ -119,6 +121,7 @@ class Noid implements PluginInterface
         }
 
         $database = $database . '/NOID/noid.bdb';
+
         return \Noid::dbopen($database, $mode);
     }
 

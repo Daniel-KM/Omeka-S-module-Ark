@@ -128,6 +128,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
     protected function translate($message)
     {
         $translator = $this->getTranslator();
+
         return $translator->translate($message);
     }
 }

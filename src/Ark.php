@@ -48,6 +48,7 @@ class Ark
     public function asString()
     {
         $qualifier = $this->qualifier ? '/' . $this->qualifier : '';
+
         return sprintf('ark:/%s/%s%s', $this->naan, $this->name, $qualifier);
     }
 

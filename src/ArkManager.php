@@ -52,22 +52,19 @@ class ArkManager
             if ($pos === false) {
                 $name = $fullName;
                 $qualifier = '';
-            }
-            else {
+            } else {
                 $name = substr($fullName, 0, $pos);
                 $qualifier = substr($fullName, $pos + 1);
             }
-        }
-        elseif (is_array($ark)) {
-             if ($ark['naan'] !== $naan
+        } elseif (is_array($ark)) {
+            if ($ark['naan'] !== $naan
                     || empty($ark['name']) || $ark['name'] == '?' || $ark['name'] == '??'
                 ) {
                 return null;
             }
             $name = $ark['name'];
             $qualifier = empty($ark['qualifier']) ? null : $ark['qualifier'];
-        }
-        else {
+        } else {
             return null;
         }
 
@@ -81,7 +78,7 @@ class ArkManager
             $resources = $this->api->search($resourceName, [
                 'property' => [
                     $property->id() => [
-                        'eq' => [ $base . $name ],
+                        'eq' => [$base . $name],
                     ],
                 ],
                 'limit' => 1,
@@ -162,6 +159,7 @@ class ArkManager
             $message = sprintf('No Ark created: check your format "%s" [%s #%d].',
                 get_class($namePlugin), get_class($resource), $resource->id());
             error_log('[Ark&Noid] ' . $message);
+
             return;
         }
 
@@ -171,6 +169,7 @@ class ArkManager
         if (!$this->checkFullArk($ark)) {
             $message = sprintf('Ark "%s" is not correct: check your format "%s" and your processor [%s].', $ark, get_class($namePlugin), get_class($resource));
             error_log('[Ark&Noid] ' . $message);
+
             return;
         }
 
@@ -183,6 +182,7 @@ class ArkManager
                 $message = sprintf('The proposed ark "%s" is not unique [%s #%d].',
                     $ark, get_class($resource), $resource->id());
                 error_log('[Ark&Noid] ' . $message);
+
                 return;
             }
 
@@ -190,6 +190,7 @@ class ArkManager
                 . ' ' . sprintf('Check parameters of the format "%s" [%s #%d].',
                 get_class($namePlugin), get_class($resource), $resource->id());
             error_log('[Ark&Noid] ' . $message);
+
             return;
         }
 
@@ -199,17 +200,19 @@ class ArkManager
     /**
      * Return the qualifier part of an ark.
      *
-     * @return string The qualifier.
+     * @return string The qualifier
      */
     protected function getQualifier($resource)
     {
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
+
         return $qualifierPlugin->create($resource);
     }
 
     protected function getResourceFromQualifier($resource, $qualifier)
     {
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
+
         return $qualifierPlugin->getResourceFromQualifier($resource, $qualifier);
     }
 
@@ -229,6 +232,7 @@ class ArkManager
             }
 
             $clean = preg_replace('/[^a-zA-Z0-9]/', '', $result[1]);
+
             return $clean == $result[1];
         }
 
@@ -238,17 +242,19 @@ class ArkManager
         }
 
         $clean = preg_replace('/[^a-zA-Z0-9]/', '', $ark);
+
         return $clean == $ark;
     }
 
     /**
      * Check if an ark exists in the base.
      *
-     * @param string $ark The full well formed ark, with "ark:/".
+     * @param string $ark The full well formed ark, with "ark:/"
+     *
      * @return bool
      */
     protected function arkExists($ark)
     {
-        return (boolean) $this->find($ark);
+        return (bool) $this->find($ark);
     }
 }

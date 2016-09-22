@@ -24,6 +24,7 @@ class Ark extends AbstractPlugin
         if (is_array($ark)) {
             $ark = $this->buildArkFromArgs($ark);
         }
+
         return $this->arkManager->find($ark);
     }
 

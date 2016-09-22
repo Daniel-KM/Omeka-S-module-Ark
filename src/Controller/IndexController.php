@@ -37,7 +37,7 @@ class IndexController extends AbstractActionController
         $uri = $_SERVER['REQUEST_URI'];
         if (0 == substr_compare($uri, '?', -1)) {
             $this->setPlainTextContentType();
-            $view = new ViewModel([ 'resource' => $resource ]);
+            $view = new ViewModel(['resource' => $resource]);
             $view->setTemplate('ark/index/metadata');
             $view->setTerminal(true);
 
@@ -64,6 +64,7 @@ class IndexController extends AbstractActionController
         $namespace = 'Omeka\Controller\Site';
         $controllerName = ucfirst($resource->getControllerName());
         $controllerClass = $namespace . '\\' . $controllerName;
+
         return $this->forward()->dispatch($controllerClass, [
             '__NAMESPACE__' => $namespace,
             '__SITE__' => true,

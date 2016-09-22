@@ -26,11 +26,9 @@ class Ark extends AbstractHelper
     /**
      * Return the ark of a record.
      *
-     * @param AbstractRecord|array $record Record object or array with record
-     * type and record id.
-     * @param string $type  Optional type: text (default), name, absolute, link,
-     * or route.
-     * @return string The ark of the record, if any.
+     * @param AbstractResourceEntityRepresentation $resource
+     *
+     * @return $this
      */
     public function __invoke($resource = null)
     {
