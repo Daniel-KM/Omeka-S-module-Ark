@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "dbb8438660f0ecde9dec67cbe1edee46",
+    "hash": "749f4af7fc543cad4d2dc1112d13ac3c",
     "content-hash": "3a80e295bf91c748a49b433f085b4040",
     "packages": [
         {
@@ -31,12 +31,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/biblibre/omeka-s-test-helper.git",
-                "reference": "5701cc73970a2d3864e78f46a3fa629d19110083"
+                "reference": "a02c8dc4259365f7de1d09626a97347ba19cbf6e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/biblibre/omeka-s-test-helper/zipball/5701cc73970a2d3864e78f46a3fa629d19110083",
-                "reference": "5701cc73970a2d3864e78f46a3fa629d19110083",
+                "url": "https://api.github.com/repos/biblibre/omeka-s-test-helper/zipball/a02c8dc4259365f7de1d09626a97347ba19cbf6e",
+                "reference": "a02c8dc4259365f7de1d09626a97347ba19cbf6e",
                 "shasum": ""
             },
             "require": {
@@ -58,7 +58,7 @@
                 "omeka",
                 "test"
             ],
-            "time": "2016-09-15 18:19:18"
+            "time": "2016-09-22 16:40:26"
         }
     ],
     "aliases": [],
