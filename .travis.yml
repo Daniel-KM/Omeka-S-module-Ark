@@ -8,8 +8,7 @@ cache:
 before_install:
   - sudo apt-get update
   - sudo apt-get install -qq php5 php5-mysql php5-dev ant mysql-server mysql-client
-  - phpenv global system
-  - phpenv install --releases
+  - php-config --configure-options
   - false
 
 install:
