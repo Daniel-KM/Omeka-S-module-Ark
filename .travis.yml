@@ -2,7 +2,7 @@ sudo: required
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -qq php5
+  - sudo apt-get install -qq php5 php-pear
 
 before_script:
   - php-config --configure-options
