@@ -8,6 +8,7 @@ cache:
 before_install:
   - sudo apt-get update
   - sudo apt-get install -qq php5 php5-mysql php5-dev ant mysql-server mysql-client
+  - phpenv global system
 
 install:
   - cd ../..
@@ -25,4 +26,4 @@ before_script:
   - composer install
   - cd test
 
-script: phpunit
+script: /usr/bin/php phpunit
