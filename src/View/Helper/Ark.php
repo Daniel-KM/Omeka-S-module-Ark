@@ -48,6 +48,10 @@ class Ark extends AbstractHelper
         $view = $this->getView();
         $ark = $this->arkManager->getArk($resource);
 
+        if (!$ark) {
+            return null;
+        }
+
         return $view->serverUrl() . $view->url('site/ark/default', [
             'naan' => $ark->getNaan(),
             'name' => $ark->getName(),
