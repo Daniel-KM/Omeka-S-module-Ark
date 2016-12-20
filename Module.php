@@ -181,6 +181,7 @@ where: http://example.com/ark:/99999/',
         $services = $this->getServiceLocator();
         $entityManager = $services->get('Omeka\EntityManager');
         $arkManager = $services->get('Ark\ArkManager');
+        $api = $services->get('Omeka\ApiManager');
 
         $request = $event->getParam('request');
         $response = $event->getParam('response');
@@ -188,7 +189,7 @@ where: http://example.com/ark:/99999/',
 
         $resource = $response->getContent();
         if ($resource instanceof ResourceReference) {
-            $resource = $resource->getRepresentation();
+            $resource = $api->read($resource->resourceName(), $resource->id())->getContent();
         }
 
         // Check if an ark exists (no automatic change or update), else create.
