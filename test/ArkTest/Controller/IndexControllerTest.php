@@ -28,6 +28,11 @@ class IndexControllerTest extends ArkControllerTestCase
         }
     }
 
+    public function tearDown()
+    {
+        $this->api()->delete('sites', $this->site->id());
+    }
+
     public function testArkUrlShouldDisplayCorrectItem()
     {
         $item = $this->api()->create('items', [])->getContent();
@@ -35,10 +40,13 @@ class IndexControllerTest extends ArkControllerTestCase
         $ark = $item->value('dcterms:identifier')->value();
         $this->assertSame('ark:/99999/0n', $ark);
 
-        $uri = "/s/default/$ark?";
+        $uri = "/s/default/$ark";
+        $_SERVER['REQUEST_URI'] = $uri;
         $this->dispatch($uri);
 
         $this->assertResponseStatusCode(200);
+        $this->assertControllerName('Omeka\Controller\Site\Item');
+        $this->assertActionName('show');
         $this->assertQueryContentRegex('.property .value', '#ark:/99999/0n#');
     }
 

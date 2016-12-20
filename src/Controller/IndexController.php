@@ -47,32 +47,6 @@ class IndexController extends AbstractActionController
 
             return $view;
         }
-
-        if ($resource->resourceName() == 'media' && strpos($qualifier, '.') !== false) {
-            $variant = substr($qualifier, strpos($qualifier, '.') + 1);
-            $variants = ['large', 'medium', 'square'];
-            if ($variant === 'original') {
-                $url = $resource->originalUrl();
-            } elseif (in_array($variant, $variants)) {
-                $url = $resource->thumbnailUrl($variant);
-            }
-            if ($url) {
-                return $this->redirect()->toUrl($url);
-            }
-        }
-
-        $namespace = 'Omeka\Controller\Site';
-        $controllerName = ucfirst($resource->getControllerName());
-        $controllerClass = $namespace . '\\' . $controllerName;
-
-        return $this->forward()->dispatch($controllerClass, [
-            '__NAMESPACE__' => $namespace,
-            '__SITE__' => true,
-            'site-slug' => $this->params('site-slug'),
-            'controller' => $controllerClass,
-            'action' => 'show',
-            'id' => $resource->id(),
-        ]);
     }
 
     /**

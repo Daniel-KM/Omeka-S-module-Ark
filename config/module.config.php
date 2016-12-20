@@ -16,11 +16,17 @@ return [
             'ark' => 'Ark\Service\View\Helper\ArkFactory',
         ],
     ],
+    'listeners' => [
+        'Ark\MvcListeners',
+    ],
     'service_manager' => [
         'factories' => [
             'Ark\ArkManager' => 'Ark\Service\ArkManagerFactory',
             'Ark\QualifierPluginManager' => 'Ark\Service\QualifierPluginManagerFactory',
             'Ark\NamePluginManager' => 'Ark\Service\NamePluginManagerFactory',
+        ],
+        'invokables' => [
+            'Ark\MvcListeners' => 'Ark\Mvc\MvcListeners',
         ],
     ],
     'controller_plugins' => [
