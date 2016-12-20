@@ -9,12 +9,11 @@ use Zend\Http\Response;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
 use Zend\Router\Http\RouteMatch;
-use Zend\View\Model\ViewModel;
 
 class MvcListeners extends AbstractListenerAggregate
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function attach(EventManagerInterface $events, $priority = 1)
     {
@@ -93,7 +92,7 @@ class MvcListeners extends AbstractListenerAggregate
             $params = array_merge($defaultParams, [
                 'controller' => 'Omeka\Controller\Site' . "\\$controllerName",
                 'action' => 'show',
-                'id' => $resource->id()
+                'id' => $resource->id(),
             ]);
             $routeName = 'site/resource-id';
         }
@@ -110,7 +109,7 @@ class MvcListeners extends AbstractListenerAggregate
         $event->setName(MvcEvent::EVENT_DISPATCH_ERROR);
         $event->setError(Application::ERROR_ROUTER_NO_MATCH);
 
-        $target  = $event->getTarget();
+        $target = $event->getTarget();
         $results = $target->getEventManager()->triggerEvent($event);
 
         return !empty($results) ? $results->last() : null;

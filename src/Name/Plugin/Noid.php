@@ -2,6 +2,7 @@
 /**
  * Php Noid format for Ark name.
  */
+
 namespace Ark\Name\Plugin;
 
 class Noid implements PluginInterface
