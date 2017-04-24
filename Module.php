@@ -188,31 +188,23 @@ where: http://example.com/ark:/99999/',
         $requestResource = $request->getResource();
 
         $resource = $response->getContent();
-        if ($resource instanceof ResourceReference) {
-            $resource = $api->read($resource->resourceName(), $resource->id())->getContent();
-        }
+        $representation = $api->read($resource->getResourceName(), $resource->getId())->getContent();
 
         // Check if an ark exists (no automatic change or update), else create.
-        $ark = $arkManager->getArk($resource);
+        $ark = $arkManager->getArk($representation);
         if (empty($ark)) {
-            $ark = $arkManager->createName($resource);
+            $ark = $arkManager->createName($representation);
             if ($ark) {
-                $entity = $this->getEntityFromRepresentation($resource);
-                $values = $entity->getValues();
+                $values = $resource->getValues();
 
                 $value = new Value;
                 $value->setType('literal');
-                $value->setResource($entity);
+                $value->setResource($resource);
                 $value->setProperty($this->getIdentifierPropertyEntity());
                 $value->setValue($ark);
 
                 $values->add($value);
                 $entityManager->flush();
-
-                $apiAdapters = $this->getServiceLocator()->get('Omeka\ApiAdapterManager');
-                $adapter = $apiAdapters->get($resource->resourceName());
-                $resource = $adapter->getRepresentation($entity);
-                $response->setContent($resource);
             }
         }
     }
@@ -228,18 +220,5 @@ where: http://example.com/ark:/99999/',
         $property = $query->getSingleResult();
 
         return $property;
-    }
-
-    protected function getEntityFromRepresentation($resource)
-    {
-        $services = $this->getServiceLocator();
-        $apiAdapterManager = $services->get('Omeka\ApiAdapterManager');
-        $entityManager = $services->get('Omeka\EntityManager');
-
-        $adapter = $apiAdapterManager->get($resource->resourceName());
-        $entityClass = $adapter->getEntityClass();
-        $entity = $entityManager->find($entityClass, $resource->id());
-
-        return $entity;
     }
 }
