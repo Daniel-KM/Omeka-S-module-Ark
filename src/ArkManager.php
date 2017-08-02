@@ -77,8 +77,10 @@ class ArkManager
         foreach (['items', 'item_sets', 'media'] as $resourceName) {
             $resources = $this->api->search($resourceName, [
                 'property' => [
-                    $property->id() => [
-                        'eq' => [$base . $name],
+                    [
+                        'property' => $property->id(),
+                        'type' => 'eq',
+                        'text' => $base . $name,
                     ],
                 ],
                 'limit' => 1,
