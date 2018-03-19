@@ -12,7 +12,8 @@ class Noid implements PluginInterface
     {
         $this->settings = $settings;
 
-        $this->databaseDir = OMEKA_PATH . '/files/arkandnoid';
+        $basePath = $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $this->databaseDir = $basePath . '/arkandnoid';
     }
 
     public function isFullArk()
