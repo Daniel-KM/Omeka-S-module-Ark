@@ -6,14 +6,13 @@ namespace Ark\Name\Plugin;
 
 class Noid implements PluginInterface
 {
+    protected $settings;
     protected $databaseDir;
 
-    public function __construct($settings)
+    public function __construct($settings, $databaseDir)
     {
         $this->settings = $settings;
-
-        $basePath = $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        $this->databaseDir = $basePath . '/arkandnoid';
+        $this->databaseDir = $databaseDir;
     }
 
     public function isFullArk()

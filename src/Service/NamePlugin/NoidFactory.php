@@ -11,8 +11,8 @@ class NoidFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $name, array $options = null)
     {
         $settings = $services->get('Omeka\Settings');
-        $arkManager = $services->get('Ark\ArkManager');
-
-        return new Noid($settings, $arkManager);
+        $basePath = $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $databaseDir = $basePath . '/arkandnoid';
+        return new Noid($settings, $databaseDir);
     }
 }
