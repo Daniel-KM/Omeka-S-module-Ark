@@ -12,9 +12,6 @@ use Zend\Router\Http\RouteMatch;
 
 class MvcListeners extends AbstractListenerAggregate
 {
-    /**
-     * {@inheritdoc}
-     */
     public function attach(EventManagerInterface $events, $priority = 1)
     {
         $this->listeners[] = $events->attach(

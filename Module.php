@@ -7,7 +7,6 @@ use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
-use Omeka\Api\Representation\ResourceReference;
 use Omeka\Entity\Value;
 use Omeka\Module\AbstractModule;
 use Ark\Form\ConfigForm;

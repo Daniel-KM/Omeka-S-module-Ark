@@ -6,7 +6,7 @@ class Noid extends \Ark\Name\Plugin\Noid
 {
     protected function getDatabaseDir()
     {
-        return __DIR__ . '/../../../files/arkandnoid';
+        return dirname(dirname(__DIR__)) . '/../files/arkandnoid';
     }
 
     public function deleteDatabase()

@@ -8,7 +8,7 @@ return [
     ],
     'view_manager' => [
         'template_path_stack' => [
-            __DIR__ . '/../view/',
+            dirname(__DIR__) . '/view/',
         ],
     ],
     'view_helpers' => [
