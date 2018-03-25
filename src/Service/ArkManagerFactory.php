@@ -12,9 +12,13 @@ class ArkManagerFactory implements FactoryInterface
     {
         $api = $services->get('Omeka\ApiManager');
         $settings = $services->get('Omeka\Settings');
-        $qualifierPlugins = $services->get('Ark\QualifierPluginManager');
         $namePlugins = $services->get('Ark\NamePluginManager');
-
-        return new ArkManager($api, $settings, $qualifierPlugins, $namePlugins);
+        $qualifierPlugins = $services->get('Ark\QualifierPluginManager');
+        return new ArkManager(
+            $api,
+            $settings,
+            $namePlugins,
+            $qualifierPlugins
+        );
     }
 }

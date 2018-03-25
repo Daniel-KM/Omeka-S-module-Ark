@@ -2,23 +2,44 @@
 
 namespace Ark;
 
+use Ark\Name\PluginManager as NamePlugins;
+use Ark\Qualifier\PluginManager as QualifierPlugins;
+use Omeka\Api\Manager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Ark\Name\Noid;
-use Ark\Qualifier\Internal;
+use Omeka\Settings\Settings;
 
 class ArkManager
 {
+    /**
+     * @var Manager
+     */
     protected $api;
+
+    /**
+     * @var Settings
+     */
     protected $settings;
-    protected $qualifierPlugins;
+
+    /**
+     * @var NamePlugins
+     */
     protected $namePlugins;
 
-    public function __construct($api, $settings, $qualifierPlugins, $namePlugins)
-    {
+    /**
+     * @var QualifierPlugins
+     */
+    protected $qualifierPlugins;
+
+    public function __construct(
+        Manager $api,
+        Settings $settings,
+        NamePlugins $namePlugins,
+        QualifierPlugins $qualifierPlugins
+    ) {
         $this->api = $api;
         $this->settings = $settings;
-        $this->qualifierPlugins = $qualifierPlugins;
         $this->namePlugins = $namePlugins;
+        $this->qualifierPlugins = $qualifierPlugins;
     }
 
     public function find($ark)
