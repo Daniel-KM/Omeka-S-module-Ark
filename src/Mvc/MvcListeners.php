@@ -29,11 +29,9 @@ class MvcListeners extends AbstractListenerAggregate
 
         $routeMatch = $event->getRouteMatch();
         $matchedRouteName = $routeMatch->getMatchedRouteName();
-        if ('site/ark/default' !== $matchedRouteName) {
+        if (!in_array($matchedRouteName, ['site/ark/default', 'admin/ark/default'], true)) {
             return;
         }
-
-        $siteSlug = $routeMatch->getParam('site-slug');
 
         $naan = $routeMatch->getParam('naan');
         $name = $routeMatch->getParam('name');
@@ -71,27 +69,41 @@ class MvcListeners extends AbstractListenerAggregate
             }
         }
 
-        $defaultParams = [
-            '__NAMESPACE__' => 'Omeka\Controller\Site',
-            '__SITE__' => true,
-            'site-slug' => $siteSlug,
-        ];
-
+        $isAdmin = $routeMatch->getParam('__ADMIN__');
         $controllerName = StaticFilter::execute($resource->getControllerName(), 'WordDashToCamelCase');
-        if ($controllerName === 'ItemSet') {
-            $params = array_merge($defaultParams, [
-                'controller' => 'Omeka\Controller\Site\Item',
-                'action' => 'browse',
-                'item-set-id' => $resource->id(),
-            ]);
-            $routeName = 'site/item-set';
-        } else {
-            $params = array_merge($defaultParams, [
-                'controller' => 'Omeka\Controller\Site' . "\\$controllerName",
+
+        if ($isAdmin) {
+            $params = [
+                '__NAMESPACE__' => 'Omeka\Controller\Admin',
+                '__ADMIN__' => true,
+                'controller' => 'Omeka\Controller\Admin\\' . $controllerName,
                 'action' => 'show',
                 'id' => $resource->id(),
-            ]);
-            $routeName = 'site/resource-id';
+            ];
+            $routeName = 'admin/id';
+        } else {
+            $siteSlug = $routeMatch->getParam('site-slug');
+            if ($controllerName === 'ItemSet') {
+                $params = [
+                    '__NAMESPACE__' => 'Omeka\Controller\Site',
+                    '__SITE__' => true,
+                    'site-slug' => $siteSlug,
+                    'controller' => 'Omeka\Controller\Site\Item',
+                    'action' => 'browse',
+                    'item-set-id' => $resource->id(),
+                ];
+                $routeName = 'site/item-set';
+            } else {
+                $params = [
+                    '__NAMESPACE__' => 'Omeka\Controller\Site',
+                    '__SITE__' => true,
+                    'site-slug' => $siteSlug,
+                    'controller' => 'Omeka\Controller\Site\\' . $controllerName,
+                    'action' => 'show',
+                    'id' => $resource->id(),
+                ];
+                $routeName = 'site/resource-id';
+            }
         }
 
         $routeMatch = new RouteMatch($params);

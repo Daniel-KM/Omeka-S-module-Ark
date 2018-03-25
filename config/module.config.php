@@ -82,6 +82,46 @@ return [
                     ],
                 ],
             ],
+            'admin' => [
+                'child_routes' => [
+                    'ark' => [
+                        'type' => 'Literal',
+                        'options' => [
+                            'route' => '/ark:',
+                            'defaults' => [
+                                '__NAMESPACE__' => 'Ark\Controller',
+                                'controller' => 'ArkController',
+                                'action' => 'policy',
+                            ],
+                        ],
+                        'child_routes' => [
+                            'default' => [
+                                'type' => 'Segment',
+                                'options' => [
+                                    'route' => '/:naan/:name[/:qualifier]',
+                                    'constraints' => [
+                                        'naan' => '\d{5}',
+                                        'name' => '[A-Za-z0-9_]+',
+                                        'qualifier' => '[A-Za-z0-9_.]+',
+                                    ],
+                                    'defaults' => [
+                                        'action' => 'index',
+                                    ],
+                                ],
+                            ],
+                            'policy' => [
+                                'type' => 'Segment',
+                                'options' => [
+                                    'route' => '/:naan',
+                                    'defaults' => [
+                                        'action' => 'policy',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ],
     ],
     'ark' => [

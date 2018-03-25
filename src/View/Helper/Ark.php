@@ -52,7 +52,9 @@ class Ark extends AbstractHelper
             return null;
         }
 
-        return $view->serverUrl() . $view->url('site/ark/default', [
+        $isAdmin = $view->params()->fromRoute('__ADMIN__');
+        $route = $isAdmin ? 'admin/ark/default' : 'site/ark/default';
+        return $view->serverUrl() . $view->url($route, [
             'naan' => $ark->getNaan(),
             'name' => $ark->getName(),
             'qualifier' => $ark->getQualifier(),

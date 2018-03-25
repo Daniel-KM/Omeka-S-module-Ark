@@ -9,6 +9,7 @@ use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\Controller\AbstractController;
+use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 
@@ -52,6 +53,12 @@ class Module extends AbstractModule
             'Ark\ModuleManager\Feature\QualifierPluginProviderInterface',
             'getArkQualifierPluginConfig'
         );
+    }
+
+    public function onBootstrap(MvcEvent $event)
+    {
+        parent::onBootstrap($event);
+        $this->addAclRules();
     }
 
     public function install(ServiceLocatorInterface $serviceLocator)
@@ -130,6 +137,18 @@ class Module extends AbstractModule
         if (!$namePlugin->isDatabaseCreated()) {
             $namePlugin->createDatabase();
         }
+    }
+
+    /**
+     * Add ACL rules for this module.
+     */
+    protected function addAclRules()
+    {
+        // Allow all access to the controller, because there will be a forward.
+        $services = $this->getServiceLocator();
+        $acl = $services->get('Omeka\Acl');
+        $roles = $acl->getRoles();
+        $acl->allow($roles, [Controller\ArkController::class]);
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
