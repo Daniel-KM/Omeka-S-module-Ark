@@ -6,7 +6,7 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Omeka\Mvc\Exception\NotFoundException;
 
-class IndexController extends AbstractActionController
+class ArkController extends AbstractActionController
 {
     /**
      * Route the url to the original record.

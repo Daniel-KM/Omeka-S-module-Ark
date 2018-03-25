@@ -32,7 +32,7 @@ return [
     ],
     'controllers' => [
         'invokables' => [
-            'Ark\Controller\Index' => Controller\IndexController::class,
+            Controller\ArkController::class => Controller\ArkController::class,
         ],
     ],
     'controller_plugins' => [
@@ -50,7 +50,8 @@ return [
                             'route' => '/ark:',
                             'defaults' => [
                                 '__NAMESPACE__' => 'Ark\Controller',
-                                'controller' => 'Index',
+                                'controller' => 'ArkController',
+                                'action' => 'policy',
                             ],
                         ],
                         'child_routes' => [
