@@ -2,31 +2,20 @@
 
 namespace Ark\Form;
 
+use Ark\ArkManager;
+use Zend\Form\Element;
 use Zend\Form\Form;
 use Zend\I18n\Translator\TranslatorAwareInterface;
 use Zend\I18n\Translator\TranslatorAwareTrait;
-use Ark\ArkManager;
 
 class ConfigForm extends Form implements TranslatorAwareInterface
 {
     use TranslatorAwareTrait;
 
-    protected $settings;
-
     /**
      * @var ArkManager
      */
     protected $arkManager;
-
-    public function setSettings($settings)
-    {
-        $this->settings = $settings;
-    }
-
-    public function getSettings()
-    {
-        return $this->settings;
-    }
 
     public function setArkManager(ArkManager $arkManager)
     {
@@ -45,82 +34,69 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $this->add([
             'name' => 'ark_naan',
-            'type' => 'Text',
+            'type' => Element\Text::class,
             'options' => [
-                'label' => 'NAAN',
+                'label' => 'NAAN', // @translate
             ],
             'attributes' => [
-                'value' => $this->getSettings()->get('ark_naan'),
                 'disabled' => $databaseCreated,
             ],
         ]);
 
         $this->add([
             'name' => 'ark_naa',
-            'type' => 'Text',
+            'type' => Element\Text::class,
             'options' => [
-                'label' => 'NAA',
+                'label' => 'NAA', // @translate
             ],
             'attributes' => [
-                'value' => $this->getSettings()->get('ark_naa'),
                 'disabled' => $databaseCreated,
             ],
         ]);
 
         $this->add([
             'name' => 'ark_subnaa',
-            'type' => 'Text',
+            'type' => Element\Text::class,
             'options' => [
-                'label' => 'Sub NAA',
+                'label' => 'Sub NAA', // @translate
             ],
             'attributes' => [
-                'value' => $this->getSettings()->get('ark_subnaa'),
                 'disabled' => $databaseCreated,
             ],
         ]);
 
         $this->add([
             'name' => 'ark_noid_template',
-            'type' => 'Text',
+            'type' => Element\Text::class,
             'options' => [
-                'label' => 'Noid Template',
+                'label' => 'Noid Template', // @translate
             ],
             'attributes' => [
-                'value' => $this->getSettings()->get('ark_noid_template'),
                 'disabled' => $databaseCreated,
             ],
         ]);
 
         $this->add([
             'name' => 'ark_note',
-            'type' => 'Textarea',
+            'type' => Element\Textarea::class,
             'options' => [
-                'label' => 'Note',
-            ],
-            'attributes' => [
-                'value' => $this->getSettings()->get('ark_note'),
+                'label' => 'Note', // @translate
             ],
         ]);
 
         $this->add([
             'name' => 'ark_policy_statement',
-            'type' => 'Textarea',
+            'type' => Element\Textarea::class,
             'options' => [
-                'label' => 'Policy statement',
-            ],
-            'attributes' => [
-                'value' => $this->getSettings()->get('ark_policy_statement'),
+                'label' => 'Policy statement', // @translate
             ],
         ]);
 
         $this->add([
             'name' => 'ark_policy_main',
-            'type' => 'Textarea',
+            'type' => Element\Textarea::class,
             'options' => [
-                'label' => 'Main Policy',
-            ],
-            'attributes' => [
-                'value' => $this->getSettings()->get('ark_policy_main'),
+                'label' => 'Main policy', // @translate
             ],
         ]);
     }

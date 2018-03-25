@@ -2,21 +2,22 @@
 
 namespace Ark;
 
+use Ark\Form\ConfigForm;
+use Omeka\Entity\Value;
+use Omeka\Module\AbstractModule;
+use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
-use Omeka\Entity\Value;
-use Omeka\Module\AbstractModule;
-use Ark\Form\ConfigForm;
 
 /**
  * Ark.
  *
  * Creates and manages unique, universel and persistent ark identifiers.
  *
- * @copyright Daniel Berthereau, 2015-2016
+ * @copyright Daniel Berthereau, 2015-2018
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
 
@@ -25,29 +26,6 @@ use Ark\Form\ConfigForm;
  */
 class Module extends AbstractModule
 {
-    /**
-     * @var array This plugin's options
-     */
-    protected $settings = [
-        // 12345 means example and 99999 means test.
-        'ark_naan' => '99999',
-        'ark_naa' => 'example.org',
-        'ark_subnaa' => 'sub',
-        'ark_noid_template' => '.zek',
-        'ark_note' => '',
-        'ark_policy_statement' => 'erc-support:
-who: Our Institution
-what: Permanent: Stable Content:
-when: 20160101
-where: http://example.com/ark:/99999/',
-        // From the policy statement of the California Digital Library.
-        'ark_policy_main' => 'Our institution assigns identifiers within the ARK domain under the NAAN 99999 and according to the following principles:
-
-* No ARK shall be re-assigned; that is, once an ARK-to-object association has been made public, that association shall be considered unique into the indefinite future.
-* To help them age and travel well, the Name part of our institution-assigned ARKs shall contain no widely recognizable semantic information (to the extent possible).
-* Our institution-assigned ARKs shall be generated with a terminal check character that guarantees them against single character errors and transposition errors.',
-    ];
-
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
@@ -61,6 +39,7 @@ where: http://example.com/ark:/99999/',
         $container = $event->getParam('ServiceManager');
         $serviceListener = $container->get('ServiceListener');
 
+        /** @var \Zend\ModuleManager\Listener\ServiceListener $serviceListener */
         $serviceListener->addServiceManager(
             'Ark\NamePluginManager',
             'ark_name_plugins',
@@ -75,67 +54,74 @@ where: http://example.com/ark:/99999/',
         );
     }
 
-    /**
-     * Installs the plugin.
-     */
     public function install(ServiceLocatorInterface $serviceLocator)
     {
-        $this->installSettings($serviceLocator);
+        $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'install');
     }
 
-    protected function installSettings($serviceLocator)
-    {
-        $settings = $serviceLocator->get('Omeka\Settings');
-        foreach ($this->settings as $key => $value) {
-            $settings->set($key, $value);
-        }
-    }
-
-    /**
-     * Uninstalls the plugin.
-     */
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
-        $this->uninstallSettings($serviceLocator);
+        $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'uninstall');
     }
 
-    protected function uninstallSettings($serviceLocator)
+    protected function manageSettings($settings, $process, $key = 'config')
     {
-        $settings = $serviceLocator->get('Omeka\Settings');
-        foreach ($this->settings as $key => $value) {
-            $settings->delete($key);
+        $config = require __DIR__ . '/config/module.config.php';
+        $defaultSettings = $config[strtolower(__NAMESPACE__)][$key];
+        foreach ($defaultSettings as $name => $value) {
+            switch ($process) {
+                case 'install':
+                    $settings->set($name, $value);
+                    break;
+                case 'uninstall':
+                    $settings->delete($name);
+                    break;
+            }
         }
     }
 
-    /**
-     * Shows plugin configuration page.
-     */
     public function getConfigForm(PhpRenderer $renderer)
     {
-        $forms = $this->getServiceLocator()->get('FormElementManager');
-        $form = $forms->get(ConfigForm::class);
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
+        $settings = $services->get('Omeka\Settings');
+        $formElementManager = $services->get('FormElementManager');
 
-        return $renderer->render('ark/config-form', [
+        $data = [];
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
+        foreach ($defaultSettings as $name => $value) {
+            $data[$name] = $settings->get($name);
+        }
+
+        $form = $formElementManager->get(ConfigForm::class);
+        $form->init();
+        $form->setData($data);
+
+        return $renderer->render('ark/module/config', [
             'form' => $form,
         ]);
     }
-
-    /**
-     * Saves plugin configuration page.
-     *
-     * @param array Options set in the config form
-     */
     public function handleConfigForm(AbstractController $controller)
     {
         $services = $this->getServiceLocator();
+        $config = $services->get('Config');
         $settings = $services->get('Omeka\Settings');
         $arkManager = $services->get('Ark\ArkManager');
 
-        $post = $controller->getRequest()->getPost();
+        $params = $controller->getRequest()->getPost();
 
-        foreach (array_keys($this->settings) as $name) {
-            $value = $post->get($name);
-            if (isset($value)) {
+        $form = $this->getServiceLocator()->get('FormElementManager')
+            ->get(ConfigForm::class);
+        $form->init();
+        $form->setData($params);
+        if (!$form->isValid()) {
+            $controller->messenger()->addErrors($form->getMessages());
+            return false;
+        }
+
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
+        foreach ($params as $name => $value) {
+            if (isset($defaultSettings[$name])) {
                 $settings->set($name, $value);
             }
         }
@@ -173,9 +159,9 @@ where: http://example.com/ark:/99999/',
     /**
      * Add an ark to a record, if needed.
      *
-     * @param Record $record
+     * @param Event $event
      */
-    public function addArk($event)
+    public function addArk(Event $event)
     {
         $services = $this->getServiceLocator();
         $entityManager = $services->get('Omeka\EntityManager');
