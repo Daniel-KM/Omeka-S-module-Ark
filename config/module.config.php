@@ -1,10 +1,19 @@
 <?php
+namespace Ark;
 
 return [
-    'form_elements' => [
-        'factories' => [
-            'Ark\Form\ConfigForm' => 'Ark\Service\Form\ConfigFormFactory',
+    'service_manager' => [
+        'invokables' => [
+            'Ark\MvcListeners' => Mvc\MvcListeners::class,
         ],
+        'factories' => [
+            'Ark\ArkManager' => Service\ArkManagerFactory::class,
+            'Ark\QualifierPluginManager' => Service\QualifierPluginManagerFactory::class,
+            'Ark\NamePluginManager' => Service\NamePluginManagerFactory::class,
+        ],
+    ],
+    'listeners' => [
+        'Ark\MvcListeners',
     ],
     'view_manager' => [
         'template_path_stack' => [
@@ -13,30 +22,22 @@ return [
     ],
     'view_helpers' => [
         'factories' => [
-            'ark' => 'Ark\Service\View\Helper\ArkFactory',
+            'ark' => Service\View\Helper\ArkFactory::class,
         ],
     ],
-    'listeners' => [
-        'Ark\MvcListeners',
-    ],
-    'service_manager' => [
+    'form_elements' => [
         'factories' => [
-            'Ark\ArkManager' => 'Ark\Service\ArkManagerFactory',
-            'Ark\QualifierPluginManager' => 'Ark\Service\QualifierPluginManagerFactory',
-            'Ark\NamePluginManager' => 'Ark\Service\NamePluginManagerFactory',
-        ],
-        'invokables' => [
-            'Ark\MvcListeners' => 'Ark\Mvc\MvcListeners',
-        ],
-    ],
-    'controller_plugins' => [
-        'factories' => [
-            'ark' => 'Ark\Service\ControllerPlugin\ArkFactory',
+            'Ark\Form\ConfigForm' => Service\Form\ConfigFormFactory::class,
         ],
     ],
     'controllers' => [
         'invokables' => [
-            'Ark\Controller\Index' => 'Ark\Controller\IndexController',
+            'Ark\Controller\Index' => Controller\IndexController::class,
+        ],
+    ],
+    'controller_plugins' => [
+        'factories' => [
+            'ark' => Service\ControllerPlugin\ArkFactory::class,
         ],
     ],
     'router' => [
@@ -84,12 +85,12 @@ return [
     ],
     'ark_qualifier_plugins' => [
         'factories' => [
-            'internal' => 'Ark\Service\QualifierPlugin\InternalFactory',
+            'internal' => Service\QualifierPlugin\InternalFactory::class,
         ],
     ],
     'ark_name_plugins' => [
         'factories' => [
-            'noid' => 'Ark\Service\NamePlugin\NoidFactory',
+            'noid' => Service\NamePlugin\NoidFactory::class,
         ],
     ],
 ];
