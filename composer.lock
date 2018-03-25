@@ -4,7 +4,6 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "749f4af7fc543cad4d2dc1112d13ac3c",
     "content-hash": "3a80e295bf91c748a49b433f085b4040",
     "packages": [
         {
@@ -58,7 +57,7 @@
                 "omeka",
                 "test"
             ],
-            "time": "2016-09-22 16:40:26"
+            "time": "2016-09-22T16:40:26+00:00"
         }
     ],
     "aliases": [],
