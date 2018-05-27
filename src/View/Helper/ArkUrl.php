@@ -97,11 +97,14 @@ class ArkUrl extends Url
                 if (!$this->view->setting('ark_use_public')) {
                     break;
                 }
-                $usePublic = true;
-                // No break.
+                $admin = false;
+                // No break;
             case 'admin/id':
-                if (empty($usePublic) && !$this->view->setting('ark_use_admin')) {
-                    break;
+                if (!isset($admin)) {
+                    if (!$this->view->setting('ark_use_admin')) {
+                        break;
+                    }
+                    $admin = true;
                 }
                 if (empty($params['id']) || empty($params['controller'])) {
                     break;
@@ -122,7 +125,8 @@ class ArkUrl extends Url
                 $url = $this->view->ark()->urlFromResourceId(
                     $params['id'],
                     $mapControllerToResourceTypes[$controller],
-                    $options
+                    $options,
+                    $admin
                 );
                 if ($url) {
                     return $url;
@@ -138,7 +142,8 @@ class ArkUrl extends Url
                 $url = $this->view->ark()->urlFromResourceId(
                     $params['item-set-id'],
                     'item_sets',
-                    $options
+                    $options,
+                    false
                 );
                 if ($url) {
                     return $url;

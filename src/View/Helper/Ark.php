@@ -76,15 +76,19 @@ class Ark extends AbstractHelper
      *
      * @param AbstractResourceEntityRepresentation $resource
      * @param array|Traversable $options Url options. Params are reused.
+     * @param bool|null $admin If null, determined from the params.
      * @return string|null
      */
-    public function url(AbstractResourceEntityRepresentation $resource = null, array $options = [])
-    {
+    public function url(
+        AbstractResourceEntityRepresentation $resource = null,
+        array $options = [],
+        $admin = null
+    ) {
         $ark = $this->identifier($resource);
         if (empty($ark)) {
             return;
         }
-        return $this->urlFromArk($ark, $options);
+        return $this->urlFromArk($ark, $options, $admin);
     }
 
     /**
@@ -93,15 +97,20 @@ class Ark extends AbstractHelper
      * @param int $resourceId
      * @param string $resourceType "items", "item_sets" or "media" or variants.
      * @param array|Traversable $options Url options. Params are reused.
+     * @param bool|null $admin If null, determined from the params.
      * @return string|null
      */
-    public function urlFromResourceId($resourceId, $resourceType = null, array $options = [])
-    {
+    public function urlFromResourceId(
+        $resourceId,
+        $resourceType = null,
+        array $options = [],
+        $admin = null
+    ) {
         $ark = $this->identifierFromResourceId($resourceId, $resourceType);
         if (empty($ark)) {
             return;
         }
-        return $this->urlFromArk($ark, $options);
+        return $this->urlFromArk($ark, $options, $admin);
     }
 
     /**
@@ -113,7 +122,7 @@ class Ark extends AbstractHelper
      */
     public function getAbsoluteUrl(AbstractResourceEntityRepresentation $resource = null)
     {
-        return $this->url($resource, ['force_canonical' => true]);
+        return $this->url($resource, ['force_canonical' => true], null);
     }
 
     /**
@@ -131,19 +140,39 @@ class Ark extends AbstractHelper
      *
      * @param ArkArk $ark
      * @param array|Traversable $options Url options. Params are reused.
+     * @param bool|null $admin If null, determined from the params.
      * @return string
      */
-    protected function urlFromArk(ArkArk $ark, array $options = [])
+    protected function urlFromArk(ArkArk $ark, array $options = [], $admin = null)
     {
         $view = $this->getView();
-        $isAdmin = $view->params()->fromRoute('__ADMIN__');
-        $route = $isAdmin ? 'admin/ark/default' : 'site/ark/default';
+        $isAdmin = is_null($admin)
+            ? $view->params()->fromRoute('__ADMIN__')
+            : $admin;
+        if ($isAdmin) {
+            return $view->url(
+                'admin/ark/default',
+                [
+                    'naan' => $ark->getNaan(),
+                    'name' => $ark->getName(),
+                    'qualifier' => $ark->getQualifier(),
+                ],
+                $options,
+                true
+            );
+        }
+
+        $siteSlug = $view->params()->fromRoute('site-slug') ?: $view->defaultSiteSlug();
+        if (empty($siteSlug)) {
+            return;
+        }
         return $view->url(
-            $route,
+            'site/ark/default',
             [
                 'naan' => $ark->getNaan(),
                 'name' => $ark->getName(),
                 'qualifier' => $ark->getQualifier(),
+                'site-slug' => $siteSlug,
             ],
             $options,
             true

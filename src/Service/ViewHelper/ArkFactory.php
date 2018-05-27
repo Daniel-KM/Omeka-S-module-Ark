@@ -1,6 +1,6 @@
 <?php
 
-namespace Ark\Service\View\Helper;
+namespace Ark\Service\ViewHelper;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;

@@ -25,7 +25,8 @@ return [
             'Url' => View\Helper\ArkUrl::class,
         ],
         'factories' => [
-            'ark' => Service\View\Helper\ArkFactory::class,
+            'ark' => Service\ViewHelper\ArkFactory::class,
+            'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
         ],
     ],
     'form_elements' => [
