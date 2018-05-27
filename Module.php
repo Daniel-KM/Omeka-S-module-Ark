@@ -19,11 +19,12 @@ use Zend\View\Renderer\PhpRenderer;
  * Creates and manages unique, universel and persistent ark identifiers.
  *
  * @copyright Daniel Berthereau, 2015-2018
+ * @copyright biblibre, 2016-2017
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
 
 /**
- * The Ark plugin.
+ * The Ark module.
  */
 class Module extends AbstractModule
 {
@@ -44,13 +45,13 @@ class Module extends AbstractModule
         $serviceListener->addServiceManager(
             'Ark\NamePluginManager',
             'ark_name_plugins',
-            'Ark\ModuleManager\Feature\NamePluginProviderInterface',
+            \Ark\ModuleManager\Feature\NamePluginProviderInterface::class,
             'getArkNamePluginConfig'
         );
         $serviceListener->addServiceManager(
             'Ark\QualifierPluginManager',
             'ark_qualifier_plugins',
-            'Ark\ModuleManager\Feature\QualifierPluginProviderInterface',
+            \Ark\ModuleManager\Feature\QualifierPluginProviderInterface::class,
             'getArkQualifierPluginConfig'
         );
     }
@@ -92,7 +93,7 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $config = $services->get('Config');
         $settings = $services->get('Omeka\Settings');
-        $formElementManager = $services->get('FormElementManager');
+        $form = $services->get('FormElementManager')->get(ConfigForm::class);
 
         $data = [];
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
@@ -100,7 +101,6 @@ class Module extends AbstractModule
             $data[$name] = $settings->get($name);
         }
 
-        $form = $formElementManager->get(ConfigForm::class);
         $form->init();
         $form->setData($data);
 
@@ -117,8 +117,7 @@ class Module extends AbstractModule
 
         $params = $controller->getRequest()->getPost();
 
-        $form = $this->getServiceLocator()->get('FormElementManager')
-            ->get(ConfigForm::class);
+        $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $form->init();
         $form->setData($params);
         if (!$form->isValid()) {
@@ -154,22 +153,22 @@ class Module extends AbstractModule
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
         $sharedEventManager->attach(
-            'Omeka\Api\Adapter\ItemAdapter',
+            \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.post',
             [$this, 'addArk']
         );
         $sharedEventManager->attach(
-            'Omeka\Api\Adapter\ItemAdapter',
+            \Omeka\Api\Adapter\ItemAdapter::class,
             'api.update.post',
             [$this, 'addArk']
         );
         $sharedEventManager->attach(
-            'Omeka\Api\Adapter\ItemSetAdapter',
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.create.post',
             [$this, 'addArk']
         );
         $sharedEventManager->attach(
-            'Omeka\Api\Adapter\ItemSetAdapter',
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.update.post',
             [$this, 'addArk']
         );

@@ -5,13 +5,9 @@ namespace Ark\Form;
 use Ark\ArkManager;
 use Zend\Form\Element;
 use Zend\Form\Form;
-use Zend\I18n\Translator\TranslatorAwareInterface;
-use Zend\I18n\Translator\TranslatorAwareTrait;
 
-class ConfigForm extends Form implements TranslatorAwareInterface
+class ConfigForm extends Form
 {
-    use TranslatorAwareTrait;
-
     /**
      * @var ArkManager
      */
@@ -99,12 +95,5 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Main policy', // @translate
             ],
         ]);
-    }
-
-    protected function translate($message)
-    {
-        $translator = $this->getTranslator();
-
-        return $translator->translate($message);
     }
 }

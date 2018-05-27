@@ -2,9 +2,9 @@
 
 namespace Ark\View\Helper;
 
-use Zend\View\Helper\AbstractHelper;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Ark\ArkManager;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Zend\View\Helper\AbstractHelper;
 
 /**
  * Helper to get or create ark.
@@ -16,6 +16,9 @@ class Ark extends AbstractHelper
      */
     protected $arkManager;
 
+    /**
+     * @var AbstractResourceEntityRepresentation
+     */
     protected $resource;
 
     public function __construct(ArkManager $arkManager)
@@ -24,16 +27,14 @@ class Ark extends AbstractHelper
     }
 
     /**
-     * Return the ark of a record.
+     * Return this helper for ark.
      *
      * @param AbstractResourceEntityRepresentation $resource
-     *
-     * @return $this
+     * @return self
      */
-    public function __invoke($resource = null)
+    public function __invoke(AbstractResourceEntityRepresentation $resource = null)
     {
         $this->resource = $resource;
-
         return $this;
     }
 
@@ -61,6 +62,11 @@ class Ark extends AbstractHelper
         ], true);
     }
 
+    /**
+     * Check if the ark database is ready.
+     *
+     * @return bool
+     */
     public function isNoidDatabaseCreated()
     {
         return $this->arkManager->getArkNamePlugin()->isDatabaseCreated();

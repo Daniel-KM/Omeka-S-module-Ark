@@ -4,14 +4,14 @@ namespace Ark;
 
 use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
-use Omeka\Api\Manager;
+use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 
 class ArkManager
 {
     /**
-     * @var Manager
+     * @var ApiManager
      */
     protected $api;
 
@@ -30,8 +30,14 @@ class ArkManager
      */
     protected $qualifierPlugins;
 
+    /**
+     * @param ApiManager $api
+     * @param Settings $settings
+     * @param NamePlugins $namePlugins
+     * @param QualifierPlugins $qualifierPlugins
+     */
     public function __construct(
-        Manager $api,
+        ApiManager $api,
         Settings $settings,
         NamePlugins $namePlugins,
         QualifierPlugins $qualifierPlugins
@@ -42,6 +48,12 @@ class ArkManager
         $this->qualifierPlugins = $qualifierPlugins;
     }
 
+    /**
+     * Find the resource from an ark.
+     *
+     * @param string|array $ark
+     * @return AbstractResourceEntityRepresentation|null
+     */
     public function find($ark)
     {
         if (empty($ark)) {
@@ -95,8 +107,8 @@ class ArkManager
             return null;
         }
 
-        foreach (['items', 'item_sets', 'media'] as $resourceName) {
-            $resources = $this->api->search($resourceName, [
+        foreach (['items', 'item_sets', 'media'] as $resourceType) {
+            $resources = $this->api->search($resourceType, [
                 'property' => [
                     [
                         'property' => $property->id(),
@@ -127,12 +139,19 @@ class ArkManager
         return $resource;
     }
 
+    /**
+     * Return the ark of a resource, if any.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return Ark
+     */
     public function getArk(AbstractResourceEntityRepresentation $resource)
     {
-        $media = null;
         if ($resource->resourceName() == 'media') {
             $media = $resource;
             $resource = $media->item();
+        } else {
+            $media = null;
         }
 
         $identifiers = $resource->value('dcterms:identifier', ['all' => true, 'type' => 'literal']);
@@ -161,12 +180,21 @@ class ArkManager
         return $ark;
     }
 
+    /**
+     * @return \Ark\Name\Plugin\Noid
+     */
     public function getArkNamePlugin()
     {
         return $this->namePlugins->get('noid');
     }
 
-    public function createName($resource)
+    /**
+     * Create the ark for a resource.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return string|null
+     */
+    public function createName(AbstractResourceEntityRepresentation $resource)
     {
         if (empty($resource)) {
             return;
@@ -223,22 +251,30 @@ class ArkManager
     /**
      * Return the qualifier part of an ark.
      *
-     * @return string The qualifier
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return string
      */
-    protected function getQualifier($resource)
+    protected function getQualifier(AbstractResourceEntityRepresentation $resource)
     {
+        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
-
         return $qualifierPlugin->create($resource);
     }
 
     protected function getResourceFromQualifier($resource, $qualifier)
     {
+        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
 
         return $qualifierPlugin->getResourceFromQualifier($resource, $qualifier);
     }
 
+    /**
+     * Check if a full ark is a true ark.
+     *
+     * @param string $ark
+     * @return boolean
+     */
     protected function checkFullArk($ark)
     {
         $ark = trim($ark);
@@ -270,10 +306,9 @@ class ArkManager
     }
 
     /**
-     * Check if an ark exists in the base.
+     * Check if an ark exists in the database.
      *
      * @param string $ark The full well formed ark, with "ark:/"
-     *
      * @return bool
      */
     protected function arkExists($ark)

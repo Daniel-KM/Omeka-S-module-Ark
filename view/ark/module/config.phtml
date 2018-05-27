@@ -1,8 +1,11 @@
+<?php
+$translate = $this->plugin('translate');
+?>
 <p class="explanation">
 <?php
-    echo $this->translate('Ark allows to creates and manages unique, universel and persistent ark identifiers.') . '<br />';
+    echo $translate('Ark allows to creates and manages unique, universel and persistent ark identifiers.') . '<br />';
     echo sprintf(
-        $this->translate('See %sthe official help%s for more informations.'),
+        $translate('See %sthe official help%s for more informations.'),
         '<a href="http://n2t.net/e/ark_ids.html">', '</a>'
     );
 ?>
@@ -10,9 +13,9 @@
 
 <?php if ($this->ark()->isNoidDatabaseCreated()): ?>
     <p>
-        <?php echo $this->translate('NOID database is already created, which means some settings are not modifiable.'); ?>
-        <br>
-        <?php echo sprintf($this->translate('To be able to modify them, you have to manually remove the database (located in %s).'), OMEKA_PATH . '/files/arkandnoid'); ?>
+        <?php echo $translate('NOID database is already created, which means some settings are not modifiable.'); ?>
+        <br />
+        <?php echo sprintf($translate('To be able to modify them, you have to manually remove the database (located in %s).'), OMEKA_PATH . '/files/arkandnoid'); ?>
     </p>
 <?php endif; ?>
 

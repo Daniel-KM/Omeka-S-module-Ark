@@ -26,6 +26,7 @@ class ConfigControllerTest extends ArkControllerTestCase
 
     public function testConfigFormSubmitShouldSaveCreateDbAndRedirect()
     {
+        // TODO The test failed because there is a csrf check in config form.
         $data = [
             'ark_naan' => '12345',
             'ark_naa' => 'example.com',
