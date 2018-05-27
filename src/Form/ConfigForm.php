@@ -95,5 +95,21 @@ class ConfigForm extends Form
                 'label' => 'Main policy', // @translate
             ],
         ]);
+
+        $this->add([
+            'name' => 'ark_use_admin',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Use in admin board', // @translate
+            ],
+        ]);
+
+        $this->add([
+            'name' => 'ark_use_public',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Use in public front-end', // @translate
+            ],
+        ]);
     }
 }

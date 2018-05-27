@@ -94,6 +94,15 @@ class ArkUrl extends Url
         // Check if there is a ark url for pages of resources.
         switch ($name) {
             case 'site/resource-id':
+                if (!$this->view->setting('ark_use_public')) {
+                    break;
+                }
+                $usePublic = true;
+                // No break.
+            case 'admin/id':
+                if (empty($usePublic) && !$this->view->setting('ark_use_admin')) {
+                    break;
+                }
                 if (empty($params['id']) || empty($params['controller'])) {
                     break;
                 }
