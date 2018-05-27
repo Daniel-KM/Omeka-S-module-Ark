@@ -15,6 +15,16 @@ interface PluginInterface
     public function create(AbstractResourceEntityRepresentation $resource);
 
     /**
+     * Create the qualifier from a resource id, generally a media id.
+     *
+     * May avoid a query when the id is known, but not the resource.
+     *
+     * @param int $resourceId
+     * @return string
+     */
+    public function createFromResourceId($resourceId);
+
+    /**
      * Get the resource from a resource (generally item) and a qualifier
      * (generally media).
      *
@@ -23,4 +33,14 @@ interface PluginInterface
      * @return AbstractResourceEntityRepresentation|null
      */
     public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier);
+
+    /**
+     * Get the resource from a resource id (generally item) and a qualifier
+     * (generally media).
+     *
+     * @param int $resourceId
+     * @param string $qualifier
+     * @return AbstractResourceEntityRepresentation|null
+     */
+    public function getResourceFromResourceIdAndQualifier($resourceId, $qualifier);
 }

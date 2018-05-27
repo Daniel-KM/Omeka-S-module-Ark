@@ -4,6 +4,7 @@ namespace Ark;
 
 use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
+use Doctrine\DBAL\Connection;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
@@ -14,6 +15,11 @@ class ArkManager
      * @var ApiManager
      */
     protected $api;
+
+    /**
+     * @var Connection
+     */
+    protected $connection;
 
     /**
      * @var Settings
@@ -32,17 +38,20 @@ class ArkManager
 
     /**
      * @param ApiManager $api
+     * @param Connection $connection
      * @param Settings $settings
      * @param NamePlugins $namePlugins
      * @param QualifierPlugins $qualifierPlugins
      */
     public function __construct(
         ApiManager $api,
+        Connection $connection,
         Settings $settings,
         NamePlugins $namePlugins,
         QualifierPlugins $qualifierPlugins
     ) {
         $this->api = $api;
+        $this->connection = $connection;
         $this->settings = $settings;
         $this->namePlugins = $namePlugins;
         $this->qualifierPlugins = $qualifierPlugins;
@@ -170,6 +179,98 @@ class ArkManager
     }
 
     /**
+     * Return the ark of a resource via its id, if any.
+     *
+     * @param int $resourceId
+     * @param string $resourceType "items", "item_sets" or "media" or variants.
+     * @return Ark|null
+     */
+    public function getArkFromResourceId($resourceId, $resourceType = null)
+    {
+        $resourceId = (int) $resourceId;
+        if (empty($resourceId)) {
+            return;
+        }
+
+        $resourceTypes = [
+            null => null,
+            'item' => \Omeka\Entity\Item::class,
+            'items' => \Omeka\Entity\Item::class,
+            'item-set' => \Omeka\Entity\ItemSet::class,
+            'item_sets' => \Omeka\Entity\ItemSet::class,
+            'media' => \Omeka\Entity\Media::class,
+            'resource' => null,
+            'resources' => null,
+            // Avoid a check.
+            \Omeka\Entity\Item::class => \Omeka\Entity\Item::class,
+            \Omeka\Entity\ItemSet::class => \Omeka\Entity\ItemSet::class,
+            \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
+            \Omeka\Entity\Resource::class => \Omeka\Entity\Resource::class,
+        ];
+        if (!isset($resourceTypes[$resourceType])) {
+            return;
+        }
+        $resourceClass = $resourceTypes[$resourceType];
+
+        $protocol = 'ark:';
+        $naan = $this->settings->get('ark_naan');
+        $base = $naan ? "$protocol/$naan/" : "$protocol/";
+
+        $connection = $this->connection;
+        $qb = $connection->createQueryBuilder();
+        $qb
+            ->select('value.value')
+            ->from('value', 'value')
+            // Property 10 = dcterms:identifier.
+            ->where('value.property_id = 10')
+            ->andWhere('value.type = "literal"');
+
+        if ($resourceClass) {
+            $qb
+                ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
+                ->andWhere('resource.resource_type = :resource_type');
+            if ($resourceClass === \Omeka\Entity\Media::class) {
+                $qb
+                    ->innerJoin('resource', 'media', 'media', 'media.item_id = resource.id')
+                    ->setParameter('resource_type', \Omeka\Entity\Item::class)
+                    ->andWhere('media.id = :media_id')
+                    ->setParameter('media_id', $resourceId);
+            } else {
+                $qb
+                    ->andWhere('value.resource_id = :resource_id')
+                    ->setParameter('resource_id', $resourceId)
+                    ->setParameter('resource_type', $resourceClass);
+            }
+        } else {
+            $qb
+                ->andWhere('value.resource_id = :resource_id')
+                ->setParameter('resource_id', $resourceId);
+        }
+
+        $qb
+            ->andWhere('value.value LIKE :value')
+            ->setParameter('value', $base . '%')
+            ->groupBy(['value.resource_id'])
+            ->addOrderBy('value.resource_id', 'ASC')
+            ->addOrderBy('value.id', 'ASC')
+            // Only one identifier by resource.
+            ->setMaxResults(1);
+
+        $stmt = $connection->executeQuery($qb, $qb->getParameters());
+        $ark = $stmt->fetchColumn();
+
+        if ($ark) {
+            $ark = new Ark($naan, substr($ark, strlen($base)));
+            if ($resourceClass === \Omeka\Entity\Media::class) {
+                $qualifier = $this->getQualifierFromResourceId($resourceId);
+                $ark->setQualifier($qualifier);
+            }
+        }
+
+        return $ark;
+    }
+
+    /**
      * @return \Ark\Name\Plugin\Noid
      */
     public function getArkNamePlugin()
@@ -250,12 +351,45 @@ class ArkManager
         return $qualifierPlugin->create($resource);
     }
 
-    protected function getResourceFromQualifier($resource, $qualifier)
+    /**
+     * Return the qualifier part of an ark via the resource id.
+     *
+     * @param int $resourceId
+     * @return string
+     */
+    protected function getQualifierFromResourceId($resourceId)
     {
         /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
+        return $qualifierPlugin->createFromResourceId($resourceId);
+    }
 
+    /**
+     * Get resource from resource qualifier.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @param string $qualifier
+     * @return AbstractResourceEntityRepresentation
+     */
+    protected function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
+    {
+        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
+        $qualifierPlugin = $this->qualifierPlugins->get('internal');
         return $qualifierPlugin->getResourceFromQualifier($resource, $qualifier);
+    }
+
+    /**
+     * Get resource from qualifier.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @param string $qualifier
+     * @return AbstractResourceEntityRepresentation
+     */
+    protected function getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
+    {
+        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
+        $qualifierPlugin = $this->qualifierPlugins->get('internal');
+        return $qualifierPlugin->getResourceFromResourceIdAndQualifier($resource, $qualifier);
     }
 
     /**
