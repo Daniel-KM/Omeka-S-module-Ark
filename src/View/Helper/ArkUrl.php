@@ -97,6 +97,10 @@ class ArkUrl extends Url
                 if (empty($params['id']) || empty($params['controller'])) {
                     break;
                 }
+                // Use only with the action show (default in standard).
+                if (!empty($params['action']) && $params['action'] !== 'show') {
+                    break;
+                }
                 $controller = $params['controller'];
                 $mapControllerToResourceTypes = [
                     'item' => 'items',
