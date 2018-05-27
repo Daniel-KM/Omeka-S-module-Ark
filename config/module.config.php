@@ -21,6 +21,9 @@ return [
         ],
     ],
     'view_helpers' => [
+        'invokables' => [
+            'Url' => View\Helper\ArkUrl::class,
+        ],
         'factories' => [
             'ark' => Service\View\Helper\ArkFactory::class,
         ],
