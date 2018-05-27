@@ -101,33 +101,22 @@ class ArkManager
             return null;
         }
 
-        $properties = $this->api->search('properties', ['term' => 'dcterms:identifier'])->getContent();
-        $property = $properties[0];
-        if (empty($property)) {
-            return null;
-        }
-
-        foreach (['items', 'item_sets', 'media'] as $resourceType) {
-            $resources = $this->api->search($resourceType, [
-                'property' => [
-                    [
-                        'property' => $property->id(),
-                        'type' => 'eq',
-                        'text' => $base . $name,
-                    ],
+        $resources = $this->api->search('resources', [
+            'property' => [
+                [
+                    // Property 10 = dcterms:identifier.
+                    'property' => 10,
+                    'type' => 'eq',
+                    'text' => $base . $name,
                 ],
-                'limit' => 1,
-            ])->getContent();
+            ],
+            'limit' => 1,
+        ])->getContent();
 
-            if (!empty($resources)) {
-                break;
-            }
-        }
         if (empty($resources)) {
             return null;
         }
-
-        $resource = $resources[0];
+        $resource = reset($resources);
 
         if ($qualifier) {
             $qualifierResource = $this->getResourceFromQualifier($resource, $qualifier);
