@@ -5,14 +5,14 @@ namespace Ark;
 use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
 use Doctrine\DBAL\Connection;
-use Omeka\Api\Manager as ApiManager;
+use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 
 class ArkManager
 {
     /**
-     * @var ApiManager
+     * @var Api
      */
     protected $api;
 
@@ -37,14 +37,14 @@ class ArkManager
     protected $qualifierPlugins;
 
     /**
-     * @param ApiManager $api
+     * @param Api $api
      * @param Connection $connection
      * @param Settings $settings
      * @param NamePlugins $namePlugins
      * @param QualifierPlugins $qualifierPlugins
      */
     public function __construct(
-        ApiManager $api,
+        Api $api,
         Connection $connection,
         Settings $settings,
         NamePlugins $namePlugins,
@@ -110,27 +110,42 @@ class ArkManager
             return null;
         }
 
-        $resources = $this->api->search('resources', [
-            'property' => [
-                [
-                    // Property 10 = dcterms:identifier.
-                    'property' => 10,
-                    'type' => 'eq',
-                    'text' => $base . $name,
-                ],
-            ],
-            'limit' => 1,
-        ])->getContent();
+        // The resource adapter does not implement the search operation for now.
+        $connection = $this->connection;
+        $qb = $connection->createQueryBuilder();
+        $qb
+            ->select('value.resource_id, resource.resource_type')
+            ->from('value', 'value')
+            ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
+            // Property 10 = dcterms:identifier.
+            ->where('value.property_id = 10')
+            ->andWhere('value.type = "literal"')
+            ->andWhere('value.value = :value')
+            ->setParameter('value', $base . $name)
+            ->groupBy(['value.resource_id'])
+            ->addOrderBy('value.resource_id', 'ASC')
+            ->addOrderBy('value.id', 'ASC')
+            // Only one identifier by resource.
+            ->setMaxResults(1);
+        $stmt = $connection->executeQuery($qb, $qb->getParameters());
+        $resource = $stmt->fetch();
 
-        if (empty($resources)) {
+        if (empty($resource)) {
             return null;
         }
-        $resource = reset($resources);
 
         if ($qualifier) {
-            $qualifierResource = $this->getResourceFromQualifier($resource, $qualifier);
+            $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resource['resource_id'], $qualifier);
             if ($qualifierResource) {
                 $resource = $qualifierResource;
+            }
+        } else {
+            $resourceType = $this->resourceType($resource['resource_type']);
+            if ($resourceType) {
+                $resource = $this->api
+                    ->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent();
+            } else {
+                $resource = null;
             }
         }
 
@@ -192,25 +207,10 @@ class ArkManager
             return;
         }
 
-        $resourceTypes = [
-            null => null,
-            'item' => \Omeka\Entity\Item::class,
-            'items' => \Omeka\Entity\Item::class,
-            'item-set' => \Omeka\Entity\ItemSet::class,
-            'item_sets' => \Omeka\Entity\ItemSet::class,
-            'media' => \Omeka\Entity\Media::class,
-            'resource' => null,
-            'resources' => null,
-            // Avoid a check.
-            \Omeka\Entity\Item::class => \Omeka\Entity\Item::class,
-            \Omeka\Entity\ItemSet::class => \Omeka\Entity\ItemSet::class,
-            \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
-            \Omeka\Entity\Resource::class => \Omeka\Entity\Resource::class,
-        ];
-        if (!isset($resourceTypes[$resourceType])) {
+        $resourceClass = $this->resourceClass($resourceType);
+        if ($resourceClass === false) {
             return;
         }
-        $resourceClass = $resourceTypes[$resourceType];
 
         $protocol = 'ark:';
         $naan = $this->settings->get('ark_naan');
@@ -389,7 +389,7 @@ class ArkManager
     {
         /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
-        return $qualifierPlugin->getResourceFromResourceIdAndQualifier($resource, $qualifier);
+        return $qualifierPlugin->getResourceFromResourceIdAndQualifier($resourceId, $qualifier);
     }
 
     /**
@@ -437,5 +437,54 @@ class ArkManager
     protected function arkExists($ark)
     {
         return (bool) $this->find($ark);
+    }
+
+    /**
+     * Get the resource class from the resource type.
+     *
+     * @param string|null  $resourceType
+     * @return string|null|bool Null if any resources. False if not managed.
+     */
+    protected function resourceClass($resourceType)
+    {
+        $resourceTypes = [
+            null => null,
+            'item' => \Omeka\Entity\Item::class,
+            'items' => \Omeka\Entity\Item::class,
+            'item-set' => \Omeka\Entity\ItemSet::class,
+            'item_sets' => \Omeka\Entity\ItemSet::class,
+            'media' => \Omeka\Entity\Media::class,
+            'resource' => null,
+            'resources' => null,
+            // Avoid a check.
+            \Omeka\Entity\Item::class => \Omeka\Entity\Item::class,
+            \Omeka\Entity\ItemSet::class => \Omeka\Entity\ItemSet::class,
+            \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
+            \Omeka\Entity\Resource::class => null,
+        ];
+        if (!isset($resourceTypes[$resourceType])) {
+            return false;
+        }
+        return $resourceTypes[$resourceType];
+    }
+
+    /**
+     * Get the resource type from the resource class.
+     *
+     * @param string $resourceClass
+     * @return string|null|bool Null if any resources. False if not managed.
+     */
+    protected function resourceType($resourceClass)
+    {
+        $resourceClasses = [
+            null => null,
+            \Omeka\Entity\Item::class => 'items',
+            \Omeka\Entity\ItemSet::class => 'item_sets',
+            \Omeka\Entity\Media::class => 'media',
+        ];
+        if (!isset($resourceClasses[$resourceClass])) {
+            return false;
+        }
+        return $resourceClasses[$resourceClass];
     }
 }
