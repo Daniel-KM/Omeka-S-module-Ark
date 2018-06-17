@@ -16,7 +16,6 @@ class Internal implements PluginInterface
     protected $api;
 
     /**
-     *
      * @param ApiManager $api
      */
     public function __construct(ApiManager $api)

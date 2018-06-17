@@ -396,7 +396,7 @@ class ArkManager
      * Check if a full ark is a true ark.
      *
      * @param string $ark
-     * @return boolean
+     * @return bool
      */
     protected function checkFullArk($ark)
     {
