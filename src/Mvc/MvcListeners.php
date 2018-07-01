@@ -70,15 +70,16 @@ class MvcListeners extends AbstractListenerAggregate
         }
 
         $isAdmin = $routeMatch->getParam('__ADMIN__');
-        $controllerName = StaticFilter::execute($resource->getControllerName(), 'WordDashToCamelCase');
+        $controllerName = $resource->getControllerName();
 
         if ($isAdmin) {
             $params = [
                 '__NAMESPACE__' => 'Omeka\Controller\Admin',
                 '__ADMIN__' => true,
-                'controller' => 'Omeka\Controller\Admin\\' . $controllerName,
+                'controller' => 'Omeka\Controller\Admin\\' . StaticFilter::execute($controllerName, 'WordDashToCamelCase'),
                 'action' => 'show',
                 'id' => $resource->id(),
+                '__CONTROLLER__' => $controllerName,
             ];
             $routeName = 'admin/id';
         } else {
@@ -91,6 +92,7 @@ class MvcListeners extends AbstractListenerAggregate
                     'controller' => 'Omeka\Controller\Site\Item',
                     'action' => 'browse',
                     'item-set-id' => $resource->id(),
+                    '__CONTROLLER__' => 'item-set',
                 ];
                 $routeName = 'site/item-set';
             } else {
@@ -98,9 +100,10 @@ class MvcListeners extends AbstractListenerAggregate
                     '__NAMESPACE__' => 'Omeka\Controller\Site',
                     '__SITE__' => true,
                     'site-slug' => $siteSlug,
-                    'controller' => 'Omeka\Controller\Site\\' . $controllerName,
+                    'controller' => 'Omeka\Controller\Site\\' . StaticFilter::execute($controllerName, 'WordDashToCamelCase'),
                     'action' => 'show',
                     'id' => $resource->id(),
+                    '__CONTROLLER__' => $controllerName,
                 ];
                 $routeName = 'site/resource-id';
             }
