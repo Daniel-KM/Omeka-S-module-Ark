@@ -1,7 +1,15 @@
-<?php // This shoud returns a brief machine- and eye-readable metadata record (not the full Dublin Core).
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ * @var string $policy
+ */
+
+$translate = $this->plugin('translate');
+// This shoud returns a brief machine- and eye-readable metadata record (not the full Dublin Core).
 $title = $resource->value('dcterms:title', ['type' => 'literal']);
 if (empty($title)) {
-    $title = $this->translate('[No title]');
+    $title = $translate('[No title]');
 }
 $creators = $resource->value('dcterms:creator', ['type' => 'literal', 'all' => true]);
 $publisher = $resource->value('dcterms:publisher', ['type' => 'literal']);

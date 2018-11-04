@@ -1,4 +1,12 @@
-<?php $title = $this->translate('Ark Policy Statement'); ?>
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var string $policy
+ */
+
+$translate = $this->plugin('translate');
+?>
+<?php $title = $translate('Ark Policy Statement'); ?>
 
 <div id="content" role="main">
     <?php echo $this->pageTitle($title, 2); ?>
