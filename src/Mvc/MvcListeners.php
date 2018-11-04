@@ -84,7 +84,7 @@ class MvcListeners extends AbstractListenerAggregate
             $routeName = 'admin/id';
         } else {
             $siteSlug = $routeMatch->getParam('site-slug');
-            if ($controllerName === 'ItemSet') {
+            if ($controllerName === 'item-set') {
                 $params = [
                     '__NAMESPACE__' => 'Omeka\Controller\Site',
                     '__SITE__' => true,
