@@ -98,26 +98,41 @@ class Module extends AbstractModule
         $data = [];
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
         foreach ($defaultSettings as $name => $value) {
-            $data[$name] = $settings->get($name);
+            $data[$name] = $settings->get($name, $value);
         }
 
         $form->init();
         $form->setData($data);
 
-        return $renderer->render('ark/module/config', [
-            'form' => $form,
-        ]);
+        $view = $renderer;
+        $html = '<p class="explanation">'
+            . $view->translate('Ark allows to creates and manages unique, universel and persistent ark identifiers.') //  @translate
+            . '</p><p>'
+            . sprintf($view->translate('See %sthe official help%s for more informations.'), // @translate
+                '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
+            . '</p>';
+        if ($view->ark()->isNoidDatabaseCreated()) {
+            $html .= '<p>'
+                . $view->translate('NOID database is already created, which means some settings are not modifiable.')
+                . '</p><p>'
+                . sprintf($view->translate('To be able to modify them, you have to manually remove the database (located in %s).'), // @translate
+                    OMEKA_PATH . '/files/arkandnoid')
+                . '</p>';
+        }
+
+        $html .= $renderer->formCollection($form);
+        return $html;
     }
     public function handleConfigForm(AbstractController $controller)
     {
         $services = $this->getServiceLocator();
         $config = $services->get('Config');
         $settings = $services->get('Omeka\Settings');
+        $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $arkManager = $services->get('Ark\ArkManager');
 
         $params = $controller->getRequest()->getPost();
 
-        $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $form->init();
         $form->setData($params);
         if (!$form->isValid()) {
@@ -125,11 +140,11 @@ class Module extends AbstractModule
             return false;
         }
 
+        $params = $form->getData();
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
+        $params = array_intersect_key($params, $defaultSettings);
         foreach ($params as $name => $value) {
-            if (array_key_exists($name, $defaultSettings)) {
-                $settings->set($name, $value);
-            }
+            $settings->set($name, $value);
         }
 
         $namePlugin = $arkManager->getArkNamePlugin();
@@ -186,30 +201,31 @@ class Module extends AbstractModule
         $arkManager = $services->get('Ark\ArkManager');
         $api = $services->get('Omeka\ApiManager');
 
-        $request = $event->getParam('request');
         $response = $event->getParam('response');
-        $requestResource = $request->getResource();
-
         $resource = $response->getContent();
         $representation = $api->read($resource->getResourceName(), $resource->getId())->getContent();
 
         // Check if an ark exists (no automatic change or update), else create.
         $ark = $arkManager->getArk($representation);
-        if (empty($ark)) {
-            $ark = $arkManager->createName($representation);
-            if ($ark) {
-                $values = $resource->getValues();
-
-                $value = new Value;
-                $value->setType('literal');
-                $value->setResource($resource);
-                $value->setProperty($this->getIdentifierPropertyEntity());
-                $value->setValue($ark);
-
-                $values->add($value);
-                $entityManager->flush();
-            }
+        if ($ark) {
+            return;
         }
+
+        $ark = $arkManager->createName($representation);
+        if (empty($ark)) {
+            return;
+        }
+
+        $values = $resource->getValues();
+
+        $value = new Value;
+        $value->setType('literal');
+        $value->setResource($resource);
+        $value->setProperty($this->getIdentifierPropertyEntity());
+        $value->setValue($ark);
+
+        $values->add($value);
+        $entityManager->flush();
     }
 
     protected function getIdentifierPropertyEntity()
