@@ -134,11 +134,10 @@ class ArkManager
             return null;
         }
 
-        if ($qualifier) {
-            $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resource['resource_id'], $qualifier);
-            if ($qualifierResource) {
-                $resource = $qualifierResource;
-            }
+        if ($qualifier
+            && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resource['resource_id'], $qualifier)
+        ) {
+            $resource = $qualifierResource;
         } else {
             $resourceType = $this->resourceType($resource['resource_type']);
             if ($resourceType) {
