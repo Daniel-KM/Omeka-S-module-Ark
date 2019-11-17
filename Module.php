@@ -41,7 +41,7 @@ class Module extends AbstractModule
         $container = $event->getParam('ServiceManager');
         $serviceListener = $container->get('ServiceListener');
 
-        /** @var \Zend\ModuleManager\Listener\ServiceListener $serviceListener */
+        /* @var \Zend\ModuleManager\Listener\ServiceListener $serviceListener */
         $serviceListener->addServiceManager(
             'Ark\NamePluginManager',
             'ark_name_plugins',

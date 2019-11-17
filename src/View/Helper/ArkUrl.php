@@ -98,7 +98,7 @@ class ArkUrl extends Url
                     break;
                 }
                 $admin = false;
-                // No break;
+                // no break;
             case 'admin/id':
                 if (!isset($admin)) {
                     if (!$this->view->setting('ark_use_admin')) {
