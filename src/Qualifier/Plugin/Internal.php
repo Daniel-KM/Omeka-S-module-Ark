@@ -37,12 +37,12 @@ class Internal implements PluginInterface
     public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
     {
         if ($resource->resourceName() != 'items') {
-            return;
+            return null;
         }
 
         $qualifier = (int) $qualifier;
         if (empty($qualifier)) {
-            return;
+            return null;
         }
 
         $media = $this->api
@@ -59,12 +59,12 @@ class Internal implements PluginInterface
     {
         $resourceId = (int) $resourceId;
         if (empty($resourceId)) {
-            return;
+            return null;
         }
 
         $qualifier = (int) $qualifier;
         if (empty($qualifier)) {
-            return;
+            return null;
         }
 
         $media = $this->api

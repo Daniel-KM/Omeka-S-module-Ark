@@ -25,6 +25,7 @@ class MvcListeners extends AbstractListenerAggregate
         $serviceLocator = $event->getApplication()->getServiceManager();
         $controllerPlugins = $serviceLocator->get('ControllerPluginManager');
         $settings = $serviceLocator->get('Omeka\Settings');
+        /** @var \Ark\Mvc\Controller\Plugin\Ark $arkPlugin */
         $arkPlugin = $controllerPlugins->get('ark');
 
         $routeMatch = $event->getRouteMatch();

@@ -40,6 +40,7 @@ class Noid implements PluginInterface
             return $ark;
         }
 
+        $resourceIds = [];
         $resourceIds[] = $resource->id();
 
         $contact = $this->getContact();
