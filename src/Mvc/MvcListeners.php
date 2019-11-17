@@ -93,7 +93,7 @@ class MvcListeners extends AbstractListenerAggregate
                     'controller' => 'Omeka\Controller\Site\Item',
                     'action' => 'browse',
                     'item-set-id' => $resource->id(),
-                    '__CONTROLLER__' => 'item-set',
+                    '__CONTROLLER__' => 'item',
                 ];
                 $routeName = 'site/item-set';
             } else {
