@@ -18,7 +18,7 @@ it, or use and init the source.
 
 * From the zip
 
-Download the last release [`Ark.zip`] from the list of releases (the master does
+Download the last release [Ark.zip] from the list of releases (the master does
 not contain the dependency), and uncompress it in the `modules` directory.
 
 * From the source and for development
@@ -27,8 +27,7 @@ If the module was installed from the source, rename the name of the folder of
 the module to `Ark`, go to the root module, and run:
 
 ```
-    npm install
-    gulp
+composer install
 ```
 
 
@@ -76,23 +75,14 @@ This Agreement may be freely reproduced and published, provided it is not
 altered, and that no provisions are either added or removed herefrom.
 
 
-Contact
--------
-
-Current maintainers:
-
-* Daniel Berthereau (see [Daniel-KM] on GitHub)
-* BibLibre
-
-First version of this plugin has been built for [Mines ParisTech]. The upgrade
-for Omeka S has been built for [Paris Sciences et Lettres (PSL)].
-
-
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2018
+* Copyright Daniel Berthereau, 2015-2019 (see [Daniel-KM] on GitHub)
 * Copyright BibLibre, 2016-2017
+
+First version of this plugin has been built for [Mines ParisTech]. The upgrade
+for Omeka S has been built for [Paris Sciences et Lettres (PSL)].
 
 
 [Ark & Noid]: https://github.com/Daniel-KM/Omeka-S-module-Ark
@@ -102,6 +92,8 @@ Copyright
 [Omeka]: https://omeka.org/classic
 [BibLibre]: https://github.com/biblibre
 [ark and noid management]: https://github.com/Daniel-KM/Omeka-plugin-ArkAndNoid
+[Noid]: https://github.com/Daniel-KM/Noid4Php
+[Ark.zip]: https://github.com/Daniel-KM/Omeka-S-module-Ark/releases
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-CleanUrl/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
