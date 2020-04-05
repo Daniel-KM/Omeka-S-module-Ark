@@ -95,6 +95,16 @@ class ConfigForm extends Form
                     'id' => 'ark_policy_main',
                     'rows' => 10,
                 ],
+            ])
+            ->add([
+                'name' => 'ark_qualifier_static',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Save the media qualifier', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'ark_qualifier',
+                ],
             ]);
     }
 

@@ -23,4 +23,6 @@ $settings = $services->get('Omeka\Settings');
 if (version_compare($oldVersion, '3.5.7', '<')) {
     $settings->delete('ark_use_admin');
     $settings->delete('ark_use_public');
+
+    $settings->set('ark_qualifier_static', false);
 }

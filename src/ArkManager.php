@@ -6,6 +6,7 @@ use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
 use Doctrine\DBAL\Connection;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Stdlib\Message;
 use Zend\Log\Logger;
@@ -16,6 +17,11 @@ class ArkManager
      * @string string
      */
     protected $naan;
+
+    /**
+     * @string bool
+     */
+    protected $qualifierStatic;
 
     /**
      * @var Api
@@ -46,6 +52,7 @@ class ArkManager
      * @todo Remove all code related to missing naan (use 99999 for test).
      *
      * @param string $naan
+     * @param bool $qualifierStatic
      * @param Api $api
      * @param Connection $connection
      * @param Logger $logger
@@ -54,6 +61,7 @@ class ArkManager
      */
     public function __construct(
         $naan,
+        $qualifierStatic,
         Api $api,
         Connection $connection,
         Logger $logger,
@@ -61,6 +69,7 @@ class ArkManager
         QualifierPlugins $qualifierPlugins
     ) {
         $this->naan = $naan;
+        $this->qualifierStatic = $qualifierStatic;
         $this->api = $api;
         $this->connection = $connection;
         $this->logger = $logger;
@@ -69,7 +78,7 @@ class ArkManager
     }
 
     /**
-     * Find the resource from an ark.
+     * Find the resource from an ark. The qualifier can be dynamic.
      *
      * @param string|array $ark
      * @return AbstractResourceEntityRepresentation|null
@@ -164,40 +173,53 @@ class ArkManager
      * Return the ark of a resource, if any.
      *
      * @param AbstractResourceEntityRepresentation $resource
-     * @return Ark
+     * @return Ark|null
      */
     public function getArk(AbstractResourceEntityRepresentation $resource)
     {
-        if ($resource->resourceName() == 'media') {
-            $media = $resource;
-            $resource = $media->item();
-        } else {
-            $media = null;
-        }
-
-        $identifiers = $resource->value('dcterms:identifier', ['all' => true, 'type' => 'literal']);
+        $ark = null;
+        $identifiers = $resource->value('dcterms:identifier', ['type' => 'literal', 'all' => true, 'default' => []]);
         $protocol = 'ark:';
         $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
-        $ark = null;
-        if (!empty($identifiers)) {
-            foreach ($identifiers as $identifier) {
-                if (strpos($identifier->value(), $base) === 0) {
-                    $ark = $identifier->value();
-                    break;
-                }
+        foreach ($identifiers as $identifier) {
+            if (strpos($identifier->value(), $base) === 0) {
+                $ark = $identifier->value();
+                break;
             }
         }
 
+        // Clean the ark and add the qualifer if any.
         if ($ark) {
-            $ark = new Ark($this->naan, mb_substr($ark, mb_strlen($base)));
-
-            if ($media) {
-                $qualifier = $this->getQualifier($media);
-                $ark->setQualifier($qualifier);
-            }
+            $name = strtok(mb_substr($ark, mb_strlen($base)), '/');
+            $qualifier = $resource->resourceName() === 'media'
+                ? strtok('/')
+                : null;
+            return new Ark($this->naan, $name, $qualifier);
         }
 
-        return $ark;
+        // Check dynamic ark for media.
+        if ($resource->resourceName() !== 'media' || $this->qualifierStatic) {
+            return null;
+        }
+
+        $media = $resource;
+        $resource = $media->item();
+        $identifiers = $resource->value('dcterms:identifier', ['type' => 'literal', 'all' => true, 'default' => []]);
+        $protocol = 'ark:';
+        $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
+        foreach ($identifiers as $identifier) {
+            if (strpos($identifier->value(), $base) === 0) {
+                $ark = $identifier->value();
+                break;
+            }
+        }
+        if (!$ark) {
+            return null;
+        }
+
+        $name = strtok(mb_substr($ark, mb_strlen($base)), '/');
+        $qualifier = $this->getQualifier($media);
+        return new Ark($this->naan, $name, $qualifier);
     }
 
     /**
@@ -291,6 +313,10 @@ class ArkManager
      */
     public function createName(AbstractResourceEntityRepresentation $resource)
     {
+        if ($resource->resourceName() === 'media') {
+            return $this->createNameQualifier($resource);
+        }
+
         $namePlugin = $this->namePlugins->get('noid');
         $ark = $namePlugin->create($resource);
 
@@ -339,17 +365,53 @@ class ArkManager
         return $ark;
     }
 
-    /**
-     * Return the qualifier part of an ark.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string
-     */
-    protected function getQualifier(AbstractResourceEntityRepresentation $resource)
+    protected function createNameQualifier(MediaRepresentation $media)
     {
-        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
+        // Check if the item has an ark first: avoid to set an ark separately
+        // for a media.
+        $ark = $this->getArk($media->item());
+        if (!$ark) {
+            $message = new Message(
+                'No Ark qualfiier created for media #%1$d: the item #%2$d does not have an ark. Update it first.', // @translate
+                $media->id(), $media->item()->id()
+            );
+            $this->logger->err($message);
+            return null;
+        }
+
+        if (!$this->qualifierStatic) {
+            $message = new Message(
+                'Unable to create a qualifier for media #%1$d: option is "dynamic qualifier".', // @translate
+                $media->id()
+            );
+            $this->logger->err($message);
+            return null;
+        }
+
         $qualifierPlugin = $this->qualifierPlugins->get('internal');
-        return $qualifierPlugin->create($resource);
+        $qualifier = $this->getQualifier($media);
+        if (!$qualifier) {
+            $message = new Message(
+                'Unable to create a qualifier for media #%1$d. Check the processor "%2$s".', // @translate
+                $media->id(), get_class($qualifierPlugin)
+            );
+            $this->logger->err($message);
+            return null;
+        }
+
+        $ark .= '/' . $qualifier;
+
+        // Check if the ark is single.
+        if ($this->arkExists($ark)) {
+            $message = new Message(
+                'Unable to create a unique ark. Check the processor "%1$s" [%2$s #%3$d].', // @translate
+                get_class($qualifierPlugin), $media->getControllerName(), $media->id()
+            );
+            $this->logger->err($message);
+            return null;
+        }
+
+        return $ark;
     }
 
     /**
@@ -435,7 +497,69 @@ class ArkManager
      */
     protected function arkExists($ark)
     {
-        return (bool) $this->find($ark);
+        return (bool) $this->findStatic($ark);
+    }
+
+    /**
+     * Find the resource from a static ark.
+     *
+     * @param string $ark
+     * @return AbstractResourceEntityRepresentation|null
+     */
+    protected function findStatic($ark)
+    {
+        if (empty($ark)) {
+            return null;
+        }
+
+        $protocol = 'ark:';
+        $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
+
+        // Quick check of format.
+        if (mb_strpos($ark, $base) !== 0) {
+            return null;
+        }
+
+        // The resource adapter does not implement the search operation for now.
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('value.resource_id, resource.resource_type')
+            ->from('value', 'value')
+            ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
+            // Property 10 = dcterms:identifier.
+            ->where('value.property_id = 10')
+            ->andWhere('value.type = "literal"')
+            ->andWhere('value.value = :value')
+            ->setParameter('value', $ark)
+            ->groupBy(['value.resource_id'])
+            ->addOrderBy('value.resource_id', 'ASC')
+            ->addOrderBy('value.id', 'ASC')
+            // Only one identifier by resource.
+            ->setMaxResults(1);
+        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
+        $resource = $stmt->fetch();
+
+        if (empty($resource)) {
+            return null;
+        }
+
+        $resourceType = $this->resourceType($resource['resource_type']);
+        return $resourceType
+            ? $this->api->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent()
+            : null;
+    }
+
+    /**
+     * Return the qualifier part of an ark.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return string
+     */
+    protected function getQualifier(AbstractResourceEntityRepresentation $resource)
+    {
+        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
+        $qualifierPlugin = $this->qualifierPlugins->get('internal');
+        return $qualifierPlugin->create($resource);
     }
 
     /**

@@ -36,7 +36,7 @@ class Internal implements PluginInterface
 
     public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
     {
-        if ($resource->resourceName() != 'items') {
+        if ($resource->resourceName() !== 'items') {
             return null;
         }
 

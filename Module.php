@@ -191,6 +191,16 @@ class Module extends AbstractModule
             [$this, 'addArk']
         );
         $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.create.post',
+            [$this, 'addArk']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.update.post',
+            [$this, 'addArk']
+        );
+        $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.create.post',
             [$this, 'addArk']
@@ -214,13 +224,24 @@ class Module extends AbstractModule
         $arkManager = $services->get('Ark\ArkManager');
         $api = $services->get('Omeka\ApiManager');
 
-        $response = $event->getParam('response');
-        $resource = $response->getContent();
+        /** @var \Omeka\Entity\Resource $resource */
+        $resource = $event->getParam('response')->getContent();
+
+        // Check if the media ark should be set.
+        $isMedia = $resource->getResourceName() === 'media';
+        if ($isMedia) {
+            $settings = $services->get('Omeka\Settings');
+            if (!$settings->get('ark_qualifier_static')) {
+                return;
+            }
+        }
+
         $representation = $api->read($resource->getResourceName(), $resource->getId())->getContent();
 
         // Check if an ark exists (no automatic change or update), else create.
         $ark = $arkManager->getArk($representation);
         if ($ark) {
+            // For media, the ark is static, as checked above and in manager.
             return;
         }
 
