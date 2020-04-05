@@ -144,6 +144,7 @@ where: http://example.com/ark:/99999/',
 * No ARK shall be re-assigned; that is, once an ARK-to-object association has been made public, that association shall be considered unique into the indefinite future.
 * To help them age and travel well, the Name part of our institution-assigned ARKs shall contain no widely recognizable semantic information (to the extent possible).
 * Our institution-assigned ARKs shall be generated with a terminal check character that guarantees them against single character errors and transposition errors.',
+            'ark_name' => 'noid',
             'ark_qualifier' => 'internal',
             'ark_qualifier_static' => false,
             'ark_qualifier_position_format' => '',

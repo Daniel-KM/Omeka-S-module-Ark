@@ -21,6 +21,11 @@ class ArkManager
     /**
      * @string string
      */
+    protected $namePluginName;
+
+    /**
+     * @string string
+     */
     protected $qualifierPluginName;
 
     /**
@@ -57,6 +62,7 @@ class ArkManager
      * @todo Remove all code related to missing naan (use 99999 for test).
      *
      * @param string $naan
+     * @param string $namePluginName
      * @param string $qualifierPluginName
      * @param bool $qualifierStatic
      * @param Api $api
@@ -67,6 +73,7 @@ class ArkManager
      */
     public function __construct(
         $naan,
+        $namePluginName,
         $qualifierPluginName,
         $qualifierStatic,
         Api $api,
@@ -76,6 +83,7 @@ class ArkManager
         QualifierPlugins $qualifierPlugins
     ) {
         $this->naan = $naan;
+        $this->namePluginName = $namePluginName;
         $this->qualifierPluginName = $qualifierPluginName;
         $this->qualifierStatic = $qualifierStatic;
         $this->api = $api;
@@ -306,14 +314,6 @@ class ArkManager
     }
 
     /**
-     * @return \Ark\Name\Plugin\Noid
-     */
-    public function getArkNamePlugin()
-    {
-        return $this->namePlugins->get('noid');
-    }
-
-    /**
      * Create the ark for a resource.
      *
      * @param AbstractResourceEntityRepresentation $resource
@@ -325,14 +325,13 @@ class ArkManager
             return $this->createNameQualifier($resource);
         }
 
-        $namePlugin = $this->namePlugins->get('noid');
-        $ark = $namePlugin->create($resource);
+        $ark = $this->getArkNamePlugin()->create($resource);
 
         // Check the result.
         if (empty($ark)) {
             $message = new Message(
                 'No Ark created: check your processor "%1$s" [%2$s #%3$d].', // @translate
-                get_class($namePlugin), $resource->getControllerName(), $resource->id()
+                $this->namePluginName, $resource->getControllerName(), $resource->id()
             );
             $this->logger->err($message);
             return null;
@@ -342,7 +341,7 @@ class ArkManager
         if (!$this->checkFullArk($ark)) {
             $message = new Message(
                 'Ark "%1$s" is not correct: check your naan "%2$s", your template, and your processor [%3$s].', // @translate
-                $ark, $this->naan, get_class($namePlugin)
+                $ark, $this->naan, $this->namePluginName
             );
             $this->logger->err($message);
             return null;
@@ -353,10 +352,10 @@ class ArkManager
 
         // Check if the ark is single.
         if ($this->arkExists($ark)) {
-            if ($namePlugin->isFullArk()) {
+            if ($this->getArkNamePlugin()->isFullArk()) {
                 $message = new Message(
-                    'The proposed ark "%1$s" is not unique [%2$s #%3$d].', // @translate
-                    $ark, $resource->getControllerName(), $resource->id()
+                    'The proposed ark "%1$s" by the processor "%2$s" is not unique [%3$s #%4$d].', // @translate
+                    $ark, $this->namePluginName, $resource->getControllerName(), $resource->id()
                 );
                 $this->logger->err($message);
                 return null;
@@ -364,7 +363,7 @@ class ArkManager
 
             $message = new Message(
                 'Unable to create a unique ark. Check parameters of the processor "%1$s" [%2$s #%3$d].', // @translate
-                get_class($namePlugin), $resource->getControllerName(), $resource->id()
+                $this->namePluginName, $resource->getControllerName(), $resource->id()
             );
             $this->logger->err($message);
             return null;
@@ -606,6 +605,14 @@ class ArkManager
         return isset($resourceClasses[$resourceClass])
             ? $resourceClasses[$resourceClass]
             : false;
+    }
+
+    /**
+     * @return \Ark\Name\Plugin\PluginInterface
+     */
+    public function getArkNamePlugin()
+    {
+        return $this->namePlugins->get($this->namePluginName);
     }
 
     /**

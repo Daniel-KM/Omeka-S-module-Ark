@@ -97,6 +97,20 @@ class ConfigForm extends Form
                 ],
             ])
             ->add([
+                'name' => 'ark_name',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Name processor for item', // @translate
+                    'value_options' => [
+                        'noid' => 'Noid', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'ark_name',
+                    'required' => false,
+                ],
+            ])
+            ->add([
                 'name' => 'ark_qualifier',
                 'type' => Element\Radio::class,
                 'options' => [
