@@ -68,7 +68,8 @@ class Module extends AbstractModule
                 '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
             . '</p>';
 
-        if ($view->ark()->isNoidDatabaseCreated()) {
+        $arkManager = $this->getServiceLocator()->get('Ark\ArkManager');
+        if ($arkManager->getArkNamePlugin()->isDatabaseCreated()) {
             $html .= '<p>'
                 . $view->translate('NOID database is already created, which means some settings are not modifiable.')
                 . '</p><p>'

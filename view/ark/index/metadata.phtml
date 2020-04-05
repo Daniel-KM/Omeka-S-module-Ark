@@ -32,7 +32,7 @@ who:    <?php echo '(:unkn) anonymous' . PHP_EOL; ?>
 <?php endif; ?>
 what:   <?php echo ($title ?: '(:unas) value unassigned') . PHP_EOL; ?>
 when:   <?php echo ($date ?: '(:unav) value unavailable, possibly unknown') . PHP_EOL; ?>
-where:  <?php echo $this->ark($resource)->url(null, ['force_canonical' => true], false) . PHP_EOL; ?>
+where:  <?php echo $this->ark($resource)->url(['force_canonical' => true], false) . PHP_EOL; ?>
 <?php if ($description): ?>
 about-how:    <?php echo trim($description) . PHP_EOL; ?>
 <?php endif; ?>

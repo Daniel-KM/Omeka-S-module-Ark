@@ -34,7 +34,7 @@ class Ark extends AbstractHelper
      * @param AbstractResourceEntityRepresentation $resource
      * @return self
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource = null)
+    public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
         $this->resource = $resource;
         return $this;
@@ -43,84 +43,27 @@ class Ark extends AbstractHelper
     /**
      * Get the ark for a resource.
      *
-     * @param AbstractResourceEntityRepresentation $resource
      * @return Ark|null
      */
-    public function identifier(AbstractResourceEntityRepresentation $resource = null)
-    {
-        if (empty($resource)) {
-            if (empty($this->resource)) {
-                return null;
-            }
-            $resource = $this->resource;
-        }
-        return $this->arkManager
-            ->getArk($resource);
-    }
-
-    /**
-     * Get the ark for a resource id.
-     *
-     * @param int $resourceId
-     * @param string $resourceType "items", "item_sets" or "media" or variants.
-     * @return Ark|null
-     */
-    public function identifierFromResourceId($resourceId, $resourceType = null)
+    public function identifier()
     {
         return $this->arkManager
-            ->getArkFromResourceId($resourceId, $resourceType);
+            ->getArk($this->resource);
     }
 
     /**
      * Return the ark url to a resource.
      *
-     * @param AbstractResourceEntityRepresentation $resource
      * @param array|Traversable $options Url options. Params are reused.
      * @param bool|null $admin If null, determined from the params.
      * @return string|null
      */
-    public function url(
-        AbstractResourceEntityRepresentation $resource = null,
-        array $options = [],
-        $admin = null
-    ) {
-        $ark = $this->identifier($resource);
-        if (empty($ark)) {
-            return '';
-        }
-        return $this->urlFromArk($ark, $options, $admin);
-    }
-
-    /**
-     * Quick return the ark url to a resource id.
-     *
-     * @param int $resourceId
-     * @param string $resourceType "items", "item_sets" or "media" or variants.
-     * @param array|Traversable $options Url options. Params are reused.
-     * @param bool|null $admin If null, determined from the params.
-     * @return string|null
-     */
-    public function urlFromResourceId(
-        $resourceId,
-        $resourceType = null,
-        array $options = [],
-        $admin = null
-    ) {
-        $ark = $this->identifierFromResourceId($resourceId, $resourceType);
-        if (empty($ark)) {
-            return null;
-        }
-        return $this->urlFromArk($ark, $options, $admin);
-    }
-
-    /**
-     * Check if the ark database is ready.
-     *
-     * @return bool
-     */
-    public function isNoidDatabaseCreated()
+    public function url(array $options = [], $admin = null)
     {
-        return $this->arkManager->getArkNamePlugin()->isDatabaseCreated();
+        $ark = $this->identifier($this->resource);
+        return empty($ark)
+            ? ''
+            : $this->urlFromArk($ark, $options, $admin);
     }
 
     /**
@@ -135,7 +78,7 @@ class Ark extends AbstractHelper
     {
         $view = $this->getView();
         $isAdmin = is_null($admin)
-            ? $view->params()->fromRoute('__ADMIN__')
+            ? $view->status()->isAdminRequest()
             : $admin;
         if ($isAdmin) {
             return $view->url(
