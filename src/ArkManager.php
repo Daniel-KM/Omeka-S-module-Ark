@@ -5,9 +5,11 @@ namespace Ark;
 use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
 use Doctrine\DBAL\Connection;
-use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Settings\Settings;
+use Omeka\Stdlib\Message;
+use Zend\Log\Logger;
 
 class ArkManager
 {
@@ -20,6 +22,11 @@ class ArkManager
      * @var Connection
      */
     protected $connection;
+
+    /**
+     * @var Logger
+     */
+    protected $logger;
 
     /**
      * @var Settings
@@ -39,6 +46,7 @@ class ArkManager
     /**
      * @param Api $api
      * @param Connection $connection
+     * @param Logger $logger
      * @param Settings $settings
      * @param NamePlugins $namePlugins
      * @param QualifierPlugins $qualifierPlugins
@@ -46,12 +54,14 @@ class ArkManager
     public function __construct(
         Api $api,
         Connection $connection,
+        Logger $logger,
         Settings $settings,
         NamePlugins $namePlugins,
         QualifierPlugins $qualifierPlugins
     ) {
         $this->api = $api;
         $this->connection = $connection;
+        $this->logger = $logger;
         $this->settings = $settings;
         $this->namePlugins = $namePlugins;
         $this->qualifierPlugins = $qualifierPlugins;
@@ -80,7 +90,7 @@ class ArkManager
             }
 
             // This is the ark of the naan.
-            if ($ark == $base) {
+            if ($ark === $base) {
                 return null;
             }
 
@@ -283,32 +293,27 @@ class ArkManager
      */
     public function createName(AbstractResourceEntityRepresentation $resource)
     {
-        if (empty($resource)) {
-            return;
-        }
-
-        $naan = $this->settings->get('ark_naan');
-
         $namePlugin = $this->namePlugins->get('noid');
         $ark = $namePlugin->create($resource);
 
         // Check the result.
         if (empty($ark)) {
-            $message = sprintf('No Ark created: check your format "%s" [%s #%d].',
-                get_class($namePlugin), get_class($resource), $resource->id());
-            error_log('[Ark&Noid] ' . $message);
-
-            return;
+            $message = new Message(
+                'No Ark created: check your format "%1$s" [%2$s #%3$d].', // @translate
+                get_class($namePlugin), $resource->getControllerName(), $resource->id()
+            );
+            $this->logger->err($message);
+            return null;
         }
 
-        // Complete partial ark.
-        $mainPart = $ark;
         // Check ark (useful only for external process).
         if (!$this->checkFullArk($ark)) {
-            $message = sprintf('Ark "%s" is not correct: check your format "%s" and your processor [%s].', $ark, get_class($namePlugin), get_class($resource));
-            error_log('[Ark&Noid] ' . $message);
-
-            return;
+            $message = new Message(
+                'Ark "%1$s" is not correct: check your format "%2$s" and your processor [%3$s].', // @translate
+                $ark, get_class($namePlugin), $resource->getControllerName()
+            );
+            $this->logger->err($message);
+            return null;
         }
 
         // Add the protocol.
@@ -317,18 +322,19 @@ class ArkManager
         // Check if the ark is single.
         if ($this->arkExists($ark)) {
             if ($namePlugin->isFullArk()) {
-                $message = sprintf('The proposed ark "%s" is not unique [%s #%d].',
-                    $ark, get_class($resource), $resource->id());
-                error_log('[Ark&Noid] ' . $message);
-
+                $message = new Message(
+                    'The proposed ark "%1$s" is not unique [%2$s #%3$d].', // @translate
+                    $ark, $resource->getControllerName(), $resource->id()
+                );
+                $this->logger->err($message);
                 return null;
             }
 
-            $message = 'Unable to create a unique ark.'
-                . ' ' . sprintf('Check parameters of the format "%s" [%s #%d].',
-                get_class($namePlugin), get_class($resource), $resource->id());
-            error_log('[Ark&Noid] ' . $message);
-
+            $message = new Message(
+                'Unable to create a unique ark. Check parameters of the format "%1$s" [%2$s #%3$d].', // @translate
+                get_class($namePlugin), $resource->getControllerName(), $resource->id()
+            );
+            $this->logger->err($message);
             return null;
         }
 
