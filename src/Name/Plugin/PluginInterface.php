@@ -2,8 +2,18 @@
 
 namespace Ark\Name\Plugin;
 
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+
 interface PluginInterface
 {
+    /**
+     * @return bool
+     */
     public function isFullArk();
-    public function create($resource);
+
+    /**
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return string|null
+     */
+    public function create(AbstractResourceEntityRepresentation $resource);
 }

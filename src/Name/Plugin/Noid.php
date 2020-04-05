@@ -4,12 +4,28 @@
  */
 namespace Ark\Name\Plugin;
 
+// Use Noid via composer.
+
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Settings\Settings;
+
 class Noid implements PluginInterface
 {
+    /**
+     * @var Omeka\Settings\Settings
+     */
     protected $settings;
+
+    /**
+     * @var string
+     */
     protected $databaseDir;
 
-    public function __construct($settings, $databaseDir)
+    /**
+     * @param Settings $settings
+     * @param string $databaseDir
+     */
+    public function __construct(Settings $settings, $databaseDir)
     {
         $this->settings = $settings;
         $this->databaseDir = $databaseDir;
@@ -20,7 +36,7 @@ class Noid implements PluginInterface
         return true;
     }
 
-    public function create($resource)
+    public function create(AbstractResourceEntityRepresentation $resource)
     {
         $noid = $this->openDatabase(\Noid::DB_WRITE);
         if (empty($noid)) {
@@ -36,7 +52,6 @@ class Noid implements PluginInterface
         $ark = \Noid::get_note($noid, 'locations/' . $resource->id());
         if ($ark) {
             \Noid::dbclose($noid);
-
             return $ark;
         }
 
@@ -51,8 +66,7 @@ class Noid implements PluginInterface
                 get_class($resource), $resource->id(), \Noid::errmsg($noid));
             error_log('[Ark&Noid] ' . $message);
             \Noid::dbclose($noid);
-
-            return;
+            return null;
         }
 
         // Bind the ark and the record.
@@ -78,6 +92,9 @@ class Noid implements PluginInterface
         return $ark;
     }
 
+    /**
+     * @todo Include the creation of the noid database in the interface or in another plugin.
+     */
     public function isDatabaseCreated()
     {
         $noid = $this->openDatabase();
@@ -85,10 +102,12 @@ class Noid implements PluginInterface
             return false;
         }
         \Noid::dbclose($noid);
-
         return true;
     }
 
+    /**
+     * @todo Include the creation of the noid database in the interface or in another plugin.
+     */
     public function createDatabase()
     {
         $contact = $this->getContact();
