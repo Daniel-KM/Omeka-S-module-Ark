@@ -9,6 +9,7 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
+use Omeka\Entity\Resource;
 use Omeka\Entity\Value;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
@@ -183,49 +184,63 @@ class Module extends AbstractModule
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.post',
-            [$this, 'addArk']
+            [$this, 'handleSaveResource']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.update.post',
-            [$this, 'addArk']
+            [$this, 'handleSaveResource']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.create.post',
-            [$this, 'addArk']
+            [$this, 'handleSaveResource']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.update.post',
-            [$this, 'addArk']
+            [$this, 'handleSaveResource']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.create.post',
-            [$this, 'addArk']
+            [$this, 'handleSaveResource']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.update.post',
-            [$this, 'addArk']
+            [$this, 'handleSaveResource']
         );
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function handleSaveResource(Event $event)
+    {
+        /** @var \Omeka\Entity\Resource $resource */
+        $resource = $event->getParam('response')->getContent();
+
+        $this->addArk($resource);
+
+        if ($resource->getResourceName() === 'items') {
+            foreach ($resource->getMedia() as $media) {
+                $this->addArk($media);
+            }
+        }
     }
 
     /**
      * Add an ark to a record, if needed.
      *
-     * @param Event $event
+     * @param Resource $resource
      */
-    public function addArk(Event $event)
+    protected function addArk(Resource $resource)
     {
         $services = $this->getServiceLocator();
         $entityManager = $services->get('Omeka\EntityManager');
         $arkManager = $services->get('Ark\ArkManager');
         $api = $services->get('Omeka\ApiManager');
-
-        /** @var \Omeka\Entity\Resource $resource */
-        $resource = $event->getParam('response')->getContent();
 
         // Check if the media ark should be set.
         $isMedia = $resource->getResourceName() === 'media';
