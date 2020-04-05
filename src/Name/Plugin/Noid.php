@@ -130,7 +130,7 @@ class Noid implements PluginInterface
 
         $database = $this->getDatabaseDir();
 
-        $template = $this->settings->get('ark_noid_template');
+        $template = $this->settings->get('ark_name_noid_template');
         $naan = $this->settings->get('ark_naan');
         $naa = $this->settings->get('ark_naa');
         $subnaa = $this->settings->get('ark_subnaa');
@@ -150,8 +150,8 @@ class Noid implements PluginInterface
     /**
      * @todo Include the info of the noid database in the interface or in another plugin.
      *
-     * @param string $level "meta" (default), "brief", "full", or "dump".
-     * @return string
+     * @param string $level "meta" (default), "admin", "brief", "full", or "dump".
+     * @return array|string
      */
     public function infoDatabase($level = 'meta')
     {
@@ -160,7 +160,7 @@ class Noid implements PluginInterface
             return '';
         }
 
-        $levelNoid = $level === 'meta' ? 'brief' : $level;
+        $levelNoid = in_array($level, ['meta', 'admin'])? 'brief' : $level;
         ob_start();
         $result = \Noid::dbinfo($noid, $levelNoid);
         $info = ob_get_contents();
@@ -176,8 +176,22 @@ class Noid implements PluginInterface
             return '';
         }
 
-        if ($level === 'meta') {
+        if (in_array($level, ['meta', 'admin'])) {
             $info = mb_substr($info, strpos($info, 'Admin Values' . PHP_EOL) + 13);
+
+            if ($level === 'meta') {
+                $result = [];
+                $matches = [];
+                preg_match('~^NAAN:\s*(\d{5})$~m', $info, $matches);
+                $result['naan'] = $matches[1];
+                preg_match('~^  :/naa:\s+(.+)$~m', $info, $matches);
+                $result['naa'] = $matches[1];
+                preg_match('~^  :/subnaa:\s+(.+)$~m', $info, $matches);
+                $result['subnaa'] = $matches[1];
+                preg_match('~^Template:\s+([\w\d.]+)$~m', $info, $matches);
+                $result['template'] = $matches[1];
+                $info = $result;
+            }
         }
 
         return $info;

@@ -16,7 +16,7 @@ abstract class ArkControllerTestCase extends OmekaControllerTestCase
         $this->settings()->set('ark_naan', '99999');
         $this->settings()->set('ark_naa', 'example.org');
         $this->settings()->set('ark_subnaa', 'sub');
-        $this->settings()->set('ark_noid_template', '.zek');
+        $this->settings()->set('ark_name_noid_template', '.zek');
         $this->settings()->set('ark_note', 'Note');
         $this->settings()->set('ark_policy_statement', 'Policy statement');
         $this->settings()->set('ark_policy_main', 'Main policy statement');

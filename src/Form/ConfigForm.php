@@ -53,25 +53,66 @@ class ConfigForm extends Form
                 ],
             ])
             ->add([
-                'name' => 'ark_noid_template',
+                'name' => 'ark_name',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Name processor for resource', // @translate
+                    'value_options' => [
+                        'internal' => 'Internal resource id', // @translate
+                        'noid' => 'Noid', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'ark_name',
+                    'required' => false,
+                ],
+            ])
+            ->add([
+                'name' => 'ark_name_noid_template',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Noid Template', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'ark_noid_template',
+                    'id' => 'ark_name_noid_template',
                     'disabled' => $databaseCreated,
                 ],
             ])
             ->add([
-                'name' => 'ark_note',
-                'type' => Element\Textarea::class,
+                'name' => 'ark_qualifier',
+                'type' => Element\Radio::class,
                 'options' => [
-                    'label' => 'Note', // @translate
+                    'label' => 'Qualifier for media', // @translate
+                    'value_options' => [
+                        'internal' => 'Internal media id', // @translate
+                        'position' => 'Position of the media', // @translate
+                    ],
                 ],
                 'attributes' => [
-                    'id' => 'ark_note',
-                    'rows' => 6,
+                    'id' => 'ark_qualifier',
+                    'required' => false,
+                ],
+            ])
+            ->add([
+                'name' => 'ark_qualifier_position_format',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Format of position for qualifier', // @translate
+                    'info' => 'A "sprintf" string that will format the media position. It is recommended to use a format with a leading letter to avoid confusion with numeric media id. Furthermore, the position may not be stable: a scanned image may be missing. Finally, if the first media is not marked "1" in the database, use module "Bulk Check" to fix positions.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'ark_qualifier_position_format',
+                    'placeholder' => 'p%d',
+                ],
+            ])
+            ->add([
+                'name' => 'ark_qualifier_static',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Save the media qualifier', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'ark_qualifier_static',
                 ],
             ])
             ->add([
@@ -97,54 +138,14 @@ class ConfigForm extends Form
                 ],
             ])
             ->add([
-                'name' => 'ark_name',
-                'type' => Element\Radio::class,
+                'name' => 'ark_note',
+                'type' => Element\Textarea::class,
                 'options' => [
-                    'label' => 'Name processor for item', // @translate
-                    'value_options' => [
-                        'noid' => 'Noid', // @translate
-                    ],
+                    'label' => 'Note', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'ark_name',
-                    'required' => false,
-                ],
-            ])
-            ->add([
-                'name' => 'ark_qualifier',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Qualifier for media', // @translate
-                    'value_options' => [
-                        'internal' => 'Internal media id', // @translate
-                        'position' => 'Position of the media', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    'id' => 'ark_qualifier',
-                    'required' => false,
-                ],
-            ])
-            ->add([
-                'name' => 'ark_qualifier_static',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => 'Save the media qualifier', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'ark_qualifier_static',
-                ],
-            ])
-            ->add([
-                'name' => 'ark_qualifier_position_format',
-                'type' => Element\Text::class,
-                'options' => [
-                    'label' => 'Format of position for qualifier', // @translate
-                    'info' => 'A "sprintf" string that will format the media position. It is recommended to use a format with a leading letter to avoid confusion with numeric media id. Furthermore, the position may not be stable: a scanned image may be missing. Finally, if the first media is not marked "1" in the database, use module "Bulk Check" to fix positions.', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'ark_qualifier_position_format',
-                    'placeholder' => 'p%d',
+                    'id' => 'ark_note',
+                    'rows' => 6,
                 ],
             ]);
 

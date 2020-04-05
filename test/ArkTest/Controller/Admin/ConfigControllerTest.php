@@ -31,7 +31,7 @@ class ConfigControllerTest extends ArkControllerTestCase
             'ark_naan' => '12345',
             'ark_naa' => 'example.com',
             'ark_subnaa' => 'subnaa',
-            'ark_noid_template' => '.seeeeek',
+            'ark_name_noid_template' => '.seeeeek',
             'ark_note' => 'Modified Note',
             'ark_policy_statement' => 'Modified Policy statement',
             'ark_policy_main' => 'Modified Main policy statement',
