@@ -1,38 +1,42 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
+# Daniel Berthereau <Daniel.github@Berthereau.net>, 2020.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-03-30 00:00+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2020-03-30 00:00+0200\n"
+"Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
+"Language-Team: French <kde-i18n-doc@kde.org>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.3\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: Module.php:66
 msgid ""
 "Ark allows to create and manage unique, universel and persistent ark "
 "identifiers."
 msgstr ""
+"Ark permet de créer et de gérer des identifiants uniques, universels et "
+"permanents."
 
 #: Module.php:68
 #, php-format
 msgid "See %sthe official help%s for more informations."
-msgstr ""
+msgstr "Voir %sl‘aide officielle%s pour davantage d‘informations."
 
 #: Module.php:90
 msgid ""
 "NOID database is already created, which means some settings are not "
 "modifiable."
 msgstr ""
+"La base de données NOID est déjà créée, ce qui implique qu‘il n‘est plus "
+"possible de modifier les paramètres."
 
 #: Module.php:92 Module.php:100
 #, php-format
@@ -40,27 +44,31 @@ msgid ""
 "To be able to modify them, you have to manually remove the database (located "
 "in %s)."
 msgstr ""
+"Pour pouvoir les modifier, vous devez supprimer la base manuellement (située "
+"dans %s)."
 
 #: Module.php:97
 msgid ""
 "NOID database is already created, but the settings are not the same than in "
 "the Omeka database."
 msgstr ""
+"La base de données NOID est déjà créée, mais les paramètres ne correspondent "
+"pas avec ceux de la base Omeka."
 
 #: Module.php:104
 #, php-format
 msgid "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s."
-msgstr ""
+msgstr "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Modèle: %4$s."
 
 #: src/Generic/AbstractModule.php:598
 #, php-format
 msgid "This module requires the module \"%s\"."
-msgstr ""
+msgstr "Ce module requiert le module \"%s\"."
 
 #: src/Generic/AbstractModule.php:618
 #, php-format
 msgid "This module requires modules \"%s\"."
-msgstr ""
+msgstr "Ce module requiert les modules \"%s\"."
 
 #: src/Generic/AbstractModule.php:686
 #, php-format
@@ -68,54 +76,56 @@ msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
 "unavailable."
 msgstr ""
+"Le module %s\" a été automatiquement désactivé car ses dépendances ne sont "
+"plus disponibles."
 
 #: view/ark/index/policy-html.phtml:9
 msgid "Ark Policy Statement"
-msgstr ""
+msgstr "Déclaration de politique Ark"
 
 #: src/Form/ConfigForm.php:26
 msgid "NAAN"
-msgstr ""
+msgstr "NAAN"
 
 #: src/Form/ConfigForm.php:37
 msgid "NAA"
-msgstr ""
+msgstr "NAA"
 
 #: src/Form/ConfigForm.php:48
 msgid "Sub NAA"
-msgstr ""
+msgstr "Sub NAA"
 
 #: src/Form/ConfigForm.php:59
 msgid "Name processor for resource"
-msgstr ""
+msgstr "Processeur pour le nom ark"
 
 #: src/Form/ConfigForm.php:61
 msgid "Internal resource id"
-msgstr ""
+msgstr "Id interne de la ressource"
 
 #: src/Form/ConfigForm.php:62
 msgid "Noid"
-msgstr ""
+msgstr "Noid"
 
 #: src/Form/ConfigForm.php:74
 msgid "Noid Template"
-msgstr ""
+msgstr "Modèle noid"
 
 #: src/Form/ConfigForm.php:85
 msgid "Qualifier for media"
-msgstr ""
+msgstr "Qualifiant pour le média"
 
 #: src/Form/ConfigForm.php:87
 msgid "Internal media id"
-msgstr ""
+msgstr "Id interne du média"
 
 #: src/Form/ConfigForm.php:88
 msgid "Position of the media"
-msgstr ""
+msgstr "Position du média"
 
 #: src/Form/ConfigForm.php:100
 msgid "Format of position for qualifier"
-msgstr ""
+msgstr "Format pour la position du qualifiant"
 
 #: src/Form/ConfigForm.php:101
 msgid ""
@@ -125,51 +135,57 @@ msgid ""
 "missing. Finally, if the first media is not marked \"1\" in the database, "
 "use module \"Bulk Check\" to fix positions."
 msgstr ""
+"Une chaîne \"sprintf\" pour formater la position du média. Il est recommandé "
+"d‘utiliser un format avec une lettre initiale pour éviter de confondre avec "
+"un numéro de média. De plus, la position peut ne pas être stable : une image "
+"scannée peut avoir été oubliée. Enfin, si le premier média n'est pas marqué "
+"\"1\" dans la base de données, utiliser le module \"Bulk Check\" pour "
+"corriger les positions."
 
 #: src/Form/ConfigForm.php:112
 msgid "Save the media qualifier"
-msgstr ""
+msgstr "Enregistrer le qualifiant du média"
 
 #: src/Form/ConfigForm.php:122
 msgid "Policy statement"
-msgstr ""
+msgstr "Déclaration de politique"
 
 #: src/Form/ConfigForm.php:133
 msgid "Main policy"
-msgstr ""
+msgstr "Politique générale"
 
 #: src/Name/Plugin/Noid.php:53
 #, php-format
 msgid "Cannot open database: %s"
-msgstr ""
+msgstr "Impossible d‘ouvrir la base : %s"
 
 #: src/Name/Plugin/Noid.php:54
 msgid "No database"
-msgstr ""
+msgstr "Pas base de données"
 
 #: src/Name/Plugin/Noid.php:77
 #, php-format
 msgid "Cannot create an Ark for %1$s #%2$d: %3$s"
-msgstr ""
+msgstr "Impossible de créer un ark pour %1$s #%2$d: %3$s"
 
 #: src/Name/Plugin/Noid.php:89
 #, php-format
 msgid "Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s"
-msgstr ""
+msgstr "Ark mis, mais non lié [%1$s, %2$s #%3$d]: %4$s"
 
 #: src/Name/Plugin/Noid.php:172
 #, php-format
 msgid "Cannot get database info: %s"
-msgstr ""
+msgstr "Impossible de récupérer les informations de la base : %s"
 
 #: src/Name/Plugin/Noid.php:216
 msgid "[Unknown user]"
-msgstr ""
+msgstr "[Utilisateur inconnu]"
 
 #: src/ArkManager.php:333
 #, php-format
 msgid "No Ark created: check your processor \"%1$s\" [%2$s #%3$d]."
-msgstr ""
+msgstr "Ark non créé : vérifier le processeur \"%1$s\" [%2$s #%3$d]."
 
 #: src/ArkManager.php:343
 #, php-format
@@ -177,6 +193,8 @@ msgid ""
 "Ark \"%1$s\" is not correct: check your naan \"%2$s\", your template, and "
 "your processor [%3$s]."
 msgstr ""
+"L‘ark \"%1$s\" n‘est pas correct : vérifiez votre naan \"%2$s\", votre "
+"modèle de format et votre processeurs [%3$s]."
 
 #: src/ArkManager.php:357
 #, php-format
@@ -184,6 +202,8 @@ msgid ""
 "The proposed ark \"%1$s\" by the processor \"%2$s\" is not unique [%3$s #"
 "%4$d]."
 msgstr ""
+"L‘ark proposé \"%1$s\" par le processeur \"%2$s\" n‘est pas unique [%3$s #"
+"%4$d]."
 
 #: src/ArkManager.php:365
 #, php-format
@@ -191,6 +211,8 @@ msgid ""
 "Unable to create a unique ark. Check parameters of the processor \"%1$s"
 "\" [%2$s #%3$d]."
 msgstr ""
+"Impossible de créer un ark unique. Vérifiez les paramètres du processeur "
+"\"%1$s\" [%2$s #%3$d]."
 
 #: src/ArkManager.php:382
 #, php-format
@@ -198,6 +220,8 @@ msgid ""
 "No Ark qualfiier created for media #%1$d: the item #%2$d does not have an "
 "ark. Update it first."
 msgstr ""
+"Qualifiant ark non créé pour le média #%1$d: l‘item #%2$d ne dispose pas "
+"d‘ark. Mettez-le à jour d‘abord."
 
 #: src/ArkManager.php:391
 #, php-format
@@ -205,15 +229,21 @@ msgid ""
 "Unable to create a qualifier for media #%1$d: option is \"dynamic qualifier"
 "\"."
 msgstr ""
+"Impossible de créer un qualifiant pour le média #%1$d: l‘option est "
+"\"dynamic qualifier\"."
 
 #: src/ArkManager.php:401
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d. Check the processor \"%2$s\"."
 msgstr ""
+"Impossible de créer un qualifiant pour le média #%1$d. Vérifiez le "
+"processeur \"%2$s\"."
 
 #: src/ArkManager.php:413
 #, php-format
 msgid ""
 "Unable to create a unique ark. Check the processor \"%1$s\" [%2$s #%3$d]."
 msgstr ""
+"Impossible de créer un ark unique. Vérifiez le processeur \"%1$s\" [%2$s #"
+"%3$d]."

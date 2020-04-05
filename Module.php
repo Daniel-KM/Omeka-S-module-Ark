@@ -63,7 +63,7 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $view)
     {
         $html = '<p class="explanation">'
-            . $view->translate('Ark allows to creates and manages unique, universel and persistent ark identifiers.') //  @translate
+            . $view->translate('Ark allows to create and manage unique, universel and persistent ark identifiers.') //  @translate
             . '</p><p>'
             . sprintf($view->translate('See %sthe official help%s for more informations.'), // @translate
                 '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
