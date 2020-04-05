@@ -297,7 +297,7 @@ class ArkManager
         // Check the result.
         if (empty($ark)) {
             $message = new Message(
-                'No Ark created: check your format "%1$s" [%2$s #%3$d].', // @translate
+                'No Ark created: check your processor "%1$s" [%2$s #%3$d].', // @translate
                 get_class($namePlugin), $resource->getControllerName(), $resource->id()
             );
             $this->logger->err($message);
@@ -307,8 +307,8 @@ class ArkManager
         // Check ark (useful only for external process).
         if (!$this->checkFullArk($ark)) {
             $message = new Message(
-                'Ark "%1$s" is not correct: check your format "%2$s" and your processor [%3$s].', // @translate
-                $ark, get_class($namePlugin), $resource->getControllerName()
+                'Ark "%1$s" is not correct: check your naan "%2$s", your template, and your processor [%3$s].', // @translate
+                $ark, $this->naan, get_class($namePlugin)
             );
             $this->logger->err($message);
             return null;
@@ -329,7 +329,7 @@ class ArkManager
             }
 
             $message = new Message(
-                'Unable to create a unique ark. Check parameters of the format "%1$s" [%2$s #%3$d].', // @translate
+                'Unable to create a unique ark. Check parameters of the processor "%1$s" [%2$s #%3$d].', // @translate
                 get_class($namePlugin), $resource->getControllerName(), $resource->id()
             );
             $this->logger->err($message);

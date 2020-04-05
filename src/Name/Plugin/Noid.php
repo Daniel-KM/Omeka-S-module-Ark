@@ -147,6 +147,42 @@ class Noid implements PluginInterface
         return true;
     }
 
+    /**
+     * @todo Include the info of the noid database in the interface or in another plugin.
+     *
+     * @param string $level "meta" (default), "brief", "full", or "dump".
+     * @return string
+     */
+    public function infoDatabase($level = 'meta')
+    {
+        $noid = $this->openDatabase();
+        if (empty($noid)) {
+            return '';
+        }
+
+        $levelNoid = $level === 'meta' ? 'brief' : $level;
+        ob_start();
+        $result = \Noid::dbinfo($noid, $levelNoid);
+        $info = ob_get_contents();
+        ob_end_clean();
+        \Noid::dbclose($noid);
+
+        if (!$result) {
+            $message = new Message(
+                'Cannot get database info: %s', // @translate
+                \Noid::errmsg($noid, 1)
+            );
+            $this->logger->err($message);
+            return '';
+        }
+
+        if ($level === 'meta') {
+            $info = mb_substr($info, strpos($info, 'Admin Values' . PHP_EOL) + 13);
+        }
+
+        return $info;
+    }
+
     protected function openDatabase($mode = \Noid::DB_RDONLY)
     {
         $database = $this->getDatabaseDir();

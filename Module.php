@@ -68,14 +68,55 @@ class Module extends AbstractModule
                 '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
             . '</p>';
 
-        $arkManager = $this->getServiceLocator()->get('Ark\ArkManager');
-        if ($arkManager->getArkNamePlugin()->isDatabaseCreated()) {
-            $html .= '<p>'
-                . $view->translate('NOID database is already created, which means some settings are not modifiable.')
-                . '</p><p>'
-                . sprintf($view->translate('To be able to modify them, you have to manually remove the database (located in %s).'), // @translate
-                    OMEKA_PATH . '/files/arkandnoid')
-                . '</p>';
+        $services = $this->getServiceLocator();
+        $arkManager = $services->get('Ark\ArkManager');
+        $name = $arkManager->getArkNamePlugin();
+        if ($name->isDatabaseCreated()) {
+            $info = $name->infoDatabase('meta');
+            $matches = [];
+            preg_match('~^NAAN:\s*(\d{5})$~m', $info, $matches);
+            $naan = $matches[1];
+            preg_match('~^  :/naa:\s+(.+)$~m', $info, $matches);
+            $naa = $matches[1];
+            preg_match('~^  :/subnaa:\s+(.+)$~m', $info, $matches);
+            $subnaa = $matches[1];
+            preg_match('~^Template:\s+([\w\d.]+)$~m', $info, $matches);
+            $template = $matches[1];
+
+            $settings = $services->get('Omeka\Settings');
+            $arkNaan = $settings->get('ark_naan');
+            $arkNaa = $settings->get('ark_naa');
+            $arkSubnaa = $settings->get('ark_subnaa');
+            $arkTemplate = $settings->get('ark_noid_template');
+
+            if ($arkNaan === $naan
+                && $arkNaa === $naa
+                && $arkSubnaa === $subnaa
+                && $arkTemplate === $template
+            ) {
+                $html .= '<p>'
+                    . $view->translate('NOID database is already created, which means some settings are not modifiable.')
+                    . '</p><p>'
+                    . sprintf($view->translate('To be able to modify them, you have to manually remove the database (located in %s).'), // @translate
+                        OMEKA_PATH . '/files/arkandnoid')
+                    . '</p>';
+            } else {
+                $html .= '<p>'
+                    . $view->translate('NOID database is already created, but the settings are not the same than in the Omeka database.')
+                    . '</p><p>'
+                    // TODO Add a button to reset the database.
+                    . sprintf($view->translate('To be able to modify them, you have to manually remove the database (located in %s).'), // @translate
+                        OMEKA_PATH . '/files/arkandnoid')
+                    . '</p><p>'
+                    . sprintf(
+                        $view->translate('Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s).'), // @translate
+                        '<strong>' . $naan . '</strong>',
+                        '<strong>' . $naa . '</strong>',
+                        '<strong>' . $subnaa . '</strong>',
+                        '<strong>' . $template . '</strong>'
+                    )
+                    . '</p>';
+            }
         }
 
         return $html . parent::getConfigForm($view);
