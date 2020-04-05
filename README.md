@@ -149,6 +149,9 @@ Installation
 The module uses an external library, [Noid], so use the release zip to install
 it, or use and init the source.
 
+The module only creates ark identifier. To use them as url in public site or in
+admin, use the module [Clean Url].
+
 * From the zip
 
 Download the last release [Ark.zip] from the list of releases (the master does
@@ -279,7 +282,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2019 (see [Daniel-KM] on GitHub)
+* Copyright Daniel Berthereau, 2015-2020 (see [Daniel-KM] on GitHub)
 * Copyright BibLibre, 2016-2017
 
 First version of this plugin has been built for [Mines ParisTech]. The upgrade
@@ -292,6 +295,7 @@ for Omeka S has been built for [Paris Sciences et Lettres (PSL)] by [BibLibre].
 [Ark & Noid plugin]: https://github.com/Daniel-KM/Omeka-plugin-ArkAndNoid
 [Omeka]: https://omeka.org/classic
 [ark and noid management]: https://github.com/Daniel-KM/Omeka-plugin-ArkAndNoid
+[Clean Url]: https://github.com/Daniel-KM/Omeka-S-module-CleanUrl
 [Noid]: https://github.com/Daniel-KM/Noid4Php
 [Ark.zip]: https://github.com/Daniel-KM/Omeka-S-module-Ark/releases
 [Cool URIs]: https://www.w3.org/TR/cooluris
