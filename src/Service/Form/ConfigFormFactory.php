@@ -10,9 +10,8 @@ class ConfigFormFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        $arkManager = $services->get('Ark\ArkManager');
         $configForm = new ConfigForm(null, $options);
-        $configForm->setArkManager($arkManager);
-        return $configForm;
+        return $configForm
+            ->setArkManager($services->get('Ark\ArkManager'));
     }
 }
