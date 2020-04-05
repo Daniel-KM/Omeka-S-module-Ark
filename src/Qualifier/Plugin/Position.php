@@ -52,9 +52,30 @@ class Position implements PluginInterface
             return null;
         }
 
-        $media = $this->api->read('media', ['id' => $resource->id()], [], ['responseContent' => 'resource'])->getContent();
-        $position = $media->getPosition();
-        return sprintf($this->format, $position);
+        /** @var \Omeka\Entity\Media $resource */
+        $resource = $this->api->read('media', ['id' => $resource->id()], [], ['responseContent' => 'resource'])->getContent();
+
+        // Fix the position before adding it: some media have no position, some
+        // other don't start from 1.
+
+        // Don't use $item->media() to avoid a different position for
+        // public/private.
+        // Media are automatically ordered (cf. item entity).
+        $position = 0;
+        $positionResource = 0;
+        foreach ($resource->getItem()->getMedia() as $media) {
+            ++$position;
+            if ($media->getPosition() !== $position) {
+                $media->setPosition($position);
+                $this->entityManager->persist($media);
+            }
+            if ($media->getId() === $resource->getId()) {
+                $positionResource = $position;
+            }
+        }
+        $this->entityManager->flush();
+
+        return sprintf($this->format, $positionResource);
     }
 
     public function createFromResourceId($resourceId)
