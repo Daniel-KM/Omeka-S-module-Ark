@@ -19,6 +19,11 @@ class ArkManager
     protected $naan;
 
     /**
+     * @string string
+     */
+    protected $qualifierPluginName;
+
+    /**
      * @string bool
      */
     protected $qualifierStatic;
@@ -52,6 +57,7 @@ class ArkManager
      * @todo Remove all code related to missing naan (use 99999 for test).
      *
      * @param string $naan
+     * @param string $qualifierPluginName
      * @param bool $qualifierStatic
      * @param Api $api
      * @param Connection $connection
@@ -61,6 +67,7 @@ class ArkManager
      */
     public function __construct(
         $naan,
+        $qualifierPluginName,
         $qualifierStatic,
         Api $api,
         Connection $connection,
@@ -69,6 +76,7 @@ class ArkManager
         QualifierPlugins $qualifierPlugins
     ) {
         $this->naan = $naan;
+        $this->qualifierPluginName = $qualifierPluginName;
         $this->qualifierStatic = $qualifierStatic;
         $this->api = $api;
         $this->connection = $connection;
@@ -388,12 +396,11 @@ class ArkManager
             return null;
         }
 
-        $qualifierPlugin = $this->qualifierPlugins->get('internal');
         $qualifier = $this->getQualifier($media);
         if (!$qualifier) {
             $message = new Message(
                 'Unable to create a qualifier for media #%1$d. Check the processor "%2$s".', // @translate
-                $media->id(), get_class($qualifierPlugin)
+                $media->id(), $this->qualifierPluginName
             );
             $this->logger->err($message);
             return null;
@@ -405,7 +412,7 @@ class ArkManager
         if ($this->arkExists($ark)) {
             $message = new Message(
                 'Unable to create a unique ark. Check the processor "%1$s" [%2$s #%3$d].', // @translate
-                get_class($qualifierPlugin), $media->getControllerName(), $media->id()
+                $this->qualifierPluginName, $media->getControllerName(), $media->id()
             );
             $this->logger->err($message);
             return null;
@@ -422,9 +429,7 @@ class ArkManager
      */
     protected function getQualifierFromResourceId($resourceId)
     {
-        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
-        $qualifierPlugin = $this->qualifierPlugins->get('internal');
-        return $qualifierPlugin->createFromResourceId($resourceId);
+        return $this->getQualifierPlugin()->createFromResourceId($resourceId);
     }
 
     /**
@@ -436,9 +441,7 @@ class ArkManager
      */
     protected function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
     {
-        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
-        $qualifierPlugin = $this->qualifierPlugins->get('internal');
-        return $qualifierPlugin->getResourceFromQualifier($resource, $qualifier);
+        return $this->getQualifierPlugin()->getResourceFromQualifier($resource, $qualifier);
     }
 
     /**
@@ -450,9 +453,7 @@ class ArkManager
      */
     protected function getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
     {
-        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
-        $qualifierPlugin = $this->qualifierPlugins->get('internal');
-        return $qualifierPlugin->getResourceFromResourceIdAndQualifier($resourceId, $qualifier);
+        return $this->getQualifierPlugin()->getResourceFromResourceIdAndQualifier($resourceId, $qualifier);
     }
 
     /**
@@ -557,9 +558,7 @@ class ArkManager
      */
     protected function getQualifier(AbstractResourceEntityRepresentation $resource)
     {
-        /** @var \Ark\Qualifier\Plugin\Internal $qualifierPlugin */
-        $qualifierPlugin = $this->qualifierPlugins->get('internal');
-        return $qualifierPlugin->create($resource);
+        return $this->getQualifierPlugin()->create($resource);
     }
 
     /**
@@ -607,5 +606,13 @@ class ArkManager
         return isset($resourceClasses[$resourceClass])
             ? $resourceClasses[$resourceClass]
             : false;
+    }
+
+    /**
+     * @return \Ark\Qualifier\Plugin\PluginInterface
+     */
+    public function getQualifierPlugin()
+    {
+        return $this->qualifierPlugins->get($this->qualifierPluginName);
     }
 }

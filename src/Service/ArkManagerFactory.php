@@ -13,6 +13,7 @@ class ArkManagerFactory implements FactoryInterface
         $settings = $services->get('Omeka\Settings');
         return new ArkManager(
             $settings->get('ark_naan'),
+            $settings->get('ark_qualifier'),
             (bool) $settings->get('ark_qualifier_static'),
             $services->get('ControllerPluginManager')->get('api'),
             $services->get('Omeka\Connection'),

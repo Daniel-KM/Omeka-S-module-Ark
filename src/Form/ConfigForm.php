@@ -97,6 +97,20 @@ class ConfigForm extends Form
                 ],
             ])
             ->add([
+                'name' => 'ark_qualifier',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Qualifier for media', // @translate
+                    'value_options' => [
+                        'internal' => 'Use internal media id', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'ark_qualifier',
+                    'required' => false,
+                ],
+            ])
+            ->add([
                 'name' => 'ark_qualifier_static',
                 'type' => Element\Checkbox::class,
                 'options' => [
@@ -106,6 +120,12 @@ class ConfigForm extends Form
                     'id' => 'ark_qualifier',
                 ],
             ]);
+
+            $this->getInputFilter()
+                ->add([
+                    'name' => 'ark_qualifier',
+                    'required' => false,
+                ]);
     }
 
     public function setArkManager(ArkManager $arkManager)
