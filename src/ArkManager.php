@@ -111,8 +111,7 @@ class ArkManager
         }
 
         // The resource adapter does not implement the search operation for now.
-        $connection = $this->connection;
-        $qb = $connection->createQueryBuilder();
+        $qb = $this->connection->createQueryBuilder();
         $qb
             ->select('value.resource_id, resource.resource_type')
             ->from('value', 'value')
@@ -127,7 +126,7 @@ class ArkManager
             ->addOrderBy('value.id', 'ASC')
             // Only one identifier by resource.
             ->setMaxResults(1);
-        $stmt = $connection->executeQuery($qb, $qb->getParameters());
+        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
         $resource = $stmt->fetch();
 
         if (empty($resource)) {
@@ -203,20 +202,19 @@ class ArkManager
     {
         $resourceId = (int) $resourceId;
         if (empty($resourceId)) {
-            return;
+            return null;
         }
 
         $resourceClass = $this->resourceClass($resourceType);
         if ($resourceClass === false) {
-            return;
+            return null;
         }
 
         $protocol = 'ark:';
         $naan = $this->settings->get('ark_naan');
         $base = $naan ? "$protocol/$naan/" : "$protocol/";
 
-        $connection = $this->connection;
-        $qb = $connection->createQueryBuilder();
+        $qb = $this->connection->createQueryBuilder();
         $qb
             ->select('value.value')
             ->from('value', 'value')
@@ -255,7 +253,7 @@ class ArkManager
             // Only one identifier by resource.
             ->setMaxResults(1);
 
-        $stmt = $connection->executeQuery($qb, $qb->getParameters());
+        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
         $ark = $stmt->fetchColumn();
 
         if ($ark) {
@@ -323,7 +321,7 @@ class ArkManager
                     $ark, get_class($resource), $resource->id());
                 error_log('[Ark&Noid] ' . $message);
 
-                return;
+                return null;
             }
 
             $message = 'Unable to create a unique ark.'
@@ -331,7 +329,7 @@ class ArkManager
                 get_class($namePlugin), get_class($resource), $resource->id());
             error_log('[Ark&Noid] ' . $message);
 
-            return;
+            return null;
         }
 
         return $ark;

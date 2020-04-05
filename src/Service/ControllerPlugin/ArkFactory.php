@@ -2,9 +2,9 @@
 
 namespace Ark\Service\ControllerPlugin;
 
+use Ark\Mvc\Controller\Plugin\Ark;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Ark\Mvc\Controller\Plugin\Ark;
 
 class ArkFactory implements FactoryInterface
 {

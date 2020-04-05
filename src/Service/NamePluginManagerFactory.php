@@ -2,8 +2,8 @@
 
 namespace Ark\Service;
 
-use Zend\Mvc\Service\AbstractPluginManagerFactory;
 use Ark\Name\PluginManager;
+use Zend\Mvc\Service\AbstractPluginManagerFactory;
 
 class NamePluginManagerFactory extends AbstractPluginManagerFactory
 {

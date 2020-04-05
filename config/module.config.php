@@ -49,7 +49,7 @@ return [
             'site' => [
                 'child_routes' => [
                     'ark' => [
-                        'type' => 'Literal',
+                        'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/ark:',
                             'defaults' => [
@@ -60,7 +60,7 @@ return [
                         ],
                         'child_routes' => [
                             'default' => [
-                                'type' => 'Segment',
+                                'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
                                     'route' => '/:naan/:name[/:qualifier]',
                                     'constraints' => [
@@ -74,7 +74,7 @@ return [
                                 ],
                             ],
                             'policy' => [
-                                'type' => 'Segment',
+                                'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
                                     'route' => '/:naan',
                                     'defaults' => [
@@ -89,7 +89,7 @@ return [
             'admin' => [
                 'child_routes' => [
                     'ark' => [
-                        'type' => 'Literal',
+                        'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/ark:',
                             'defaults' => [
@@ -100,7 +100,7 @@ return [
                         ],
                         'child_routes' => [
                             'default' => [
-                                'type' => 'Segment',
+                                'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
                                     'route' => '/:naan/:name[/:qualifier]',
                                     'constraints' => [
@@ -114,7 +114,7 @@ return [
                                 ],
                             ],
                             'policy' => [
-                                'type' => 'Segment',
+                                'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
                                     'route' => '/:naan',
                                     'defaults' => [

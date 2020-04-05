@@ -2,9 +2,9 @@
 
 namespace Ark\Service;
 
+use Ark\ArkManager;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Ark\ArkManager;
 
 class ArkManagerFactory implements FactoryInterface
 {

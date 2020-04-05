@@ -2,8 +2,8 @@
 
 namespace Ark\Service;
 
-use Zend\Mvc\Service\AbstractPluginManagerFactory;
 use Ark\Qualifier\PluginManager;
+use Zend\Mvc\Service\AbstractPluginManagerFactory;
 
 class QualifierPluginManagerFactory extends AbstractPluginManagerFactory
 {

@@ -2,9 +2,9 @@
 
 namespace Ark\Service\QualifierPlugin;
 
+use Ark\Qualifier\Plugin\Internal;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Ark\Qualifier\Plugin\Internal;
 
 class InternalFactory implements FactoryInterface
 {

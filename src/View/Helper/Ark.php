@@ -50,7 +50,7 @@ class Ark extends AbstractHelper
     {
         if (empty($resource)) {
             if (empty($this->resource)) {
-                return;
+                return null;
             }
             $resource = $this->resource;
         }
@@ -86,7 +86,7 @@ class Ark extends AbstractHelper
     ) {
         $ark = $this->identifier($resource);
         if (empty($ark)) {
-            return;
+            return '';
         }
         return $this->urlFromArk($ark, $options, $admin);
     }
@@ -108,7 +108,7 @@ class Ark extends AbstractHelper
     ) {
         $ark = $this->identifierFromResourceId($resourceId, $resourceType);
         if (empty($ark)) {
-            return;
+            return null;
         }
         return $this->urlFromArk($ark, $options, $admin);
     }
@@ -164,7 +164,7 @@ class Ark extends AbstractHelper
 
         $siteSlug = $view->params()->fromRoute('site-slug') ?: $view->defaultSiteSlug();
         if (empty($siteSlug)) {
-            return;
+            return '';
         }
         return $view->url(
             'site/ark/default',

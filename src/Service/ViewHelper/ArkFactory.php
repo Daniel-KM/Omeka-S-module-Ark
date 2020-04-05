@@ -2,9 +2,9 @@
 
 namespace Ark\Service\ViewHelper;
 
+use Ark\View\Helper\Ark;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Ark\View\Helper\Ark;
 
 class ArkFactory implements FactoryInterface
 {
