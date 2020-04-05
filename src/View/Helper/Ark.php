@@ -114,18 +114,6 @@ class Ark extends AbstractHelper
     }
 
     /**
-     * Get the absolute ark url of a resource.
-     *
-     * @deprecated since 0.1.3: uses url() instead.
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string|null
-     */
-    public function getAbsoluteUrl(AbstractResourceEntityRepresentation $resource = null)
-    {
-        return $this->url($resource, ['force_canonical' => true], null);
-    }
-
-    /**
      * Check if the ark database is ready.
      *
      * @return bool
