@@ -2,15 +2,19 @@
 
 namespace Ark;
 
-use Ark\Form\ConfigForm;
+if (!class_exists(\Generic\AbstractModule::class)) {
+    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
+        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
+        : __DIR__ . '/src/Generic/AbstractModule.php';
+}
+
+use Generic\AbstractModule;
 use Omeka\Entity\Value;
-use Omeka\Module\AbstractModule;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 
 /**
@@ -22,16 +26,9 @@ use Zend\View\Renderer\PhpRenderer;
  * @copyright biblibre, 2016-2017
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
-
-/**
- * The Ark module.
- */
 class Module extends AbstractModule
 {
-    public function getConfig()
-    {
-        return include __DIR__ . '/config/module.config.php';
-    }
+    const NAMESPACE = __NAMESPACE__;
 
     public function init(ModuleManager $moduleManager)
     {
@@ -39,9 +36,9 @@ class Module extends AbstractModule
 
         $event = $moduleManager->getEvent();
         $container = $event->getParam('ServiceManager');
-        $serviceListener = $container->get('ServiceListener');
 
-        /* @var \Zend\ModuleManager\Listener\ServiceListener $serviceListener */
+        /** @var \Zend\ModuleManager\Listener\ServiceListener $serviceListener */
+        $serviceListener = $container->get('ServiceListener');
         $serviceListener->addServiceManager(
             'Ark\NamePluginManager',
             'ark_name_plugins',
@@ -62,55 +59,15 @@ class Module extends AbstractModule
         $this->addAclRules();
     }
 
-    public function install(ServiceLocatorInterface $serviceLocator)
+    public function getConfigForm(PhpRenderer $view)
     {
-        $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'install');
-    }
-
-    public function uninstall(ServiceLocatorInterface $serviceLocator)
-    {
-        $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'uninstall');
-    }
-
-    protected function manageSettings($settings, $process, $key = 'config')
-    {
-        $config = require __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)][$key];
-        foreach ($defaultSettings as $name => $value) {
-            switch ($process) {
-                case 'install':
-                    $settings->set($name, $value);
-                    break;
-                case 'uninstall':
-                    $settings->delete($name);
-                    break;
-            }
-        }
-    }
-
-    public function getConfigForm(PhpRenderer $renderer)
-    {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
-        $settings = $services->get('Omeka\Settings');
-        $form = $services->get('FormElementManager')->get(ConfigForm::class);
-
-        $data = [];
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
-        foreach ($defaultSettings as $name => $value) {
-            $data[$name] = $settings->get($name, $value);
-        }
-
-        $form->init();
-        $form->setData($data);
-
-        $view = $renderer;
         $html = '<p class="explanation">'
             . $view->translate('Ark allows to creates and manages unique, universel and persistent ark identifiers.') //  @translate
             . '</p><p>'
             . sprintf($view->translate('See %sthe official help%s for more informations.'), // @translate
                 '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
             . '</p>';
+
         if ($view->ark()->isNoidDatabaseCreated()) {
             $html .= '<p>'
                 . $view->translate('NOID database is already created, which means some settings are not modifiable.')
@@ -120,15 +77,17 @@ class Module extends AbstractModule
                 . '</p>';
         }
 
-        $html .= $renderer->formCollection($form);
-        return $html;
+        return $html . parent::getConfigForm($view);
     }
+
     public function handleConfigForm(AbstractController $controller)
     {
+        // The parent cannot be used, since some fields are disabled.
+
         $services = $this->getServiceLocator();
         $config = $services->get('Config');
         $settings = $services->get('Omeka\Settings');
-        $form = $services->get('FormElementManager')->get(ConfigForm::class);
+        $form = $services->get('FormElementManager')->get(\Ark\Form\ConfigForm::class);
         $arkManager = $services->get('Ark\ArkManager');
 
         $params = $controller->getRequest()->getPost();
@@ -141,16 +100,28 @@ class Module extends AbstractModule
         }
 
         $params = $form->getData();
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
+        $defaultSettings = $config['ark']['config'];
         $params = array_intersect_key($params, $defaultSettings);
+
+        // Avoid to reset existing settings from the disabled fields.
+        $namePlugin = $arkManager->getArkNamePlugin();
+        if ($namePlugin->isDatabaseCreated()) {
+            unset(
+                $params['ark_naan'],
+                $params['ark_naa'],
+                $params['ark_subnaa'],
+                $params['ark_noid_template']
+            );
+        }
         foreach ($params as $name => $value) {
             $settings->set($name, $value);
         }
 
-        $namePlugin = $arkManager->getArkNamePlugin();
         if (!$namePlugin->isDatabaseCreated()) {
             $namePlugin->createDatabase();
         }
+
+        return true;
     }
 
     /**
