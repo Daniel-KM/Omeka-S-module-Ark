@@ -8,6 +8,8 @@ namespace Ark\Name\Plugin;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
+use Omeka\Stdlib\Message;
+use Zend\Log\Logger;
 
 class Noid implements PluginInterface
 {
@@ -17,17 +19,24 @@ class Noid implements PluginInterface
     protected $settings;
 
     /**
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
      * @var string
      */
     protected $databaseDir;
 
     /**
      * @param Settings $settings
+     * @param Logger $logger
      * @param string $databaseDir
      */
-    public function __construct(Settings $settings, $databaseDir)
+    public function __construct(Settings $settings, Logger $logger, $databaseDir)
     {
         $this->settings = $settings;
+        $this->logger = $logger;
         $this->databaseDir = $databaseDir;
     }
 
@@ -40,11 +49,12 @@ class Noid implements PluginInterface
     {
         $noid = $this->openDatabase(\Noid::DB_WRITE);
         if (empty($noid)) {
-            $message = sprintf('Cannot open database: %s',
-                \Noid::errmsg(null, 1) ?: 'No database');
-            error_log('[Ark&Noid] ' . $message);
-
-            return;
+            $message = new Message(
+                'Cannot open database: %s', // @translate
+                \Noid::errmsg(null, 1) ?: 'No database'  // @translate
+            );
+            $this->logger->err($message);
+            return null;
         }
 
         // Check if the url is already set (only the Omeka id: the other ids are
@@ -61,11 +71,13 @@ class Noid implements PluginInterface
         $contact = $this->getContact();
 
         $ark = \Noid::mint($noid, $contact);
-        if (strlen($ark) == '') {
-            $message = sprintf('Cannot create an Ark for %s #%d: %s',
-                get_class($resource), $resource->id(), \Noid::errmsg($noid));
-            error_log('[Ark&Noid] ' . $message);
+        if (!strlen($ark)) {
             \Noid::dbclose($noid);
+            $message = new Message(
+                'Cannot create an Ark for %1$s #%2$d: %3$s', // @translate
+                $resource->getControllerName(), $resource->id(), \Noid::errmsg($noid)
+            );
+            $this->logger->err($message);
             return null;
         }
 
@@ -73,18 +85,22 @@ class Noid implements PluginInterface
         $locations = implode('|', $resourceIds);
         $result = \Noid::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
         if (empty($result)) {
-            $message = sprintf('Ark set, but not bound [%s, %s #%d]: %s',
-                $ark, get_class($resource), $resource->id(), \Noid::errmsg($noid));
-            error_log('[Ark&Noid] ' . $message);
+            $message = new Message(
+                'Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s', // @translate
+                $ark, $resource->getControllerName(), $resource->id(), \Noid::errmsg($noid)
+            );
+            $this->logger->warn($message);
         }
 
         // Save the reverse bind on Omeka id to find it instantly, as a "note".
         // If needed, other urls can be find in a second step via the ark.
         $result = \Noid::note($noid, $contact, 'locations/' . $resource->id(), $ark);
         if (empty($result)) {
-            $message = sprintf('Ark set, but no reverse bind [%s, %s #%d]: %s',
-                $ark, get_class($resource), $resource->id(), \Noid::errmsg($noid));
-            error_log('[Ark&Noid] ' . $message);
+            $message = new Message(
+                'Ark set, but no reverse bind [%1$s, %2$s #%3$d]: %4$s',
+                $ark, $resource->getControllerName(), $resource->id(), \Noid::errmsg($noid)
+            );
+            $this->logger->warn($message);
         }
 
         \Noid::dbclose($noid);
@@ -145,7 +161,10 @@ class Noid implements PluginInterface
 
     protected function getContact()
     {
-        return $this->settings->get('administrator_email', 'Unknown user');
+        return $this->settings->get(
+            'administrator_email',
+            '[Unknown user]' // @translate
+        );
     }
 
     protected function getDatabaseDir()
