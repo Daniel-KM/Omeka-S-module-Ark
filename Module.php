@@ -216,28 +216,18 @@ class Module extends AbstractModule
             return;
         }
 
+        // 10 is dcterms:identifier id in default hard coded install.
+        $property = $api->read('properties', ['id' => 10], [], ['responseContent' => 'resource'])->getContent();
+
         $values = $resource->getValues();
 
         $value = new Value;
         $value->setType('literal');
         $value->setResource($resource);
-        $value->setProperty($this->getIdentifierPropertyEntity());
+        $value->setProperty($property);
         $value->setValue($ark);
 
         $values->add($value);
         $entityManager->flush();
-    }
-
-    protected function getIdentifierPropertyEntity()
-    {
-        $entityManager = $this->getServiceLocator()->get('Omeka\EntityManager');
-
-        $query = $entityManager->createQuery("
-            SELECT p FROM Omeka\Entity\Property p JOIN p.vocabulary v
-            WHERE v.prefix = 'dcterms' AND p.localName = 'identifier'
-        ");
-        $property = $query->getSingleResult();
-
-        return $property;
     }
 }
