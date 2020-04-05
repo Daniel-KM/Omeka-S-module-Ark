@@ -131,7 +131,7 @@ return [
             'ark_naan' => '99999',
             'ark_naa' => 'example.org',
             'ark_subnaa' => 'sub',
-            'ark_noid_template' => '.zek',
+            'ark_noid_template' => 'b.rllllk',
             'ark_note' => '',
             'ark_policy_statement' => 'erc-support:
 who: Our Institution
