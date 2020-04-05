@@ -9,6 +9,6 @@ $translate = $this->plugin('translate');
 <?php $title = $translate('Ark Policy Statement'); ?>
 
 <div id="content" role="main">
-    <?php echo $this->pageTitle($title, 2); ?>
-    <?php echo nl2br($policy); ?>
+    <?= $this->pageTitle($title, 2) ?>
+    <?= nl2br($policy) ?>
 </div>

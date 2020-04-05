@@ -5,38 +5,34 @@
  * @var string $policy
  */
 
-$translate = $this->plugin('translate');
 // This shoud returns a brief machine- and eye-readable metadata record (not the full Dublin Core).
-$title = $resource->value('dcterms:title', ['type' => 'literal']);
-if (empty($title)) {
-    $title = $translate('[No title]');
-}
+$title = $resource->displayTitle();
 $creators = $resource->value('dcterms:creator', ['type' => 'literal', 'all' => true]);
 $publisher = $resource->value('dcterms:publisher', ['type' => 'literal']);
 $date = $resource->value('dcterms:date', ['type' => 'literal']);
-$description = $resource->value('dcterms:description', ['type' => 'literal']);
+$description = $resource->displayDescription();
 
 ?>
 erc:
 <?php if (!empty($creators)): ?>
 <?php foreach ($creators as $creator): ?>
-who:    <?php echo trim($creator) . PHP_EOL; ?>
+who:    <?= trim($creator) . PHP_EOL ?>
 <?php endforeach; ?>
 <?php endif; ?>
 
 <?php if ($publisher): ?>
-who:    <?php echo trim($publisher) . PHP_EOL; ?>
+who:    <?= trim($publisher) . PHP_EOL ?>
 <?php endif; ?>
 <?php if (empty($creators) && empty($publisher)): ?>
-who:    <?php echo '(:unkn) anonymous' . PHP_EOL; ?>
+who:    <?= '(:unkn) anonymous' . PHP_EOL ?>
 <?php endif; ?>
-what:   <?php echo ($title ?: '(:unas) value unassigned') . PHP_EOL; ?>
-when:   <?php echo ($date ?: '(:unav) value unavailable, possibly unknown') . PHP_EOL; ?>
-where:  <?php echo $this->ark($resource)->url(['force_canonical' => true], false) . PHP_EOL; ?>
+what:   <?= ($title ?: '(:unas) value unassigned') . PHP_EOL ?>
+when:   <?= ($date ?: '(:unav) value unavailable, possibly unknown') . PHP_EOL ?>
+where:  <?= $this->ark($resource)->url(['force_canonical' => true], false) . PHP_EOL ?>
 <?php if ($description): ?>
-about-how:    <?php echo trim($description) . PHP_EOL; ?>
+about-how:    <?= trim($description) . PHP_EOL ?>
 <?php endif; ?>
 <?php if ($note = $this->setting('ark_note')): ?>
-note:   <?php echo trim($note) . PHP_EOL; ?>
+note:   <?= trim($note) . PHP_EOL ?>
 <?php endif; ?>
-<?php echo (isset($policy) && $policy) ? $this->setting('ark_policy_statement') : '' ?>
+<?= (isset($policy) && $policy) ? $this->setting('ark_policy_statement') : '' ?>
