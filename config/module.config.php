@@ -21,9 +21,6 @@ return [
         ],
     ],
     'view_helpers' => [
-        'invokables' => [
-            'Url' => View\Helper\ArkUrl::class,
-        ],
         'factories' => [
             'ark' => Service\ViewHelper\ArkFactory::class,
             'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
@@ -147,8 +144,6 @@ where: http://example.com/ark:/99999/',
 * No ARK shall be re-assigned; that is, once an ARK-to-object association has been made public, that association shall be considered unique into the indefinite future.
 * To help them age and travel well, the Name part of our institution-assigned ARKs shall contain no widely recognizable semantic information (to the extent possible).
 * Our institution-assigned ARKs shall be generated with a terminal check character that guarantees them against single character errors and transposition errors.',
-            'ark_use_admin' => false,
-            'ark_use_public' => true,
         ],
     ],
     'ark_qualifier_plugins' => [
