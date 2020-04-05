@@ -7,12 +7,16 @@ use Ark\Qualifier\PluginManager as QualifierPlugins;
 use Doctrine\DBAL\Connection;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Mvc\Controller\Plugin\Api;
-use Omeka\Settings\Settings;
 use Omeka\Stdlib\Message;
 use Zend\Log\Logger;
 
 class ArkManager
 {
+    /**
+     * @string string
+     */
+    protected $naan;
+
     /**
      * @var Api
      */
@@ -29,11 +33,6 @@ class ArkManager
     protected $logger;
 
     /**
-     * @var Settings
-     */
-    protected $settings;
-
-    /**
      * @var NamePlugins
      */
     protected $namePlugins;
@@ -44,25 +43,27 @@ class ArkManager
     protected $qualifierPlugins;
 
     /**
+     * @todo Remove all code related to missing naan (use 99999 for test).
+     *
+     * @param string $naan
      * @param Api $api
      * @param Connection $connection
      * @param Logger $logger
-     * @param Settings $settings
      * @param NamePlugins $namePlugins
      * @param QualifierPlugins $qualifierPlugins
      */
     public function __construct(
+        $naan,
         Api $api,
         Connection $connection,
         Logger $logger,
-        Settings $settings,
         NamePlugins $namePlugins,
         QualifierPlugins $qualifierPlugins
     ) {
+        $this->naan = $naan;
         $this->api = $api;
         $this->connection = $connection;
         $this->logger = $logger;
-        $this->settings = $settings;
         $this->namePlugins = $namePlugins;
         $this->qualifierPlugins = $qualifierPlugins;
     }
@@ -80,8 +81,7 @@ class ArkManager
         }
 
         $protocol = 'ark:';
-        $naan = $this->settings->get('ark_naan');
-        $base = $naan ? "$protocol/$naan/" : "$protocol/";
+        $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
 
         if (is_string($ark)) {
             // Quick check of format.
@@ -109,7 +109,7 @@ class ArkManager
                 $qualifier = mb_substr($fullName, $pos + 1);
             }
         } elseif (is_array($ark)) {
-            if ($ark['naan'] !== $naan
+            if ($ark['naan'] !== $this->naan
                     || empty($ark['name']) || $ark['name'] == '?' || $ark['name'] == '??'
                 ) {
                 return null;
@@ -177,8 +177,7 @@ class ArkManager
 
         $identifiers = $resource->value('dcterms:identifier', ['all' => true, 'type' => 'literal']);
         $protocol = 'ark:';
-        $naan = $this->settings->get('ark_naan');
-        $base = $naan ? "$protocol/$naan/" : "$protocol/";
+        $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
         $ark = null;
         if (!empty($identifiers)) {
             foreach ($identifiers as $identifier) {
@@ -190,7 +189,7 @@ class ArkManager
         }
 
         if ($ark) {
-            $ark = new Ark($naan, mb_substr($ark, mb_strlen($base)));
+            $ark = new Ark($this->naan, mb_substr($ark, mb_strlen($base)));
 
             if ($media) {
                 $qualifier = $this->getQualifier($media);
@@ -221,8 +220,7 @@ class ArkManager
         }
 
         $protocol = 'ark:';
-        $naan = $this->settings->get('ark_naan');
-        $base = $naan ? "$protocol/$naan/" : "$protocol/";
+        $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
 
         $qb = $this->connection->createQueryBuilder();
         $qb
@@ -267,7 +265,7 @@ class ArkManager
         $ark = $stmt->fetchColumn();
 
         if ($ark) {
-            $ark = new Ark($naan, substr($ark, strlen($base)));
+            $ark = new Ark($this->naan, substr($ark, strlen($base)));
             if ($resourceClass === \Omeka\Entity\Media::class) {
                 $qualifier = $this->getQualifierFromResourceId($resourceId);
                 $ark->setQualifier($qualifier);
@@ -406,13 +404,11 @@ class ArkManager
         $ark = trim($ark);
         $result = explode('/', $ark);
 
-        $naan = $this->settings->get('ark_naan');
-
-        if ($naan) {
+        if ($this->naan) {
             if (count($result) != 2) {
                 return false;
             }
-            if ($result[0] != $naan) {
+            if ($result[0] != $this->naan) {
                 return false;
             }
 
@@ -428,7 +424,7 @@ class ArkManager
 
         $clean = preg_replace('/[^a-zA-Z0-9]/', '', $ark);
 
-        return $clean == $ark;
+        return $clean === $ark;
     }
 
     /**
@@ -465,10 +461,9 @@ class ArkManager
             \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
             \Omeka\Entity\Resource::class => null,
         ];
-        if (!isset($resourceTypes[$resourceType])) {
-            return false;
-        }
-        return $resourceTypes[$resourceType];
+        return isset($resourceTypes[$resourceType])
+            ? $resourceTypes[$resourceType]
+            : false;
     }
 
     /**
@@ -485,9 +480,8 @@ class ArkManager
             \Omeka\Entity\ItemSet::class => 'item_sets',
             \Omeka\Entity\Media::class => 'media',
         ];
-        if (!isset($resourceClasses[$resourceClass])) {
-            return false;
-        }
-        return $resourceClasses[$resourceClass];
+        return isset($resourceClasses[$resourceClass])
+            ? $resourceClasses[$resourceClass]
+            : false;
     }
 }
