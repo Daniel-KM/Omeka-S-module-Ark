@@ -26,4 +26,5 @@ if (version_compare($oldVersion, '3.5.7', '<')) {
 
     $settings->set('ark_qualifier', 'internal');
     $settings->set('ark_qualifier_static', false);
+    $settings->set('ark_qualifier_position_format', '');
 }

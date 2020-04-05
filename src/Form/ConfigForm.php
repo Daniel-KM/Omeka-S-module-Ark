@@ -102,7 +102,8 @@ class ConfigForm extends Form
                 'options' => [
                     'label' => 'Qualifier for media', // @translate
                     'value_options' => [
-                        'internal' => 'Use internal media id', // @translate
+                        'internal' => 'Internal media id', // @translate
+                        'position' => 'Position of the media', // @translate
                     ],
                 ],
                 'attributes' => [
@@ -117,7 +118,19 @@ class ConfigForm extends Form
                     'label' => 'Save the media qualifier', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'ark_qualifier',
+                    'id' => 'ark_qualifier_static',
+                ],
+            ])
+            ->add([
+                'name' => 'ark_qualifier_position_format',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Format of position for qualifier', // @translate
+                    'info' => 'A "sprintf" string that will format the media position. It is recommended to use a format with a leading letter to avoid confusion with numeric media id. Furthermore, the position may not be stable: a scanned image may be missing. Finally, if the first media is not marked "1" in the database, use module "Bulk Check" to fix positions.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'ark_qualifier_position_format',
+                    'placeholder' => 'p%d',
                 ],
             ]);
 

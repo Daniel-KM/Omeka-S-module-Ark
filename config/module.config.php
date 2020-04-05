@@ -146,11 +146,13 @@ where: http://example.com/ark:/99999/',
 * Our institution-assigned ARKs shall be generated with a terminal check character that guarantees them against single character errors and transposition errors.',
             'ark_qualifier' => 'internal',
             'ark_qualifier_static' => false,
+            'ark_qualifier_position_format' => '',
         ],
     ],
     'ark_qualifier_plugins' => [
         'factories' => [
             'internal' => Service\QualifierPlugin\InternalFactory::class,
+            'position' => Service\QualifierPlugin\PositionFactory::class,
         ],
     ],
     'ark_name_plugins' => [
