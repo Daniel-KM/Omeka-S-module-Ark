@@ -172,8 +172,8 @@ class ArkUrl extends Url
             return $this->view->getResourceFullIdentifier(
                 ['type' => $params['controller'], 'id' => $params['id']],
                 isset($params['site-slug']) ? $params['site-slug'] : null,
-                true,
                 $context,
+                true,
                 !empty($options['force_canonical'])
             );
         }
