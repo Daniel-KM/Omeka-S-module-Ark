@@ -75,7 +75,7 @@ class ArkManager
 
         if (is_string($ark)) {
             // Quick check of format.
-            if (strpos($ark, $base) !== 0) {
+            if (mb_strpos($ark, $base) !== 0) {
                 return null;
             }
 
@@ -84,19 +84,19 @@ class ArkManager
                 return null;
             }
 
-            $fullName = substr($ark, strlen($base));
+            $fullName = mb_substr($ark, mb_strlen($base));
             if ($fullName == '?' || $fullName == '??') {
                 return null;
             }
 
             // Get the identifier and the qualifier parts.
-            $pos = strpos($fullName, '/');
+            $pos = mb_strpos($fullName, '/');
             if ($pos === false) {
                 $name = $fullName;
                 $qualifier = '';
             } else {
-                $name = substr($fullName, 0, $pos);
-                $qualifier = substr($fullName, $pos + 1);
+                $name = mb_substr($fullName, 0, $pos);
+                $qualifier = mb_substr($fullName, $pos + 1);
             }
         } elseif (is_array($ark)) {
             if ($ark['naan'] !== $naan
@@ -180,7 +180,7 @@ class ArkManager
         }
 
         if ($ark) {
-            $ark = new Ark($naan, substr($ark, strlen($base)));
+            $ark = new Ark($naan, mb_substr($ark, mb_strlen($base)));
 
             if ($media) {
                 $qualifier = $this->getQualifier($media);
