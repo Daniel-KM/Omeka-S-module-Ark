@@ -8,7 +8,6 @@ namespace Ark\Name\Plugin;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
-use Omeka\Stdlib\Message;
 use Zend\Log\Logger;
 
 class Internal implements PluginInterface
@@ -62,9 +61,9 @@ class Internal implements PluginInterface
     /**
      * @todo Include the info of the noid database in the interface or in another plugin.
      *
-    * @param string $level "meta" (default), "admin", "brief", "full", or "dump".
+     * @param string $level "meta" (default), "admin", "brief", "full", or "dump".
      * @return array|string
-      */
+     */
     public function infoDatabase($level = 'meta')
     {
         $arkNaan = $this->settings->get('ark_naan');

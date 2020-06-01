@@ -2,14 +2,17 @@
 
 namespace Ark\Mvc;
 
-use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
+use Zend\EventManager\EventManagerInterface;
 use Zend\Filter\StaticFilter;
 use Zend\Http\Response;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
 use Zend\Router\Http\RouteMatch;
 
+/**
+ * @todo Remove this listener and use CleanUrl only (so this module will only create and check identifiers)? See new module template.
+ */
 class MvcListeners extends AbstractListenerAggregate
 {
     public function attach(EventManagerInterface $events, $priority = 1)
@@ -22,9 +25,9 @@ class MvcListeners extends AbstractListenerAggregate
 
     public function redirectToResource(MvcEvent $event)
     {
-        $serviceLocator = $event->getApplication()->getServiceManager();
-        $controllerPlugins = $serviceLocator->get('ControllerPluginManager');
-        $settings = $serviceLocator->get('Omeka\Settings');
+        $services = $event->getApplication()->getServiceManager();
+        $controllerPlugins = $services->get('ControllerPluginManager');
+        $settings = $services->get('Omeka\Settings');
         /** @var \Ark\Mvc\Controller\Plugin\Ark $arkPlugin */
         $arkPlugin = $controllerPlugins->get('ark');
 
@@ -35,10 +38,7 @@ class MvcListeners extends AbstractListenerAggregate
         }
 
         $naan = $routeMatch->getParam('naan');
-        $name = $routeMatch->getParam('name');
-        $qualifier = $routeMatch->getParam('qualifier');
-
-        if ($naan != $settings->get('ark_naan')) {
+        if ($naan !== $settings->get('ark_naan')) {
             return $this->triggerDispatchError($event);
         }
 
@@ -47,6 +47,8 @@ class MvcListeners extends AbstractListenerAggregate
             return;
         }
 
+        $name = $routeMatch->getParam('name');
+        $qualifier = $routeMatch->getParam('qualifier');
         $resource = $arkPlugin->find([
             'naan' => $naan,
             'name' => $name,
@@ -57,7 +59,7 @@ class MvcListeners extends AbstractListenerAggregate
             return $this->triggerDispatchError($event);
         }
 
-        if ($resource->resourceName() == 'media' && strpos($qualifier, '.') !== false) {
+        if ($resource->resourceName() === 'media' && strpos($qualifier, '.') !== false) {
             $variant = substr($qualifier, strpos($qualifier, '.') + 1);
             $variants = ['large', 'medium', 'square'];
             if ($variant === 'original') {
@@ -117,7 +119,7 @@ class MvcListeners extends AbstractListenerAggregate
         return $routeMatch;
     }
 
-    protected function triggerDispatchError($event)
+    protected function triggerDispatchError(MvcEvent $event)
     {
         $event->setName(MvcEvent::EVENT_DISPATCH_ERROR);
         $event->setError(Application::ERROR_ROUTER_NO_MATCH);
@@ -131,9 +133,9 @@ class MvcListeners extends AbstractListenerAggregate
     protected function redirectToUrl($url)
     {
         $response = new Response;
-        $response->setStatusCode('302');
-        $response->getHeaders()->addHeaderLine('Location', $url);
-
+        $response
+            ->setStatusCode('302')
+            ->getHeaders()->addHeaderLine('Location', $url);
         return $response;
     }
 }

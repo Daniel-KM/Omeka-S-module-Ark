@@ -109,7 +109,7 @@ class ConfigForm extends Form
                 'name' => 'ark_qualifier_static',
                 'type' => Element\Checkbox::class,
                 'options' => [
-                    'label' => 'Save the media qualifier', // @translate
+                    'label' => 'Save the ark with qualifier for media', // @translate
                 ],
                 'attributes' => [
                     'id' => 'ark_qualifier_static',
@@ -149,11 +149,11 @@ class ConfigForm extends Form
                 ],
             ]);
 
-            $this->getInputFilter()
-                ->add([
-                    'name' => 'ark_qualifier',
-                    'required' => false,
-                ]);
+        $this->getInputFilter()
+            ->add([
+                'name' => 'ark_qualifier',
+                'required' => false,
+            ]);
     }
 
     public function setArkManager(ArkManager $arkManager)
