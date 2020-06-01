@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-30 00:00+0200\n"
+"POT-Creation-Date: 2020-06-01 11:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -127,7 +127,7 @@ msgid ""
 msgstr ""
 
 #: src/Form/ConfigForm.php:112
-msgid "Save the media qualifier"
+msgid "Save the ark with qualifier for media"
 msgstr ""
 
 #: src/Form/ConfigForm.php:122
@@ -166,53 +166,53 @@ msgstr ""
 msgid "[Unknown user]"
 msgstr ""
 
-#: src/ArkManager.php:333
+#: src/ArkManager.php:359
 #, php-format
 msgid "No Ark created: check your processor \"%1$s\" [%2$s #%3$d]."
 msgstr ""
 
-#: src/ArkManager.php:343
+#: src/ArkManager.php:369
 #, php-format
 msgid ""
 "Ark \"%1$s\" is not correct: check your naan \"%2$s\", your template, and "
 "your processor [%3$s]."
 msgstr ""
 
-#: src/ArkManager.php:357
+#: src/ArkManager.php:383
 #, php-format
 msgid ""
 "The proposed ark \"%1$s\" by the processor \"%2$s\" is not unique [%3$s #"
 "%4$d]."
 msgstr ""
 
-#: src/ArkManager.php:365
+#: src/ArkManager.php:391
 #, php-format
 msgid ""
 "Unable to create a unique ark. Check parameters of the processor \"%1$s"
 "\" [%2$s #%3$d]."
 msgstr ""
 
-#: src/ArkManager.php:382
+#: src/ArkManager.php:408
 #, php-format
 msgid ""
 "No Ark qualfiier created for media #%1$d: the item #%2$d does not have an "
 "ark. Update it first."
 msgstr ""
 
-#: src/ArkManager.php:391
+#: src/ArkManager.php:417
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d: option is \"dynamic qualifier"
 "\"."
 msgstr ""
 
-#: src/ArkManager.php:401
+#: src/ArkManager.php:427
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d. Check the processor \"%2$s\"."
 msgstr ""
 
-#: src/ArkManager.php:413
+#: src/ArkManager.php:439
 #, php-format
 msgid ""
 "Unable to create a unique ark. Check the processor \"%1$s\" [%2$s #%3$d]."

@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-30 00:00+0200\n"
-"PO-Revision-Date: 2020-03-30 00:00+0200\n"
+"POT-Creation-Date: 2020-06-01 00:00+0000\n"
+"PO-Revision-Date: 2020-06-01 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.3.1\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: Module.php:66
@@ -28,14 +28,14 @@ msgstr ""
 #: Module.php:68
 #, php-format
 msgid "See %sthe official help%s for more informations."
-msgstr "Voir %sl‘aide officielle%s pour davantage d‘informations."
+msgstr "Voir %sl’aide officielle%s pour davantage d’informations."
 
 #: Module.php:90
 msgid ""
 "NOID database is already created, which means some settings are not "
 "modifiable."
 msgstr ""
-"La base de données NOID est déjà créée, ce qui implique qu‘il n‘est plus "
+"La base de données NOID est déjà créée, ce qui implique qu’il n’est plus "
 "possible de modifier les paramètres."
 
 #: Module.php:92 Module.php:100
@@ -136,15 +136,15 @@ msgid ""
 "use module \"Bulk Check\" to fix positions."
 msgstr ""
 "Une chaîne \"sprintf\" pour formater la position du média. Il est recommandé "
-"d‘utiliser un format avec une lettre initiale pour éviter de confondre avec "
+"d’utiliser un format avec une lettre initiale pour éviter de confondre avec "
 "un numéro de média. De plus, la position peut ne pas être stable : une image "
 "scannée peut avoir été oubliée. Enfin, si le premier média n'est pas marqué "
 "\"1\" dans la base de données, utiliser le module \"Bulk Check\" pour "
 "corriger les positions."
 
 #: src/Form/ConfigForm.php:112
-msgid "Save the media qualifier"
-msgstr "Enregistrer le qualifiant du média"
+msgid "Save the ark with qualifier for media"
+msgstr "Enregistrer l’ark avec le qualifiant pour le média"
 
 #: src/Form/ConfigForm.php:122
 msgid "Policy statement"
@@ -157,7 +157,7 @@ msgstr "Politique générale"
 #: src/Name/Plugin/Noid.php:53
 #, php-format
 msgid "Cannot open database: %s"
-msgstr "Impossible d‘ouvrir la base : %s"
+msgstr "Impossible d’ouvrir la base : %s"
 
 #: src/Name/Plugin/Noid.php:54
 msgid "No database"
@@ -182,30 +182,30 @@ msgstr "Impossible de récupérer les informations de la base : %s"
 msgid "[Unknown user]"
 msgstr "[Utilisateur inconnu]"
 
-#: src/ArkManager.php:333
+#: src/ArkManager.php:359
 #, php-format
 msgid "No Ark created: check your processor \"%1$s\" [%2$s #%3$d]."
 msgstr "Ark non créé : vérifier le processeur \"%1$s\" [%2$s #%3$d]."
 
-#: src/ArkManager.php:343
+#: src/ArkManager.php:369
 #, php-format
 msgid ""
 "Ark \"%1$s\" is not correct: check your naan \"%2$s\", your template, and "
 "your processor [%3$s]."
 msgstr ""
-"L‘ark \"%1$s\" n‘est pas correct : vérifiez votre naan \"%2$s\", votre "
+"L’ark \"%1$s\" n’est pas correct : vérifiez votre naan \"%2$s\", votre "
 "modèle de format et votre processeurs [%3$s]."
 
-#: src/ArkManager.php:357
+#: src/ArkManager.php:383
 #, php-format
 msgid ""
 "The proposed ark \"%1$s\" by the processor \"%2$s\" is not unique [%3$s #"
 "%4$d]."
 msgstr ""
-"L‘ark proposé \"%1$s\" par le processeur \"%2$s\" n‘est pas unique [%3$s #"
+"L’ark proposé \"%1$s\" par le processeur \"%2$s\" n’est pas unique [%3$s #"
 "%4$d]."
 
-#: src/ArkManager.php:365
+#: src/ArkManager.php:391
 #, php-format
 msgid ""
 "Unable to create a unique ark. Check parameters of the processor \"%1$s"
@@ -214,25 +214,25 @@ msgstr ""
 "Impossible de créer un ark unique. Vérifiez les paramètres du processeur "
 "\"%1$s\" [%2$s #%3$d]."
 
-#: src/ArkManager.php:382
+#: src/ArkManager.php:408
 #, php-format
 msgid ""
 "No Ark qualfiier created for media #%1$d: the item #%2$d does not have an "
 "ark. Update it first."
 msgstr ""
-"Qualifiant ark non créé pour le média #%1$d: l‘item #%2$d ne dispose pas "
-"d‘ark. Mettez-le à jour d‘abord."
+"Qualifiant ark non créé pour le média #%1$d: l’item #%2$d ne dispose pas "
+"d’ark. Mettez-le à jour d’abord."
 
-#: src/ArkManager.php:391
+#: src/ArkManager.php:417
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d: option is \"dynamic qualifier"
 "\"."
 msgstr ""
-"Impossible de créer un qualifiant pour le média #%1$d: l‘option est "
+"Impossible de créer un qualifiant pour le média #%1$d: l’option est "
 "\"dynamic qualifier\"."
 
-#: src/ArkManager.php:401
+#: src/ArkManager.php:427
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d. Check the processor \"%2$s\"."
@@ -240,7 +240,7 @@ msgstr ""
 "Impossible de créer un qualifiant pour le média #%1$d. Vérifiez le "
 "processeur \"%2$s\"."
 
-#: src/ArkManager.php:413
+#: src/ArkManager.php:439
 #, php-format
 msgid ""
 "Unable to create a unique ark. Check the processor \"%1$s\" [%2$s #%3$d]."
