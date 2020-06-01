@@ -74,6 +74,9 @@ return [
                                 'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
                                     'route' => '/:naan',
+                                    'constraints' => [
+                                        'naan' => '\d{5}',
+                                    ],
                                     'defaults' => [
                                         'action' => 'policy',
                                     ],
@@ -114,6 +117,9 @@ return [
                                 'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
                                     'route' => '/:naan',
+                                    'constraints' => [
+                                        'naan' => '\d{5}',
+                                    ],
                                     'defaults' => [
                                         'action' => 'policy',
                                     ],
