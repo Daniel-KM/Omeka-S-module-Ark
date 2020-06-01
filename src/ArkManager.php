@@ -94,7 +94,7 @@ class ArkManager
     }
 
     /**
-     * Find the resource from an ark. The qualifier can be dynamic.
+     * Find the resource from an ark. The qualifier can be dynamic or saved.
      *
      * @param string|array $ark
      * @return AbstractResourceEntityRepresentation|null
@@ -140,41 +140,67 @@ class ArkManager
                 return null;
             }
             $name = $ark['name'];
-            $qualifier = empty($ark['qualifier']) ? null : $ark['qualifier'];
+            $qualifier = empty($ark['qualifier']) ? '' : $ark['qualifier'];
         } else {
             return null;
         }
 
+        $hasQualifier = strlen($qualifier);
+
         // The resource adapter does not implement the search operation for now.
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('value.resource_id, resource.resource_type')
+            ->select('value.value, value.resource_id, resource.resource_type')
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
             // Property 10 = dcterms:identifier.
             ->where('value.property_id = 10')
             ->andWhere('value.type = "literal"')
-            ->andWhere('value.value = :value')
-            ->setParameter('value', $base . $name)
             ->groupBy(['value.resource_id'])
             ->addOrderBy('value.resource_id', 'ASC')
-            ->addOrderBy('value.id', 'ASC')
-            // Only one identifier by resource.
-            ->setMaxResults(1);
-        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
-        $resource = $stmt->fetch();
+            ->addOrderBy('value.id', 'ASC');
+        if ($hasQualifier) {
+            $qb
+                // Manage the case where the qualifier is dynamic.
+                ->andWhere($qb->expr()->orX(
+                    'value.value = :value',
+                    'value.value = :valueq'
+                ))
+                ->setParameter('value', $base . $name)
+                ->setParameter('valueq', $base . $name . '/' . $qualifier)
+                // The base is generally the same for item and media.
+                ->setMaxResults(2);
+        } else {
+            $qb
+                ->andWhere('value.value = :value')
+                ->setParameter('value', $base . $name)
+                // Only one identifier by resource.
+                ->setMaxResults(1);
+        }
 
-        if (empty($resource)) {
+        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
+        $resources = $stmt->fetchAll();
+
+        if (empty($resources)) {
             return null;
         }
 
-        if ($qualifier
-            && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resource['resource_id'], $qualifier)
-        ) {
-            $resource = $qualifierResource;
-        } else {
+        if (count($resources) === 2) {
+            // When there are two resources, the longest has the qualifier.
+            $resource = mb_strlen($resources[0]['value']) > mb_strlen($resources[1]['value'])
+                ? $resources[0]
+                : $resources[1];
             $resourceType = $this->resourceType($resource['resource_type']);
-            if ($resourceType) {
+            $resource = $resourceType
+                ? $this->api->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent()
+                : null;
+        } else {
+            $resource = $resources[0];
+            if ($hasQualifier
+                    && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resource['resource_id'], $qualifier)
+            ) {
+                $resource = $qualifierResource;
+            } elseif ($resourceType = $this->resourceType($resource['resource_type'])) {
                 $resource = $this->api
                     ->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent();
             } else {
