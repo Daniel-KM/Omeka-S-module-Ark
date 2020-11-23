@@ -4,7 +4,7 @@ namespace Ark\Service\NamePlugin;
 
 use Ark\Name\Plugin\Internal;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class InternalFactory implements FactoryInterface
 {

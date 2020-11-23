@@ -3,7 +3,7 @@
 namespace Ark\Service;
 
 use Ark\Qualifier\PluginManager;
-use Zend\Mvc\Service\AbstractPluginManagerFactory;
+use Laminas\Mvc\Service\AbstractPluginManagerFactory;
 
 class QualifierPluginManagerFactory extends AbstractPluginManagerFactory
 {

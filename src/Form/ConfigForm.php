@@ -3,8 +3,8 @@
 namespace Ark\Form;
 
 use Ark\ArkManager;
-use Zend\Form\Element;
-use Zend\Form\Form;
+use Laminas\Form\Element;
+use Laminas\Form\Form;
 
 class ConfigForm extends Form
 {

@@ -3,7 +3,7 @@ namespace Ark\Service\ViewHelper;
 
 use Ark\View\Helper\DefaultSiteSlug;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Service factory to get the default site slug, or the first site slug.

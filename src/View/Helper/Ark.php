@@ -6,7 +6,7 @@ use Ark\Ark as ArkArk;
 use Ark\ArkManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Traversable;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * Helper to get or create ark.

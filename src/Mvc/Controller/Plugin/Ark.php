@@ -3,7 +3,7 @@
 namespace Ark\Mvc\Controller\Plugin;
 
 use Ark\ArkManager;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class Ark extends AbstractPlugin
 {

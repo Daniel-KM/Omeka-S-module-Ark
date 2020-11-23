@@ -4,7 +4,7 @@ namespace Ark\Service\ControllerPlugin;
 
 use Ark\Mvc\Controller\Plugin\Ark;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ArkFactory implements FactoryInterface
 {

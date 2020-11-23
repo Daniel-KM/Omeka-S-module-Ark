@@ -11,12 +11,12 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 use Generic\AbstractModule;
 use Omeka\Entity\Resource;
 use Omeka\Entity\Value;
-use Zend\EventManager\Event;
-use Zend\EventManager\SharedEventManagerInterface;
-use Zend\ModuleManager\ModuleManager;
-use Zend\Mvc\Controller\AbstractController;
-use Zend\Mvc\MvcEvent;
-use Zend\View\Renderer\PhpRenderer;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\ModuleManager\ModuleManager;
+use Laminas\Mvc\Controller\AbstractController;
+use Laminas\Mvc\MvcEvent;
+use Laminas\View\Renderer\PhpRenderer;
 
 /**
  * Ark.
@@ -38,7 +38,7 @@ class Module extends AbstractModule
         $event = $moduleManager->getEvent();
         $container = $event->getParam('ServiceManager');
 
-        /** @var \Zend\ModuleManager\Listener\ServiceListener $serviceListener */
+        /** @var \Laminas\ModuleManager\Listener\ServiceListener $serviceListener */
         $serviceListener = $container->get('ServiceListener');
         $serviceListener->addServiceManager(
             'Ark\NamePluginManager',

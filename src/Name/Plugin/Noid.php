@@ -9,7 +9,7 @@ namespace Ark\Name\Plugin;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 use Omeka\Stdlib\Message;
-use Zend\Log\Logger;
+use Laminas\Log\Logger;
 
 class Noid implements PluginInterface
 {

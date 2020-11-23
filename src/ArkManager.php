@@ -9,7 +9,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Stdlib\Message;
-use Zend\Log\Logger;
+use Laminas\Log\Logger;
 
 class ArkManager
 {

@@ -2,7 +2,7 @@
 
 namespace Ark\Name;
 
-use Zend\ServiceManager\AbstractPluginManager;
+use Laminas\ServiceManager\AbstractPluginManager;
 
 class PluginManager extends AbstractPluginManager
 {

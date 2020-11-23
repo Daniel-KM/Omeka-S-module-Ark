@@ -2,7 +2,7 @@
 
 namespace ArkTest\Controller\Admin;
 
-use Zend\Form\Element\Csrf;
+use Laminas\Form\Element\Csrf;
 use ArkTest\Controller\ArkControllerTestCase;
 
 class ItemControllerTest extends ArkControllerTestCase

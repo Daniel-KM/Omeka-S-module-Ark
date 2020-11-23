@@ -5,7 +5,7 @@ namespace Ark\Qualifier\Plugin;
 use Doctrine\ORM\EntityManager;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Zend\Log\Logger;
+use Laminas\Log\Logger;
 
 /**
  * Change the format for Ark qualifier.

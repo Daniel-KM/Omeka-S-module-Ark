@@ -8,7 +8,7 @@ namespace Ark\Name\Plugin;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
-use Zend\Log\Logger;
+use Laminas\Log\Logger;
 
 class Internal implements PluginInterface
 {
