@@ -1,6 +1,9 @@
 Ark & Noid (module for Omeka S)
 ===============================
 
+> __New versions of this module and support for Omeka S version 3.0 and above
+> are available on [GitLab], which seems to respect users and privacy better.__
+
 [Ark & Noid] is a module for [Omeka S] that creates and manages [ark identifiers].
 They can be used in urls the admin and the public sides with the module [Clean Url].
 
@@ -259,7 +262,7 @@ See online issues on the [module issues] page on GitHub.
 License
 -------
 
-This module is published under the [CeCILL v2.1] licence, compatible with
+This module is published under the [CeCILL v2.1] license, compatible with
 [GNU/GPL] and approved by [FSF] and [OSI].
 
 In consideration of access to the source code and the rights to copy, modify and
@@ -323,4 +326,5 @@ for Omeka S has been built for [Paris Sciences et Lettres (PSL)] by [BibLibre].
 [Mines ParisTech]: https://patrimoine.mines-paristech.fr
 [Paris Sciences et Lettres (PSL)]: https://bibnum.explore.univ-psl.fr
 [BibLibre]: https://github.com/biblibre
+[GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
