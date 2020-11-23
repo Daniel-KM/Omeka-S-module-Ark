@@ -25,17 +25,14 @@ class MvcListeners extends AbstractListenerAggregate
 
     public function redirectToResource(MvcEvent $event)
     {
-        $services = $event->getApplication()->getServiceManager();
-        $controllerPlugins = $services->get('ControllerPluginManager');
-        $settings = $services->get('Omeka\Settings');
-        /** @var \Ark\Mvc\Controller\Plugin\Ark $arkPlugin */
-        $arkPlugin = $controllerPlugins->get('ark');
-
         $routeMatch = $event->getRouteMatch();
         $matchedRouteName = $routeMatch->getMatchedRouteName();
         if (!in_array($matchedRouteName, ['site/ark/default', 'admin/ark/default'], true)) {
             return;
         }
+
+        $services = $event->getApplication()->getServiceManager();
+        $settings = $services->get('Omeka\Settings');
 
         $naan = $routeMatch->getParam('naan');
         if ($naan !== $settings->get('ark_naan')) {
@@ -46,6 +43,10 @@ class MvcListeners extends AbstractListenerAggregate
         if (isset($uri) && 0 == substr_compare($uri, '?', -1)) {
             return;
         }
+
+        /** @var \Ark\Mvc\Controller\Plugin\Ark $arkPlugin */
+        $controllerPlugins = $services->get('ControllerPluginManager');
+        $arkPlugin = $controllerPlugins->get('ark');
 
         $name = $routeMatch->getParam('name');
         $qualifier = $routeMatch->getParam('qualifier');

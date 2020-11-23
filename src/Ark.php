@@ -68,7 +68,7 @@ class Ark
     }
 
     /**
-     * @param unknown $qualifier
+     * @param string $qualifier
      * @return self
      */
     public function setQualifier($qualifier)
