@@ -166,7 +166,7 @@ If the module was installed from the source, rename the name of the folder of
 the module to `Ark`, go to the root module, and run:
 
 ```
-composer install
+composer install --no-dev
 ```
 
 **IMPORTANT**:
@@ -256,7 +256,7 @@ default.
 Troubleshooting
 ---------------
 
-See online issues on the [module issues] page on GitHub.
+See online issues on the [module issues] page on GitLab.
 
 
 License
@@ -285,26 +285,26 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2020 (see [Daniel-KM] on GitHub)
+* Copyright Daniel Berthereau, 2015-2020 (see [Daniel-KM] on GitLab)
 * Copyright BibLibre, 2016-2017
 
 First version of this plugin has been built for [Mines ParisTech]. The upgrade
 for Omeka S has been built for [Paris Sciences et Lettres (PSL)] by [BibLibre].
 
 
-[Ark & Noid]: https://github.com/Daniel-KM/Omeka-S-module-Ark
+[Ark & Noid]: https://gitlab.com/Daniel-KM/Omeka-S-module-Ark
 [Omeka S]: https://omeka.org/s
 [ark identifiers]: https://n2t.net/e/ark_ids.html
-[Ark & Noid plugin]: https://github.com/Daniel-KM/Omeka-plugin-ArkAndNoid
+[Ark & Noid plugin]: https://gitlab.com/Daniel-KM/Omeka-plugin-ArkAndNoid
 [Omeka]: https://omeka.org/classic
-[ark and noid management]: https://github.com/Daniel-KM/Omeka-plugin-ArkAndNoid
-[Clean Url]: https://github.com/Daniel-KM/Omeka-S-module-CleanUrl
-[Noid]: https://github.com/Daniel-KM/Noid4Php
-[Ark.zip]: https://github.com/Daniel-KM/Omeka-S-module-Ark/releases
+[ark and noid management]: https://gitlab.com/Daniel-KM/Omeka-plugin-ArkAndNoid
+[Clean Url]: https://gitlab.com/Daniel-KM/Omeka-S-module-CleanUrl
+[Noid]: https://gitlab.com/Daniel-KM/Noid4Php
+[Ark.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Ark/-/releases
 [Cool URIs]: https://www.w3.org/TR/cooluris
 [N2T]: http://n2t.org
 [Noid]: https://wiki.ucop.edu/display/Curation/NOID
-[Noid4Php]: https://github.com/Daniel-KM/Noid4Php
+[Noid4Php]: https://gitlab.com/Daniel-KM/Noid4Php
 [Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
 [Mines ParisTech]: http://mines-paristech.fr
 [California Digital Library]: http://www.cdlib.org
@@ -317,7 +317,7 @@ for Omeka S has been built for [Paris Sciences et Lettres (PSL)] by [BibLibre].
 [specification]: https://wiki.ucop.edu/download/attachments/16744455/arkspec.pdf?version=1&modificationDate=1440538826000&api=v2
 [templates]: https://metacpan.org/pod/distribution/Noid/noid#TEMPLATES
 [fixed]: https://secure.php.net/manual/en/migration71.incompatible.php#migration71.incompatible.fixes-to-mt_rand-algorithm
-[module issues]: https://github.com/Daniel-KM/Omeka-S-module-CleanUrl/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-CleanUrl/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
@@ -327,4 +327,4 @@ for Omeka S has been built for [Paris Sciences et Lettres (PSL)] by [BibLibre].
 [Paris Sciences et Lettres (PSL)]: https://bibnum.explore.univ-psl.fr
 [BibLibre]: https://github.com/biblibre
 [GitLab]: https://gitlab.com/Daniel-KM
-[Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
+[Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
