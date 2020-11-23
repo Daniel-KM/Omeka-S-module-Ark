@@ -1,10 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\Service\Form;
 
+use Ark\Form\ConfigForm;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Ark\Form\ConfigForm;
 
 class ConfigFormFactory implements FactoryInterface
 {

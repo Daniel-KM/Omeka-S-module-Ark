@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\Form;
 
@@ -13,7 +13,7 @@ class ConfigForm extends Form
      */
     protected $arkManager;
 
-    public function init()
+    public function init(): void
     {
         $arkNamePlugin = $this->arkManager->getArkNamePlugin();
         $databaseCreated = $arkNamePlugin->isDatabaseCreated();

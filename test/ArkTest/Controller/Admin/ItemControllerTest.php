@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace ArkTest\Controller\Admin;
 
-use Laminas\Form\Element\Csrf;
 use ArkTest\Controller\ArkControllerTestCase;
+use Laminas\Form\Element\Csrf;
 
 class ItemControllerTest extends ArkControllerTestCase
 {
     protected $namePlugin;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -19,7 +19,7 @@ class ItemControllerTest extends ArkControllerTestCase
         $this->namePlugin->createDatabase();
     }
 
-    public function testItemAddShouldCreateArkIdentifier()
+    public function testItemAddShouldCreateArkIdentifier(): void
     {
         $this->dispatch($this->urlFromRoute('admin/default', [
             'controller' => 'item',

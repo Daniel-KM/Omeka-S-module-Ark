@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\Controller;
 
@@ -34,7 +34,7 @@ class ArkController extends AbstractActionController
         }
 
         // Manage special uris.
-        $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+        $uri = $_SERVER['REQUEST_URI'] ?? null;
         if (isset($uri) && 0 == substr_compare($uri, '?', -1)) {
             $this->setPlainTextContentType();
             $view = new ViewModel(['resource' => $resource]);
@@ -77,7 +77,7 @@ class ArkController extends AbstractActionController
         return $view;
     }
 
-    protected function setPlainTextContentType()
+    protected function setPlainTextContentType(): void
     {
         $this->getResponse()
             ->getHeaders()

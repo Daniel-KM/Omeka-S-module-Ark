@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\Qualifier\Plugin;
 
 use Doctrine\ORM\EntityManager;
+use Laminas\Log\Logger;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Laminas\Log\Logger;
 
 /**
  * Change the format for Ark qualifier.

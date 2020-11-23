@@ -1,12 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\View\Helper;
 
 use Ark\Ark as ArkArk;
 use Ark\ArkManager;
+use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Traversable;
-use Laminas\View\Helper\AbstractHelper;
 
 /**
  * Helper to get or create ark.

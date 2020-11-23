@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace ArkTest\Controller;
 
-use OmekaTestHelper\Controller\OmekaControllerTestCase;
 use ArkTest\Name\Plugin\Noid;
+use OmekaTestHelper\Controller\OmekaControllerTestCase;
 
 abstract class ArkControllerTestCase extends OmekaControllerTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

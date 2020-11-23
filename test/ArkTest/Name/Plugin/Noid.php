@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace ArkTest\Name\Plugin;
 
@@ -6,10 +6,10 @@ class Noid extends \Ark\Name\Plugin\Noid
 {
     protected function getDatabaseDir()
     {
-        return dirname(dirname(__DIR__)) . '/../files/arkandnoid';
+        return dirname(__DIR__, 2) . '/../files/arkandnoid';
     }
 
-    public function deleteDatabase()
+    public function deleteDatabase(): void
     {
         if ($this->isDatabaseCreated()) {
             $this->rrmdir($this->getDatabaseDir());

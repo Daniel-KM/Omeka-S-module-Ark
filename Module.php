@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark;
 
@@ -9,14 +9,14 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
-use Omeka\Entity\Resource;
-use Omeka\Entity\Value;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
+use Omeka\Entity\Resource;
+use Omeka\Entity\Value;
 
 /**
  * Ark.
@@ -31,7 +31,7 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
-    public function init(ModuleManager $moduleManager)
+    public function init(ModuleManager $moduleManager): void
     {
         require_once __DIR__ . '/vendor/autoload.php';
 
@@ -54,7 +54,7 @@ class Module extends AbstractModule
         );
     }
 
-    public function onBootstrap(MvcEvent $event)
+    public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
         $this->addAclRules();
@@ -63,7 +63,7 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $view)
     {
         $html = '<p class="explanation">'
-            . $view->translate('Ark allows to create and manage unique, universel and persistent ark identifiers.') //  @translate
+            . $view->translate('Ark allows to create and manage unique, universel and persistent ark identifiers.') //  @translate
             . '</p><p>'
             . sprintf($view->translate('See %sthe official help%s for more informations.'), // @translate
                 '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
@@ -161,7 +161,7 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for this module.
      */
-    protected function addAclRules()
+    protected function addAclRules(): void
     {
         // Allow all access to the controller, because there will be a forward.
         $services = $this->getServiceLocator();
@@ -170,7 +170,7 @@ class Module extends AbstractModule
         $acl->allow($roles, [Controller\ArkController::class]);
     }
 
-    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
@@ -207,7 +207,7 @@ class Module extends AbstractModule
     /**
      * @param Event $event
      */
-    public function handleSaveResource(Event $event)
+    public function handleSaveResource(Event $event): void
     {
         /** @var \Omeka\Entity\Resource $resource */
         $resource = $event->getParam('response')->getContent();
@@ -226,7 +226,7 @@ class Module extends AbstractModule
      *
      * @param Resource $resource
      */
-    protected function addArk(Resource $resource)
+    protected function addArk(Resource $resource): void
     {
         $services = $this->getServiceLocator();
         $entityManager = $services->get('Omeka\EntityManager');

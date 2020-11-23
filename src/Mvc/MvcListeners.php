@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\Mvc;
 
@@ -15,7 +15,7 @@ use Laminas\Router\Http\RouteMatch;
  */
 class MvcListeners extends AbstractListenerAggregate
 {
-    public function attach(EventManagerInterface $events, $priority = 1)
+    public function attach(EventManagerInterface $events, $priority = 1): void
     {
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_ROUTE,
@@ -42,7 +42,7 @@ class MvcListeners extends AbstractListenerAggregate
             return $this->triggerDispatchError($event);
         }
 
-        $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+        $uri = $_SERVER['REQUEST_URI'] ?? null;
         if (isset($uri) && 0 == substr_compare($uri, '?', -1)) {
             return;
         }

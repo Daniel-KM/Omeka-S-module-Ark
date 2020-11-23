@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace ArkTest\Controller;
 
@@ -6,7 +6,7 @@ class IndexControllerTest extends ArkControllerTestCase
 {
     protected $site;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -28,12 +28,12 @@ class IndexControllerTest extends ArkControllerTestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->api()->delete('sites', $this->site->id());
     }
 
-    public function testArkUrlShouldDisplayCorrectItem()
+    public function testArkUrlShouldDisplayCorrectItem(): void
     {
         $item = $this->api()->create('items', [])->getContent();
 
@@ -50,7 +50,7 @@ class IndexControllerTest extends ArkControllerTestCase
         $this->assertQueryContentRegex('.property .value', '#ark:/99999/0n#');
     }
 
-    public function testArkUrlShouldDisplayCorrectItemMetadata()
+    public function testArkUrlShouldDisplayCorrectItemMetadata(): void
     {
         $item = $this->api()->create('items', [])->getContent();
 

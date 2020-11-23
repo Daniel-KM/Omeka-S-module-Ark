@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Php Noid format for Ark name.
  */
@@ -6,10 +6,10 @@ namespace Ark\Name\Plugin;
 
 // Use Noid via composer.
 
+use Laminas\Log\Logger;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 use Omeka\Stdlib\Message;
-use Laminas\Log\Logger;
 
 class Noid implements PluginInterface
 {

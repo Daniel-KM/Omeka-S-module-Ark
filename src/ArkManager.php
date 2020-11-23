@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark;
 
 use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
 use Doctrine\DBAL\Connection;
+use Laminas\Log\Logger;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Stdlib\Message;
-use Laminas\Log\Logger;
 
 class ArkManager
 {
@@ -609,9 +609,8 @@ class ArkManager
             \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
             \Omeka\Entity\Resource::class => null,
         ];
-        return isset($resourceTypes[$resourceType])
-            ? $resourceTypes[$resourceType]
-            : false;
+        return $resourceTypes[$resourceType]
+            ?? false;
     }
 
     /**
@@ -628,9 +627,8 @@ class ArkManager
             \Omeka\Entity\ItemSet::class => 'item_sets',
             \Omeka\Entity\Media::class => 'media',
         ];
-        return isset($resourceClasses[$resourceClass])
-            ? $resourceClasses[$resourceClass]
-            : false;
+        return $resourceClasses[$resourceClass]
+            ?? false;
     }
 
     /**

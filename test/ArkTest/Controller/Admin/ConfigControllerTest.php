@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace ArkTest\Controller\Admin;
 
@@ -8,7 +8,7 @@ class ConfigControllerTest extends ArkControllerTestCase
 {
     protected $namePlugin;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -17,14 +17,14 @@ class ConfigControllerTest extends ArkControllerTestCase
         $this->namePlugin->deleteDatabase();
     }
 
-    public function testConfigFormShouldReturnOkStatus()
+    public function testConfigFormShouldReturnOkStatus(): void
     {
         $this->dispatch($this->moduleConfigureUrl('Ark'));
 
         $this->assertResponseStatusCode(200);
     }
 
-    public function testConfigFormSubmitShouldSaveCreateDbAndRedirect()
+    public function testConfigFormSubmitShouldSaveCreateDbAndRedirect(): void
     {
         // TODO The test failed because there is a csrf check in config form.
         $data = [
