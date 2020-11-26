@@ -30,15 +30,29 @@ return [
         'factories' => [
             'Ark\Form\ConfigForm' => Service\Form\ConfigFormFactory::class,
         ],
+        'invokables' => [
+            'Ark\Form\CreateArksForm' => Form\CreateArksForm::class,
+        ],
     ],
     'controllers' => [
         'invokables' => [
             Controller\ArkController::class => Controller\ArkController::class,
+            'Ark\Controller\Admin\Ark' => Controller\Admin\ArkController::class,
         ],
     ],
     'controller_plugins' => [
         'factories' => [
             'ark' => Service\ControllerPlugin\ArkFactory::class,
+        ],
+    ],
+    'navigation' => [
+        'AdminModule' => [
+            [
+                'label' => 'Ark',
+                'route' => 'admin/ark-admin',
+                'resource' => 'Ark\Controller\Admin\Ark',
+                'privilege' => 'index',
+            ],
         ],
     ],
     'router' => [
@@ -124,6 +138,17 @@ return [
                                         'action' => 'policy',
                                     ],
                                 ],
+                            ],
+                        ],
+                    ],
+                    'ark-admin' => [
+                        'type' => \Zend\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/ark',
+                            'defaults' => [
+                                '__NAMESPACE__' => 'Ark\Controller\Admin',
+                                'controller' => 'Ark',
+                                'action' => 'index',
                             ],
                         ],
                     ],

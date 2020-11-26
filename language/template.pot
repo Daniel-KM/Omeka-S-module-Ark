@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-01 11:09+0200\n"
+"POT-Creation-Date: 2020-09-15 13:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -138,6 +138,10 @@ msgstr ""
 msgid "Main policy"
 msgstr ""
 
+#: src/Form/CreateArksForm.php:16
+msgid "Create ARKs"
+msgstr ""
+
 #: src/Name/Plugin/Noid.php:53
 #, php-format
 msgid "Cannot open database: %s"
@@ -164,6 +168,11 @@ msgstr ""
 
 #: src/Name/Plugin/Noid.php:216
 msgid "[Unknown user]"
+msgstr ""
+
+#: src/Controller/Admin/ArkController.php:29
+#, php-format
+msgid "ARK creation started in %sjob %s%s"
 msgstr ""
 
 #: src/ArkManager.php:359
