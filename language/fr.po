@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-01 00:00+0000\n"
+"POT-Creation-Date: 2020-09-15 13:07+0200\n"
 "PO-Revision-Date: 2020-06-01 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
@@ -154,6 +154,10 @@ msgstr "Déclaration de politique"
 msgid "Main policy"
 msgstr "Politique générale"
 
+#: src/Form/CreateArksForm.php:16
+msgid "Create ARKs"
+msgstr "Créer les ARKs"
+
 #: src/Name/Plugin/Noid.php:53
 #, php-format
 msgid "Cannot open database: %s"
@@ -181,6 +185,11 @@ msgstr "Impossible de récupérer les informations de la base : %s"
 #: src/Name/Plugin/Noid.php:216
 msgid "[Unknown user]"
 msgstr "[Utilisateur inconnu]"
+
+#: src/Controller/Admin/ArkController.php:29
+#, php-format
+msgid "ARK creation started in %sjob %s%s"
+msgstr "La création des ARK a commencé dans la %stâche %s%s"
 
 #: src/ArkManager.php:359
 #, php-format
