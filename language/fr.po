@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-15 13:07+0200\n"
-"PO-Revision-Date: 2020-06-01 00:00+0000\n"
+"POT-Creation-Date: 2021-03-01 00:00+0000\n"
+"PO-Revision-Date: 2021-03-01 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: Module.php:66
@@ -60,28 +60,36 @@ msgstr ""
 msgid "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s."
 msgstr "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Modèle: %4$s."
 
-#: src/Generic/AbstractModule.php:598
+#: src/Generic/AbstractModule.php:66
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr "Ce module requiert le module \"%s\"."
 
-#: src/Generic/AbstractModule.php:618
+#: src/Generic/AbstractModule.php:73
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr "Ce module requiert les modules \"%s\"."
 
-#: src/Generic/AbstractModule.php:686
+#: src/Generic/AbstractModule.php:80
+msgid "This module has resources that connot be installed."
+msgstr "Ce module a des ressources qui ne peuvent pas être installées."
+
+#: src/Generic/AbstractModule.php:707
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
 "unavailable."
 msgstr ""
-"Le module %s\" a été automatiquement désactivé car ses dépendances ne sont "
+"Le module \"%s\" a été automatiquement désactivé car ses dépendances ne sont "
 "plus disponibles."
 
 #: view/ark/index/policy-html.phtml:9
 msgid "Ark Policy Statement"
 msgstr "Déclaration de politique Ark"
+
+#: src/Form/CreateArksForm.php:16
+msgid "Create ARKs"
+msgstr "Créer les ARKs"
 
 #: src/Form/ConfigForm.php:26
 msgid "NAAN"
@@ -153,10 +161,6 @@ msgstr "Déclaration de politique"
 #: src/Form/ConfigForm.php:133
 msgid "Main policy"
 msgstr "Politique générale"
-
-#: src/Form/CreateArksForm.php:16
-msgid "Create ARKs"
-msgstr "Créer les ARKs"
 
 #: src/Name/Plugin/Noid.php:53
 #, php-format

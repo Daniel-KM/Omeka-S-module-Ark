@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-15 13:07+0200\n"
+"POT-Creation-Date: 2021-03-01 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,17 +52,21 @@ msgstr ""
 msgid "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:598
+#: src/Generic/AbstractModule.php:66
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:618
+#: src/Generic/AbstractModule.php:73
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:686
+#: src/Generic/AbstractModule.php:80
+msgid "This module has resources that connot be installed."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:707
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -71,6 +75,10 @@ msgstr ""
 
 #: view/ark/index/policy-html.phtml:9
 msgid "Ark Policy Statement"
+msgstr ""
+
+#: src/Form/CreateArksForm.php:16
+msgid "Create ARKs"
 msgstr ""
 
 #: src/Form/ConfigForm.php:26
@@ -136,10 +144,6 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:133
 msgid "Main policy"
-msgstr ""
-
-#: src/Form/CreateArksForm.php:16
-msgid "Create ARKs"
 msgstr ""
 
 #: src/Name/Plugin/Noid.php:53
