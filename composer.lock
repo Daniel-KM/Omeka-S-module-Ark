@@ -4,14 +4,14 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3a80e295bf91c748a49b433f085b4040",
+    "content-hash": "765a81ca4e052180e6aade36d6c474a0",
     "packages": [
         {
-            "name": "Daniel-KM/Noid4Php",
-            "version": "1.1.0",
+            "name": "daniel-km/noid4php",
+            "version": "1.1.1",
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/Daniel-KM/Noid4Php/archive/1.1.0.zip"
+                "url": "https://gitlab.com/Daniel-KM/Noid4Php/-/archive/master/Noid4Php-master.zip"
             },
             "type": "library",
             "autoload": {
@@ -39,6 +39,7 @@
             "require": {
                 "php": ">=5.5.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -55,6 +56,10 @@
                 "omeka",
                 "test"
             ],
+            "support": {
+                "issues": "https://github.com/biblibre/omeka-s-test-helper/issues",
+                "source": "https://github.com/biblibre/omeka-s-test-helper/tree/master"
+            },
             "time": "2016-09-22T16:40:26+00:00"
         }
     ],
@@ -67,5 +72,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
