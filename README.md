@@ -166,7 +166,7 @@ not contain the dependency), and uncompress it in the `modules` directory.
 If the module was installed from the source, rename the name of the folder of
 the module to `Ark`, go to the root module, and run:
 
-```
+```sh
 composer install --no-dev
 ```
 
@@ -237,9 +237,10 @@ the consistency and the sustainability of the archive.
 TODO
 ----
 
-- Integrate the script to create arks from Omeka 2.
-- Manage the policy statement by item.
-- Let the choice to link ark to the file or to the record.
+- [ ] Integrate the script to create arks from Omeka 2.
+- [ ] Manage the policy statement by item.
+- [ ] Let the choice to link ark to the file or to the record.
+- [ ] Integrate the new composer package to create noids with xml or sql.
 
 
 Warning
@@ -286,7 +287,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2020 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2015-2021 (see [Daniel-KM] on GitLab)
 * Copyright BibLibre, 2016-2017
 
 First version of this plugin has been built for [Mines ParisTech]. The upgrade
