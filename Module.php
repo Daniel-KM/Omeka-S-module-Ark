@@ -167,7 +167,15 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $acl = $services->get('Omeka\Acl');
         $roles = $acl->getRoles();
-        $acl->allow($roles, [Controller\ArkController::class]);
+        $acl
+            ->allow(
+                null,
+                [Controller\ArkController::class]
+            )
+            ->allow(
+                $roles,
+                ['Ark\Controller\Admin\Ark']
+            );
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
