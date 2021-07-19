@@ -60,22 +60,12 @@ class ArkManager
 
     /**
      * @todo Remove all code related to missing naan (use 99999 for test).
-     *
-     * @param string $naan
-     * @param string $namePluginName
-     * @param string $qualifierPluginName
-     * @param bool $qualifierStatic
-     * @param Api $api
-     * @param Connection $connection
-     * @param Logger $logger
-     * @param NamePlugins $namePlugins
-     * @param QualifierPlugins $qualifierPlugins
      */
     public function __construct(
-        $naan,
-        $namePluginName,
-        $qualifierPluginName,
-        $qualifierStatic,
+        ?string $naan,
+        ?string $namePluginName,
+        ?string $qualifierPluginName,
+        bool $qualifierStatic,
         Api $api,
         Connection $connection,
         Logger $logger,
@@ -97,9 +87,8 @@ class ArkManager
      * Find the resource from an ark. The qualifier can be dynamic or saved.
      *
      * @param string|array $ark
-     * @return AbstractResourceEntityRepresentation|null
      */
-    public function find($ark)
+    public function find($ark): ?AbstractResourceEntityRepresentation
     {
         if (empty($ark)) {
             return null;
@@ -197,18 +186,20 @@ class ArkManager
                 ? $resources[0]
                 : $resources[1];
             $resourceType = $this->resourceType($resource['resource_type']);
+            $resourceId = (int) $resource['resource_id'];
             $resource = $resourceType
-                ? $this->api->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent()
+                ? $this->api->searchOne($resourceType, ['id' => $resourceId])->getContent()
                 : null;
         } else {
             $resource = $resources[0];
+            $resourceId = (int) $resource['resource_id'];
             if ($hasQualifier
-                    && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resource['resource_id'], $qualifier)
+                    && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
             ) {
                 $resource = $qualifierResource;
             } elseif ($resourceType = $this->resourceType($resource['resource_type'])) {
                 $resource = $this->api
-                    ->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent();
+                    ->searchOne($resourceType, ['id' => $resourceId])->getContent();
             } else {
                 $resource = null;
             }
@@ -219,11 +210,8 @@ class ArkManager
 
     /**
      * Return the ark of a resource, if any.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return Ark|null
      */
-    public function getArk(AbstractResourceEntityRepresentation $resource)
+    public function getArk(AbstractResourceEntityRepresentation $resource): ?Ark
     {
         $ark = null;
         $identifiers = $resource->value('dcterms:identifier', ['type' => 'literal', 'all' => true, 'default' => []]);
@@ -273,11 +261,9 @@ class ArkManager
     /**
      * Return the ark of a resource via its id, if any.
      *
-     * @param int $resourceId
      * @param string $resourceType "items", "item_sets" or "media" or variants.
-     * @return Ark|null
      */
-    public function getArkFromResourceId($resourceId, $resourceType = null)
+    public function getArkFromResourceId($resourceId, ?string $resourceType = null): Ark
     {
         $resourceId = (int) $resourceId;
         if (empty($resourceId)) {
@@ -347,11 +333,8 @@ class ArkManager
 
     /**
      * Create the ark for a resource.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string|null
      */
-    public function createName(AbstractResourceEntityRepresentation $resource)
+    public function createName(AbstractResourceEntityRepresentation $resource): ?string
     {
         if ($resource->resourceName() === 'media') {
             return $this->createNameQualifier($resource);
@@ -404,7 +387,7 @@ class ArkManager
         return $ark;
     }
 
-    protected function createNameQualifier(MediaRepresentation $media)
+    protected function createNameQualifier(MediaRepresentation $media): ?string
     {
         // Check if the item has an ark first: avoid to set an ark separately
         // for a media.
@@ -454,46 +437,32 @@ class ArkManager
 
     /**
      * Return the qualifier part of an ark via the resource id.
-     *
-     * @param int $resourceId
-     * @return string
      */
-    protected function getQualifierFromResourceId($resourceId)
+    protected function getQualifierFromResourceId(int $resourceId): ?string
     {
         return $this->getQualifierPlugin()->createFromResourceId($resourceId);
     }
 
     /**
      * Get resource from resource qualifier.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @param string $qualifier
-     * @return AbstractResourceEntityRepresentation
      */
-    protected function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
+    protected function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, string $qualifier): ?AbstractResourceEntityRepresentation
     {
         return $this->getQualifierPlugin()->getResourceFromQualifier($resource, $qualifier);
     }
 
     /**
      * Get resource from qualifier.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @param string $qualifier
-     * @return AbstractResourceEntityRepresentation
      */
-    protected function getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
+    protected function getResourceFromResourceIdAndQualifier(int $resourceId, string $qualifier): ?AbstractResourceEntityRepresentation
     {
         return $this->getQualifierPlugin()->getResourceFromResourceIdAndQualifier($resourceId, $qualifier);
     }
 
     /**
      * Check if a full ark is a true ark.
-     *
-     * @param string $ark
-     * @return bool
      */
-    protected function checkFullArk($ark)
+    protected function checkFullArk(string $ark): bool
     {
         $ark = trim($ark);
         $result = explode('/', $ark);
@@ -525,20 +494,16 @@ class ArkManager
      * Check if an ark exists in the database.
      *
      * @param string $ark The full well formed ark, with "ark:/"
-     * @return bool
      */
-    protected function arkExists($ark)
+    protected function arkExists(string $ark): bool
     {
         return (bool) $this->findStatic($ark);
     }
 
     /**
      * Find the resource from a static ark.
-     *
-     * @param string $ark
-     * @return AbstractResourceEntityRepresentation|null
      */
-    protected function findStatic($ark)
+    protected function findStatic(string $ark): ?AbstractResourceEntityRepresentation
     {
         if (empty($ark)) {
             return null;
@@ -588,11 +553,8 @@ class ArkManager
 
     /**
      * Return the qualifier part of an ark.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string
      */
-    protected function getQualifier(AbstractResourceEntityRepresentation $resource)
+    protected function getQualifier(AbstractResourceEntityRepresentation $resource): string
     {
         return $this->getQualifierPlugin()->create($resource);
     }
@@ -600,10 +562,9 @@ class ArkManager
     /**
      * Get the resource class from the resource type.
      *
-     * @param string|null  $resourceType
      * @return string|null|bool Null if any resources. False if not managed.
      */
-    protected function resourceClass($resourceType)
+    protected function resourceClass(?string $resourceType)
     {
         $resourceTypes = [
             null => null,
@@ -620,17 +581,15 @@ class ArkManager
             \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
             \Omeka\Entity\Resource::class => null,
         ];
-        return $resourceTypes[$resourceType]
-            ?? false;
+        return $resourceTypes[$resourceType] ?? false;
     }
 
     /**
      * Get the resource type from the resource class.
      *
-     * @param string $resourceClass
      * @return string|null|bool Null if any resources. False if not managed.
      */
-    protected function resourceType($resourceClass)
+    protected function resourceType(?string $resourceClass)
     {
         $resourceClasses = [
             null => null,
@@ -638,22 +597,15 @@ class ArkManager
             \Omeka\Entity\ItemSet::class => 'item_sets',
             \Omeka\Entity\Media::class => 'media',
         ];
-        return $resourceClasses[$resourceClass]
-            ?? false;
+        return $resourceClasses[$resourceClass] ?? false;
     }
 
-    /**
-     * @return \Ark\Name\Plugin\PluginInterface
-     */
-    public function getArkNamePlugin()
+    public function getArkNamePlugin(): \Ark\Name\Plugin\PluginInterface
     {
         return $this->namePlugins->get($this->namePluginName);
     }
 
-    /**
-     * @return \Ark\Qualifier\Plugin\PluginInterface
-     */
-    public function getQualifierPlugin()
+    public function getQualifierPlugin(): \Ark\Qualifier\Plugin\PluginInterface
     {
         return $this->qualifierPlugins->get($this->qualifierPluginName);
     }
