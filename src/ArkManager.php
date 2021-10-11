@@ -151,7 +151,10 @@ class ArkManager
             // Property 10 = dcterms:identifier.
             ->where('value.property_id = 10')
             ->andWhere('value.type = "literal"')
-            ->groupBy(['value.resource_id', 'resource.resource_type'])
+            ->groupBy([
+                'value.resource_id',
+                'resource.resource_type',
+            ])
             ->addOrderBy('value.resource_id', 'ASC')
             ->addOrderBy('value.id', 'ASC');
         if ($hasQualifier) {
@@ -535,7 +538,11 @@ class ArkManager
             ->andWhere('value.type = "literal"')
             ->andWhere('value.value = :value')
             ->setParameter('value', $ark)
-            ->groupBy(['value.resource_id', 'resource.resource_type', 'value.id'])
+            ->groupBy([
+                'value.resource_id',
+                'resource.resource_type',
+                'value.id',
+            ])
             ->addOrderBy('value.resource_id', 'ASC')
             ->addOrderBy('value.id', 'ASC')
             // Only one identifier by resource.
