@@ -192,9 +192,11 @@ class ArkManager
                 : null;
         } else {
             $resource = $resources[0];
-            $resourceId = (int) $resource['resource_id'];
-            if ($hasQualifier
-                    && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
+            $resourceId = empty($resource['resource_id']) ? 0 : (int) $resource['resource_id'];
+            if (!$resourceId) {
+                $resource = null;
+            } elseif ($hasQualifier
+                && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
             ) {
                 $resource = $qualifierResource;
             } elseif ($resourceType = $this->resourceType($resource['resource_type'])) {
