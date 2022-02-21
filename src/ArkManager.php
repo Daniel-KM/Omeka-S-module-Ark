@@ -216,8 +216,12 @@ class ArkManager
     /**
      * Return the ark of a resource, if any.
      */
-    public function getArk(AbstractResourceEntityRepresentation $resource): ?Ark
+    public function getArk(?AbstractResourceEntityRepresentation $resource): ?Ark
     {
+        if (!$resource) {
+            return null;
+        }
+
         $ark = null;
         $identifiers = $resource->value('dcterms:identifier', ['type' => 'literal', 'all' => true, 'default' => []]);
         $protocol = 'ark:';
