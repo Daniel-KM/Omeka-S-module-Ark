@@ -111,7 +111,7 @@ class Position implements PluginInterface
         $stmt->bindValue('item_id', $resourceId);
         $stmt->bindValue('position', $position);
         $stmt->execute();
-        $id = $stmt->fetchColumn();
+        $id = $stmt->fetchOne();
 
         if (!$id) {
             return null;

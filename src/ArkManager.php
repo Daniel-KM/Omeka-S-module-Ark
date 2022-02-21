@@ -176,8 +176,7 @@ class ArkManager
                 ->setMaxResults(1);
         }
 
-        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
-        $resources = $stmt->fetchAll();
+        $resources = $this->connection->executeQuery($qb, $qb->getParameters())->fetchAll();
 
         if (empty($resources)) {
             return null;
@@ -326,8 +325,7 @@ class ArkManager
             // Only one identifier by resource.
             ->setMaxResults(1);
 
-        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
-        $ark = $stmt->fetchColumn();
+        $ark = $this->connection->executeQuery($qb, $qb->getParameters())->fetchOne();
 
         if ($ark) {
             $ark = new Ark($this->naan, substr($ark, strlen($base)));
@@ -551,8 +549,7 @@ class ArkManager
             ->addOrderBy('value.id', 'ASC')
             // Only one identifier by resource.
             ->setMaxResults(1);
-        $stmt = $this->connection->executeQuery($qb, $qb->getParameters());
-        $resource = $stmt->fetch();
+        $resource = $this->connection->executeQuery($qb, $qb->getParameters())->fetchAssociative();
 
         if (empty($resource)) {
             return null;
