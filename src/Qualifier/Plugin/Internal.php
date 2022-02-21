@@ -23,18 +23,18 @@ class Internal implements PluginInterface
         $this->api = $api;
     }
 
-    public function create(AbstractResourceEntityRepresentation $resource)
+    public function create(AbstractResourceEntityRepresentation $resource): ?string
     {
-        return $resource->id();
+        return (string) $resource->id();
     }
 
-    public function createFromResourceId($resourceId)
+    public function createFromResourceId($resourceId): ?string
     {
         $resourceId = (int) $resourceId;
-        return $resourceId ? (string) $resourceId : '';
+        return $resourceId ? (string) $resourceId : null;
     }
 
-    public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
+    public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, string $qualifier): ?AbstractResourceEntityRepresentation
     {
         if ($resource->resourceName() !== 'items') {
             return null;
@@ -55,7 +55,7 @@ class Internal implements PluginInterface
         return $media ? reset($media) : null;
     }
 
-    public function getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
+    public function getResourceFromResourceIdAndQualifier($resourceId, string $qualifier): ?AbstractResourceEntityRepresentation
     {
         $resourceId = (int) $resourceId;
         if (empty($resourceId)) {

@@ -563,7 +563,7 @@ class ArkManager
     /**
      * Return the qualifier part of an ark.
      */
-    protected function getQualifier(AbstractResourceEntityRepresentation $resource): string
+    protected function getQualifier(AbstractResourceEntityRepresentation $resource): ?string
     {
         $result = $this->getQualifierPlugin()->create($resource);
         return is_null($result) ? null : (string) $result;

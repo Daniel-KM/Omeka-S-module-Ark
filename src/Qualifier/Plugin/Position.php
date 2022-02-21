@@ -46,7 +46,7 @@ class Position implements PluginInterface
         $this->entityManager = $entityManager;
     }
 
-    public function create(AbstractResourceEntityRepresentation $resource)
+    public function create(AbstractResourceEntityRepresentation $resource): ?string
     {
         if ($resource->resourceName() !== 'media') {
             return null;
@@ -78,7 +78,7 @@ class Position implements PluginInterface
         return sprintf($this->format, $positionResource);
     }
 
-    public function createFromResourceId($resourceId)
+    public function createFromResourceId($resourceId): ?string
     {
         try {
             $resource = $this->api->read('media', ['id' => $resourceId])->getContent();
@@ -88,7 +88,7 @@ class Position implements PluginInterface
         }
     }
 
-    public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, $qualifier)
+    public function getResourceFromQualifier(AbstractResourceEntityRepresentation $resource, string $qualifier): ?AbstractResourceEntityRepresentation
     {
         if ($resource->resourceName() !== 'items') {
             return null;
@@ -96,7 +96,7 @@ class Position implements PluginInterface
         return $this->getResourceFromResourceIdAndQualifier($resource->id(), $qualifier);
     }
 
-    public function getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
+    public function getResourceFromResourceIdAndQualifier($resourceId, string $qualifier): ?AbstractResourceEntityRepresentation
     {
         $resourceId = (int) $resourceId;
         if (empty($resourceId)) {
