@@ -40,7 +40,7 @@ class Position implements PluginInterface
      */
     public function __construct($format, Logger $logger, ApiManager $api, EntityManager $entityManager)
     {
-        $this->format = mb_strlen($format) ? $format : 'p%d';
+        $this->format = mb_strlen((string) $format) ? $format : 'p%d';
         $this->logger = $logger;
         $this->api = $api;
         $this->entityManager = $entityManager;

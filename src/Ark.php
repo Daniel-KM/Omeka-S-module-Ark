@@ -28,7 +28,7 @@ class Ark
     {
         $this->naan = $naan;
         $this->name = $name;
-        $this->qualifier = $qualifier;
+        $this->qualifier = is_null($qualifier) ? null : (string) $qualifier;
     }
 
     /**
@@ -73,7 +73,7 @@ class Ark
      */
     public function setQualifier($qualifier)
     {
-        $this->qualifier = $qualifier;
+        $this->qualifier = is_null($qualifier) ? null : (string) $qualifier;
         return $this;
     }
 
