@@ -287,7 +287,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2022 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2015-2023 (see [Daniel-KM] on GitLab)
 * Copyright BibLibre, 2016-2017
 
 First version of this plugin has been built for [Mines ParisTech]. The upgrade

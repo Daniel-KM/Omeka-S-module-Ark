@@ -23,7 +23,7 @@ use Omeka\Entity\Value;
  *
  * Creates and manages unique, universel and persistent ark identifiers.
  *
- * @copyright Daniel Berthereau, 2015-2018
+ * @copyright Daniel Berthereau, 2015-2023
  * @copyright biblibre, 2016-2017
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
