@@ -139,13 +139,13 @@ class ArkManager
         // The resource adapter does not implement the search operation for now.
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
+            ->select(
                 'value.value',
                 'MIN(value.resource_id)',
                 'resource.resource_type',
                 // Only needed to support group by on mysql.
-                'value.id',
-            ])
+                'value.id'
+            )
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
             // Property 10 = dcterms:identifier.
@@ -527,12 +527,12 @@ class ArkManager
         // The resource adapter does not implement the search operation for now.
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
+            ->select(
                 'value.resource_id',
                 'resource.resource_type',
                 // Only needed to support group by on mysql.
-                'value.id',
-            ])
+                'value.id'
+            )
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
             // Property 10 = dcterms:identifier.
