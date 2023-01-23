@@ -141,7 +141,7 @@ class ArkManager
         $qb
             ->select(
                 'value.value',
-                'MIN(value.resource_id)',
+                'value.resource_id',
                 'resource.resource_type',
                 // Only needed to support group by on mysql.
                 'value.id'
