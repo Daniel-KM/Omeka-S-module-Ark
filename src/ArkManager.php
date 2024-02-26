@@ -166,8 +166,6 @@ class ArkManager
                 'value.value',
                 'value.resource_id',
                 'resource.resource_type',
-                // Only needed to support group by on mysql.
-                'value.id'
             )
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
@@ -177,6 +175,8 @@ class ArkManager
             ->groupBy([
                 'value.resource_id',
                 'resource.resource_type',
+                // Only needed to support order by on mysql.
+                'value.id',
             ])
             ->addOrderBy('value.resource_id', 'ASC')
             ->addOrderBy('value.id', 'ASC');
@@ -350,7 +350,11 @@ class ArkManager
         $qb
             ->andWhere('value.value LIKE :value')
             ->setParameter('value', $base . '%')
-            ->groupBy(['value.resource_id'])
+            ->groupBy([
+                'value.resource_id',
+                // Only needed to support order by on mysql.
+                'value.id',
+            ])
             ->addOrderBy('value.resource_id', 'ASC')
             ->addOrderBy('value.id', 'ASC')
             // Only one identifier by resource.
@@ -561,8 +565,6 @@ class ArkManager
             ->select(
                 'value.resource_id',
                 'resource.resource_type',
-                // Only needed to support group by on mysql.
-                'value.id'
             )
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
@@ -574,6 +576,7 @@ class ArkManager
             ->groupBy([
                 'value.resource_id',
                 'resource.resource_type',
+                // Only needed to support group by on mysql.
                 'value.id',
             ])
             ->addOrderBy('value.resource_id', 'ASC')
