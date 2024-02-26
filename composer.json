@@ -2,7 +2,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "daniel-km/noid4php": "^1.1.0"
+        "daniel-km/noid4php": "1.1.2"
     },
     "require-dev": {
         "biblibre/omeka-s-test-helper": "dev-master"
@@ -12,7 +12,7 @@
             "type": "package",
             "package": {
                 "name": "daniel-km/noid4php",
-                "version": "1.1.1",
+                "version": "1.1.2",
                 "dist": {
                     "url": "https://gitlab.com/Daniel-KM/Noid4Php/-/archive/master/Noid4Php-master.zip",
                     "type": "zip"

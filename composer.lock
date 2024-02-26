@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "765a81ca4e052180e6aade36d6c474a0",
+    "content-hash": "b093632e741909cb66cdd39be2bd5a32",
     "packages": [
         {
             "name": "daniel-km/noid4php",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "dist": {
                 "type": "zip",
                 "url": "https://gitlab.com/Daniel-KM/Noid4Php/-/archive/master/Noid4Php-master.zip"
