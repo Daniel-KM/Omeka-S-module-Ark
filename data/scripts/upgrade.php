@@ -46,3 +46,13 @@ if (version_compare($oldVersion, '3.5.7', '<')) {
     $settings->set('ark_qualifier_position_format', '');
     $settings->set('ark_qualifier_static', false);
 }
+
+if (version_compare($oldVersion, '3.5.14', '<')) {
+    $settings->set('ark_property', 'dcterms:identifier');
+    $message = new PsrMessage(
+        'It is now possible to define a specific property to store arks. Warning: if you change it, old arks won’t be moved (use module {link}Bulk Edit{link_end} for that).', // @translate
+        ['link' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-BulkEdit" target="_blank" rel="noopener">', 'link_end' => '</a>']
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addSuccess($message);
+}
