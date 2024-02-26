@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-01 00:00+0000\n"
+"POT-Creation-Date: 2024-02-26 00:00+0000"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,115 +17,147 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Module.php:66
+#: data/scripts/upgrade.php:31 Module.php:67
+#, php-format
+msgid "The module %1$s should be upgraded to version %2$s or later."
+msgstr ""
+
+#: Module.php:76
+msgid ""
+"Noid requires the extension \"Database (dbm-style) Abstraction Layer\" (dba)."
+msgstr ""
+
+#: Module.php:83
+msgid "Noid requires BerkeleyDB: not installed."
+msgstr ""
+
+#: Module.php:97
 msgid ""
 "Ark allows to create and manage unique, universel and persistent ark "
 "identifiers."
 msgstr ""
 
-#: Module.php:68
+#: Module.php:100
 #, php-format
-msgid "See %sthe official help%s for more informations."
+msgid "See %1$sreadme%3$s or %2$sthe original help%3$s for more informations."
 msgstr ""
 
-#: Module.php:90
+#: Module.php:122
 msgid ""
 "NOID database is already created, which means some settings are not "
 "modifiable."
 msgstr ""
 
-#: Module.php:92 Module.php:100
+#: Module.php:124 Module.php:132
 #, php-format
 msgid ""
 "To be able to modify them, you have to manually remove the database (located "
 "in %s)."
 msgstr ""
 
-#: Module.php:97
+#: Module.php:129
 msgid ""
 "NOID database is already created, but the settings are not the same than in "
 "the Omeka database."
 msgstr ""
 
-#: Module.php:104
+#: Module.php:136
 #, php-format
 msgid "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s."
-msgstr ""
-
-#: src/Generic/AbstractModule.php:66
-#, php-format
-msgid "This module requires the module \"%s\"."
-msgstr ""
-
-#: src/Generic/AbstractModule.php:73
-#, php-format
-msgid "This module requires modules \"%s\"."
-msgstr ""
-
-#: src/Generic/AbstractModule.php:80
-msgid "This module has resources that connot be installed."
-msgstr ""
-
-#: src/Generic/AbstractModule.php:707
-#, php-format
-msgid ""
-"The module \"%s\" was automatically deactivated because the dependencies are "
-"unavailable."
 msgstr ""
 
 #: view/ark/index/policy-html.phtml:9
 msgid "Ark Policy Statement"
 msgstr ""
 
-#: src/Form/CreateArksForm.php:16
-msgid "Create ARKs"
+#: data/scripts/upgrade.php:53
+msgid ""
+"It is now possible to define a specific property to store arks. Warning: if "
+"you change it, old arks won’t be moved (use module {link}Bulk Edit{link_end} "
+"for that)."
 msgstr ""
 
-#: src/Form/ConfigForm.php:26
+#: src/Name/Plugin/Noid.php:51
+#, php-format
+msgid "Cannot open database: %s"
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:52
+msgid "No database"
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:75
+#, php-format
+msgid "Cannot create an Ark for %1$s #%2$d: %3$s"
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:87
+#, php-format
+msgid "Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s"
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:170
+#, php-format
+msgid "Cannot get database info: %s"
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:214
+msgid "[Unknown user]"
+msgstr ""
+
+#: src/Job/CreateArks.php:70
+msgid "{resource} #{resource_id}: Failed to create ARK identifier."
+msgstr ""
+
+#: src/Job/CreateArks.php:85
+msgid "{resource} #{resource_id}: Created ARK identifier {identifier}."
+msgstr ""
+
+#: src/Form/ConfigForm.php:27
 msgid "NAAN"
 msgstr ""
 
-#: src/Form/ConfigForm.php:37
+#: src/Form/ConfigForm.php:38
 msgid "NAA"
 msgstr ""
 
-#: src/Form/ConfigForm.php:48
+#: src/Form/ConfigForm.php:49
 msgid "Sub NAA"
 msgstr ""
 
-#: src/Form/ConfigForm.php:59
+#: src/Form/ConfigForm.php:60
 msgid "Name processor for resource"
 msgstr ""
 
-#: src/Form/ConfigForm.php:61
+#: src/Form/ConfigForm.php:62
 msgid "Internal resource id"
 msgstr ""
 
-#: src/Form/ConfigForm.php:62
+#: src/Form/ConfigForm.php:63
 msgid "Noid"
 msgstr ""
 
-#: src/Form/ConfigForm.php:74
+#: src/Form/ConfigForm.php:75
 msgid "Noid Template"
 msgstr ""
 
-#: src/Form/ConfigForm.php:85
+#: src/Form/ConfigForm.php:86
 msgid "Qualifier for media"
 msgstr ""
 
-#: src/Form/ConfigForm.php:87
+#: src/Form/ConfigForm.php:88
 msgid "Internal media id"
 msgstr ""
 
-#: src/Form/ConfigForm.php:88
+#: src/Form/ConfigForm.php:89
 msgid "Position of the media"
 msgstr ""
 
-#: src/Form/ConfigForm.php:100
+#: src/Form/ConfigForm.php:101
 msgid "Format of position for qualifier"
 msgstr ""
 
-#: src/Form/ConfigForm.php:101
+#: src/Form/ConfigForm.php:102
 msgid ""
 "A \"sprintf\" string that will format the media position. It is recommended "
 "to use a format with a leading letter to avoid confusion with numeric media "
@@ -134,99 +166,86 @@ msgid ""
 "use module \"Bulk Check\" to fix positions."
 msgstr ""
 
-#: src/Form/ConfigForm.php:112
+#: src/Form/ConfigForm.php:113
 msgid "Save the ark with qualifier for media"
 msgstr ""
 
-#: src/Form/ConfigForm.php:122
+#: src/Form/ConfigForm.php:123
+msgid "Property where to store the identifier (usually dcterms:identifier)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:124
+msgid ""
+"If changed, you will need to move all existing identifiers to the new "
+"property via module Bulk Edit."
+msgstr ""
+
+#: src/Form/ConfigForm.php:136
 msgid "Policy statement"
 msgstr ""
 
-#: src/Form/ConfigForm.php:133
+#: src/Form/ConfigForm.php:147
 msgid "Main policy"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:53
-#, php-format
-msgid "Cannot open database: %s"
+#: src/Form/CreateArksForm.php:16
+msgid "Create ARKs"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:54
-msgid "No database"
-msgstr ""
-
-#: src/Name/Plugin/Noid.php:77
-#, php-format
-msgid "Cannot create an Ark for %1$s #%2$d: %3$s"
-msgstr ""
-
-#: src/Name/Plugin/Noid.php:89
-#, php-format
-msgid "Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s"
-msgstr ""
-
-#: src/Name/Plugin/Noid.php:172
-#, php-format
-msgid "Cannot get database info: %s"
-msgstr ""
-
-#: src/Name/Plugin/Noid.php:216
-msgid "[Unknown user]"
-msgstr ""
-
-#: src/Controller/Admin/ArkController.php:29
-#, php-format
-msgid "ARK creation started in %sjob %s%s"
-msgstr ""
-
-#: src/ArkManager.php:359
+#: src/ArkManager.php:386
 #, php-format
 msgid "No Ark created: check your processor \"%1$s\" [%2$s #%3$d]."
 msgstr ""
 
-#: src/ArkManager.php:369
+#: src/ArkManager.php:396
 #, php-format
 msgid ""
 "Ark \"%1$s\" is not correct: check your naan \"%2$s\", your template, and "
 "your processor [%3$s]."
 msgstr ""
 
-#: src/ArkManager.php:383
+#: src/ArkManager.php:410
 #, php-format
 msgid ""
-"The proposed ark \"%1$s\" by the processor \"%2$s\" is not unique [%3$s #"
-"%4$d]."
+"The proposed ark \"%1$s\" by the processor \"%2$s\" is not unique [%3$s "
+"#%4$d]."
 msgstr ""
 
-#: src/ArkManager.php:391
+#: src/ArkManager.php:418
 #, php-format
 msgid ""
-"Unable to create a unique ark. Check parameters of the processor \"%1$s"
-"\" [%2$s #%3$d]."
+"Unable to create a unique ark. Check parameters of the processor "
+"\"%1$s\" [%2$s #%3$d]."
 msgstr ""
 
-#: src/ArkManager.php:408
+#: src/ArkManager.php:435
 #, php-format
 msgid ""
 "No Ark qualfiier created for media #%1$d: the item #%2$d does not have an "
 "ark. Update it first."
 msgstr ""
 
-#: src/ArkManager.php:417
+#: src/ArkManager.php:444
 #, php-format
 msgid ""
-"Unable to create a qualifier for media #%1$d: option is \"dynamic qualifier"
-"\"."
+"Unable to create a qualifier for media #%1$d: option is \"dynamic "
+"qualifier\"."
 msgstr ""
 
-#: src/ArkManager.php:427
+#: src/ArkManager.php:454
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d. Check the processor \"%2$s\"."
 msgstr ""
 
-#: src/ArkManager.php:439
+#: src/ArkManager.php:466
 #, php-format
 msgid ""
 "Unable to create a unique ark. Check the processor \"%1$s\" [%2$s #%3$d]."
+msgstr ""
+
+#: src/Controller/Admin/ArkController.php:23
+msgid ""
+"ARK creation started in job {link_job}#{job_id}{link_end} ({link_log}"
+"logs{link_end})."
 msgstr ""
