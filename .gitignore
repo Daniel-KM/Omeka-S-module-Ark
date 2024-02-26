@@ -8,6 +8,7 @@
 /node_modules
 /vendor
 .sass-cache/
+/test/.phpunit.result.cache
 .bundle
 .DS_Store
 .php_cs.cache

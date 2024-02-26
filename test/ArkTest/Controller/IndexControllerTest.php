@@ -22,6 +22,10 @@ class IndexControllerTest extends ArkControllerTestCase
             'o:is_public' => '1',
         ])->getContent();
 
+        /** @var \Omeka\Settings\SiteSettings $siteSettings */
+        $siteSettings = $this->getServiceLocator()->get('Omeka\Settings\Site');
+        $siteSettings->setTargetId($this->site->id());
+
         $items = $this->api()->search('items')->getContent();
         foreach ($items as $item) {
             $this->api()->delete('items', $item->id());
@@ -38,7 +42,7 @@ class IndexControllerTest extends ArkControllerTestCase
         $item = $this->api()->create('items', [])->getContent();
 
         $ark = $item->value('dcterms:identifier')->value();
-        $this->assertSame('ark:/99999/0n', $ark);
+        $this->assertSame('ark:/99999/bapZs2', $ark);
 
         $uri = "/s/default/$ark";
         $_SERVER['REQUEST_URI'] = $uri;
@@ -47,7 +51,7 @@ class IndexControllerTest extends ArkControllerTestCase
         $this->assertResponseStatusCode(200);
         $this->assertControllerName('Omeka\Controller\Site\Item');
         $this->assertActionName('show');
-        $this->assertQueryContentRegex('.property .value', '#ark:/99999/0n#');
+        $this->assertQueryContentRegex('.property .value', '#ark:/99999/bapZs2#');
     }
 
     public function testArkUrlShouldDisplayCorrectItemMetadata(): void
@@ -55,7 +59,7 @@ class IndexControllerTest extends ArkControllerTestCase
         $item = $this->api()->create('items', [])->getContent();
 
         $ark = $item->value('dcterms:identifier')->value();
-        $this->assertSame('ark:/99999/0n', $ark);
+        $this->assertSame('ark:/99999/bapZs2', $ark);
 
         $uri = "/s/default/$ark?";
         $_SERVER['REQUEST_URI'] = $uri;

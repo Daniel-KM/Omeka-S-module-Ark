@@ -25,13 +25,14 @@ class ItemControllerTest extends ArkControllerTestCase
             'controller' => 'item',
             'action' => 'add',
         ]), 'POST', [
+            'values_json' => '{}',
             'csrf' => (new Csrf('csrf'))->getValue(),
         ]);
         $this->assertResponseStatusCode(302);
 
         $itemId = $this->getIdFromLocationHeader();
         $item = $this->api()->read('items', $itemId)->getContent();
-        $this->assertSame('ark:/99999/0n', $item->value('dcterms:identifier')->value());
+        $this->assertSame('ark:/99999/bapZs2', $item->value('dcterms:identifier')->value());
     }
 
     protected function getIdFromLocationHeader()

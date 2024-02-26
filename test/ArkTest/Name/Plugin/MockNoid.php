@@ -2,11 +2,14 @@
 
 namespace ArkTest\Name\Plugin;
 
-class Noid extends \Ark\Name\Plugin\Noid
+class MockNoid extends \Ark\Name\Plugin\Noid
 {
+    /**
+     * Override the default path to the original ark database.
+     */
     protected function getDatabaseDir()
     {
-        return dirname(__DIR__, 2) . '/../files/arkandnoid';
+        return dirname(__DIR__, 3) . '/files/arkandnoid';
     }
 
     public function deleteDatabase(): void
