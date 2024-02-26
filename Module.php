@@ -13,6 +13,8 @@ use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
+use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
+use Omeka\Entity\Property;
 use Omeka\Entity\Resource;
 use Omeka\Entity\Value;
 use Omeka\Module\AbstractModule;
@@ -210,6 +212,8 @@ class Module extends AbstractModule
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
+        // The ark cannot be added during pre, because a ark cannot be
+        // recreated (incremented), so if there is an issue, it will be lost.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.post',
@@ -247,57 +251,78 @@ class Module extends AbstractModule
      */
     public function handleSaveResource(Event $event): void
     {
-        /** @var \Omeka\Entity\Resource $resource */
+        /**
+         * @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Entity\Resource $resource
+         * @var \Common\Stdlib\EasyMeta $easyMeta
+         * @var \Doctrine\ORM\EntityManager $entityManager
+         */
+        $services = $this->getServiceLocator();
         $resource = $event->getParam('response')->getContent();
+        $settings = $services->get('Omeka\Settings');
+        $setStaticQualifier = $settings->get('ark_qualifier_static');
 
-        $this->addArk($resource);
+        $resourceName = $resource->getResourceName();
+        if ($resourceName === 'media' && !$setStaticQualifier) {
+            return;
+        }
 
-        if ($resource->getResourceName() === 'items') {
+        $easyMeta = $services->get('EasyMeta');
+
+        // 10 is dcterms:identifier id in default hard coded install.
+
+        $entityManager = $services->get('Omeka\EntityManager');
+        $property = $entityManager->getReference(\Omeka\Entity\Property::class, 10);
+
+        $adapter = $event->getTarget();
+        $result = $this->addArk($resource, $property, $adapter);
+
+        // Check if the media ark should be set.
+        if ($resourceName === 'items' && $setStaticQualifier) {
+            $mediaAdapter = $services->get('Omeka\ApiAdapterManager')->get('media');
             foreach ($resource->getMedia() as $media) {
-                $this->addArk($media);
+                $result = $this->addArk($media, $property, $mediaAdapter) || $result;
             }
+        }
+
+        if ($result) {
+            $entityManager->flush();
         }
     }
 
     /**
      * Add an ark to a record, if needed.
-     *
-     * @param Resource $resource
      */
-    protected function addArk(Resource $resource): void
-    {
+    protected function addArk(
+        Resource $resource,
+        Property $property,
+        AbstractResourceEntityAdapter $adapter
+    ): bool {
+        /**
+         * @var \Ark\ArkManager $arkManager
+         * @var \Doctrine\ORM\EntityManager $entityManager
+         */
         $services = $this->getServiceLocator();
-        $entityManager = $services->get('Omeka\EntityManager');
         $arkManager = $services->get('Ark\ArkManager');
-        $api = $services->get('Omeka\ApiManager');
 
-        // Check if the media ark should be set.
-        $isMedia = $resource->getResourceName() === 'media';
-        if ($isMedia) {
-            $settings = $services->get('Omeka\Settings');
-            if (!$settings->get('ark_qualifier_static')) {
-                return;
-            }
-        }
-
-        $representation = $api->read($resource->getResourceName(), $resource->getId())->getContent();
+        $representation = $adapter->getRepresentation($resource);
 
         // Check if an ark exists (no automatic change or update), else create.
         $ark = $arkManager->getArk($representation);
         if ($ark) {
-            // For media, the ark is static, as checked above and in manager.
-            return;
+            return false;
         }
 
         $ark = $arkManager->createName($representation);
         if (empty($ark)) {
-            return;
+            return false;
         }
 
-        // 10 is dcterms:identifier id in default hard coded install.
-        $property = $api->read('properties', ['id' => 10], [], ['responseContent' => 'resource'])->getContent();
+        $entityManager = $services->get('Omeka\EntityManager');
 
-        $values = $resource->getValues();
+        // Use a reference to avoid an issue in next modules.
+        $resource = $entityManager->getReference(\Omeka\Entity\Resource::class, $resource->getId());
 
         $value = new Value;
         $value->setType('literal');
@@ -305,7 +330,12 @@ class Module extends AbstractModule
         $value->setProperty($property);
         $value->setValue($ark);
 
+        // Normally useless, but may avoid an issue.
+        $entityManager->persist($value);
+
+        $values = $resource->getValues();
         $values->add($value);
-        $entityManager->flush();
+
+        return true;
     }
 }
