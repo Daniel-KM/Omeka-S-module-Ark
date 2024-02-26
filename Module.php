@@ -67,6 +67,20 @@ class Module extends AbstractModule
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
+
+        // Check if dba is installed.
+        if (!extension_loaded('dba')) {
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
+                $translate('Noid requires the extension "Database (dbm-style) Abstraction Layer" (dba).') // @ŧranslate
+            );
+        }
+
+        // Check if BerkeleyDB is installed.
+        if (!in_array('db4', dba_handlers())) {
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
+                $translate('Noid requires BerkeleyDB: not installed.') // @translate
+            );
+        }
     }
 
     public function onBootstrap(MvcEvent $event): void
