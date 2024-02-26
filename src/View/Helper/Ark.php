@@ -93,7 +93,7 @@ class Ark extends AbstractHelper
             );
         }
 
-        $siteSlug = $view->params()->fromRoute('site-slug') ?: $view->defaultSiteSlug();
+        $siteSlug = $view->params()->fromRoute('site-slug') ?: $view->defaultSite('slug');
         if (empty($siteSlug)) {
             return '';
         }

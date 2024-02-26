@@ -23,7 +23,6 @@ return [
     'view_helpers' => [
         'factories' => [
             'ark' => Service\ViewHelper\ArkFactory::class,
-            'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
         ],
     ],
     'form_elements' => [

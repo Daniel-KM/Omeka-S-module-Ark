@@ -2,13 +2,11 @@
 
 namespace Ark;
 
-if (!class_exists(\Generic\AbstractModule::class)) {
-    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
-        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
-        : __DIR__ . '/src/Generic/AbstractModule.php';
+if (!class_exists(\Common\TraitModule::class)) {
+    require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
-use Generic\AbstractModule;
+use Common\TraitModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\ModuleManager\ModuleManager;
@@ -17,18 +15,21 @@ use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Entity\Resource;
 use Omeka\Entity\Value;
+use Omeka\Module\AbstractModule;
 
 /**
  * Ark.
  *
  * Creates and manages unique, universel and persistent ark identifiers.
  *
- * @copyright Daniel Berthereau, 2015-2023
+ * @copyright Daniel Berthereau, 2015-2024
  * @copyright biblibre, 2016-2017
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
 class Module extends AbstractModule
 {
+    use TraitModule;
+
     const NAMESPACE = __NAMESPACE__;
 
     public function init(ModuleManager $moduleManager): void
@@ -52,6 +53,20 @@ class Module extends AbstractModule
             \Ark\ModuleManager\Feature\QualifierPluginProviderInterface::class,
             'getArkQualifierPluginConfig'
         );
+    }
+
+    protected function preInstall(): void
+    {
+        $services = $this->getServiceLocator();
+        $translate = $services->get('ControllerPluginManager')->get('translate');
+
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.54')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Common', '3.4.54'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
     }
 
     public function onBootstrap(MvcEvent $event): void
@@ -111,7 +126,8 @@ class Module extends AbstractModule
             }
         }
 
-        return $html . parent::getConfigForm($view);
+        return $html
+            . $this->getConfigFormAuto($view);
     }
 
     public function handleConfigForm(AbstractController $controller)

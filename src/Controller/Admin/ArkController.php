@@ -3,7 +3,7 @@
 namespace Ark\Controller\Admin;
 
 use Ark\Form\CreateArksForm;
-use Omeka\Stdlib\Message;
+use Common\Stdlib\PsrMessage;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
@@ -17,21 +17,19 @@ class ArkController extends AbstractActionController
             $data = $this->getRequest()->getPost();
             $form->setData($data);
             if ($form->isValid()) {
-                $job = $this->jobDispatcher()->dispatch('Ark\Job\CreateArks');
-
-                $jobUrl = $this->url()->fromRoute('admin/id', [
-                    'controller' => 'job',
-                    'action' => 'show',
-                    'id' => $job->getId(),
-                ]);
-
-                $message = new Message(
-                    'ARK creation started in %sjob %s%s', // @translate
-                    sprintf('<a href="%s">', htmlspecialchars($jobUrl)),
-                    $job->getId(),
-                    '</a>'
+                $job = $this->jobDispatcher()->dispatch(\Ark\Job\CreateArks::class);
+                $urlPlugin = $this->url();
+                $message = new PsrMessage(
+                    'ARK creation started in job {link_job}#{job_id}{link_end} ({link_log}logs{link_end}).', // @translate
+                    [
+                        'link_job' => sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()])),
+                        'job_id' => $job->getId(),
+                        'link_end' => '</a>',
+                        'link_log' => sprintf('<a href="%1$s">', class_exists('Log\Module')
+                            ? $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])
+                            : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+                    ]
                 );
-
                 $message->setEscapeHtml(false);
                 $this->messenger()->addSuccess($message);
 

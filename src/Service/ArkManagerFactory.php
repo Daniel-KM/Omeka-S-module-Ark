@@ -16,8 +16,9 @@ class ArkManagerFactory implements FactoryInterface
             $settings->get('ark_name'),
             $settings->get('ark_qualifier'),
             (bool) $settings->get('ark_qualifier_static'),
-            $services->get('ControllerPluginManager')->get('api'),
+            $services->get('Omeka\ApiManager'),
             $services->get('Omeka\Connection'),
+            $services->get('EasyMeta'),
             $services->get('Omeka\Logger'),
             $services->get('Ark\NamePluginManager'),
             $services->get('Ark\QualifierPluginManager')

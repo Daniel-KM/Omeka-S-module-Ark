@@ -4,11 +4,13 @@ namespace Ark;
 
 use Ark\Name\PluginManager as NamePlugins;
 use Ark\Qualifier\PluginManager as QualifierPlugins;
+use Common\Stdlib\EasyMeta;
 use Doctrine\DBAL\Connection;
 use Laminas\Log\Logger;
+use Omeka\Api\Manager as ApiManager;
+use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Mvc\Controller\Plugin\Api;
 use Omeka\Stdlib\Message;
 
 class ArkManager
@@ -34,27 +36,32 @@ class ArkManager
     protected $qualifierStatic;
 
     /**
-     * @var Api
+     * @var \Omeka\Api\Manager
      */
     protected $api;
 
     /**
-     * @var Connection
+     * @var \Doctrine\DBAL\Connection
      */
     protected $connection;
 
     /**
-     * @var Logger
+     * @var \Common\Stdlib\EasyMeta
+     */
+    protected $easyMeta;
+
+    /**
+     * @var \Laminas\Log\Logger
      */
     protected $logger;
 
     /**
-     * @var NamePlugins
+     * @var \Ark\Name\PluginManager
      */
     protected $namePlugins;
 
     /**
-     * @var QualifierPlugins
+     * @var \Ark\Qualifier\PluginManager
      */
     protected $qualifierPlugins;
 
@@ -66,8 +73,9 @@ class ArkManager
         ?string $namePluginName,
         ?string $qualifierPluginName,
         bool $qualifierStatic,
-        Api $api,
+        ApiManager $api,
         Connection $connection,
+        EasyMeta $easyMeta,
         Logger $logger,
         NamePlugins $namePlugins,
         QualifierPlugins $qualifierPlugins
@@ -77,6 +85,7 @@ class ArkManager
         $this->qualifierPluginName = $qualifierPluginName;
         $this->qualifierStatic = $qualifierStatic;
         $this->api = $api;
+        $this->easyMeta = $easyMeta;
         $this->connection = $connection;
         $this->logger = $logger;
         $this->namePlugins = $namePlugins;
@@ -187,11 +196,13 @@ class ArkManager
             $resource = mb_strlen($resources[0]['value']) > mb_strlen($resources[1]['value'])
                 ? $resources[0]
                 : $resources[1];
-            $resourceType = $this->resourceType($resource['resource_type']);
+            $resourceType = $this->easyMeta->resourceName($resource['resource_type']);
             $resourceId = (int) $resource['resource_id'];
-            $resource = $resourceType
-                ? $this->api->searchOne($resourceType, ['id' => $resourceId])->getContent()
-                : null;
+            try {
+                $resource = $resourceType ? $this->api->read($resourceType, ['id' => $resourceId])->getContent() : null;
+            } catch (NotFoundException $e) {
+                $resource = null;
+            }
         } else {
             $resource = $resources[0];
             $resourceId = empty($resource['resource_id']) ? 0 : (int) $resource['resource_id'];
@@ -201,9 +212,12 @@ class ArkManager
                 && $qualifierResource = $this->getResourceFromResourceIdAndQualifier($resourceId, $qualifier)
             ) {
                 $resource = $qualifierResource;
-            } elseif ($resourceType = $this->resourceType($resource['resource_type'])) {
-                $resource = $this->api
-                    ->searchOne($resourceType, ['id' => $resourceId])->getContent();
+            } elseif ($resourceType = $this->easyMeta->resourceName($resource['resource_type'])) {
+                try {
+                    $resource = $this->api->read($resourceType, ['id' => $resourceId])->getContent();
+                } catch (NotFoundException $e) {
+                    $resource = null;
+                }
             } else {
                 $resource = null;
             }
@@ -278,9 +292,12 @@ class ArkManager
             return null;
         }
 
-        $resourceClass = $this->resourceClass($resourceType);
-        if ($resourceClass === false) {
+        $entityClass = $this->easyMeta->entityClass($resourceType);
+        if (!$entityClass) {
             return null;
+        }
+        if ($entityClass = \Omeka\Entity\Resource::class) {
+            $entityClass = null;
         }
 
         $protocol = 'ark:';
@@ -294,11 +311,11 @@ class ArkManager
             ->where('value.property_id = 10')
             ->andWhere('value.type = "literal"');
 
-        if ($resourceClass) {
+        if ($entityClass) {
             $qb
                 ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
                 ->andWhere('resource.resource_type = :resource_type');
-            if ($resourceClass === \Omeka\Entity\Media::class) {
+            if ($entityClass === \Omeka\Entity\Media::class) {
                 $qb
                     ->innerJoin('resource', 'media', 'media', 'media.item_id = resource.id')
                     ->setParameter('resource_type', \Omeka\Entity\Item::class)
@@ -308,7 +325,7 @@ class ArkManager
                 $qb
                     ->andWhere('value.resource_id = :resource_id')
                     ->setParameter('resource_id', $resourceId)
-                    ->setParameter('resource_type', $resourceClass);
+                    ->setParameter('resource_type', $entityClass);
             }
         } else {
             $qb
@@ -329,7 +346,7 @@ class ArkManager
 
         if ($ark) {
             $ark = new Ark($this->naan, substr($ark, strlen($base)));
-            if ($resourceClass === \Omeka\Entity\Media::class) {
+            if ($entityClass === \Omeka\Entity\Media::class) {
                 $qualifier = $this->getQualifierFromResourceId($resourceId);
                 $ark->setQualifier($qualifier);
             }
@@ -555,10 +572,14 @@ class ArkManager
             return null;
         }
 
-        $resourceType = $this->resourceType($resource['resource_type']);
-        return $resourceType
-            ? $this->api->searchOne($resourceType, ['id' => $resource['resource_id']])->getContent()
-            : null;
+        $resourceType = $this->easyMeta->resourceName($resource['resource_type']);
+        try {
+            $resource = $resourceType ? $this->api->read($resourceType, ['id' => $resource['resource_id']])->getContent() : null;
+        } catch (NotFoundException $e) {
+            $resource = null;
+        }
+
+        return $resource;
     }
 
     /**
@@ -568,47 +589,6 @@ class ArkManager
     {
         $result = $this->getQualifierPlugin()->create($resource);
         return is_null($result) ? null : (string) $result;
-    }
-
-    /**
-     * Get the resource class from the resource type.
-     *
-     * @return string|null|bool Null if any resources. False if not managed.
-     */
-    protected function resourceClass(?string $resourceType)
-    {
-        $resourceTypes = [
-            null => null,
-            'item' => \Omeka\Entity\Item::class,
-            'items' => \Omeka\Entity\Item::class,
-            'item-set' => \Omeka\Entity\ItemSet::class,
-            'item_sets' => \Omeka\Entity\ItemSet::class,
-            'media' => \Omeka\Entity\Media::class,
-            'resource' => null,
-            'resources' => null,
-            // Avoid a check.
-            \Omeka\Entity\Item::class => \Omeka\Entity\Item::class,
-            \Omeka\Entity\ItemSet::class => \Omeka\Entity\ItemSet::class,
-            \Omeka\Entity\Media::class => \Omeka\Entity\Media::class,
-            \Omeka\Entity\Resource::class => null,
-        ];
-        return $resourceTypes[$resourceType] ?? false;
-    }
-
-    /**
-     * Get the resource type from the resource class.
-     *
-     * @return string|null|bool Null if any resources. False if not managed.
-     */
-    protected function resourceType(?string $resourceClass)
-    {
-        $resourceClasses = [
-            null => null,
-            \Omeka\Entity\Item::class => 'items',
-            \Omeka\Entity\ItemSet::class => 'item_sets',
-            \Omeka\Entity\Media::class => 'media',
-        ];
-        return $resourceClasses[$resourceClass] ?? false;
     }
 
     public function getArkNamePlugin(): \Ark\Name\Plugin\PluginInterface
