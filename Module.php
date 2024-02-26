@@ -95,9 +95,10 @@ class Module extends AbstractModule
     {
         $html = '<p class="explanation">'
             . $view->translate('Ark allows to create and manage unique, universel and persistent ark identifiers.') //  @translate
-            . '</p><p>'
-            . sprintf($view->translate('See %sthe official help%s for more informations.'), // @translate
-                '<a href="http://n2t.net/e/ark_ids.html">', '</a>')
+            . '</p>'
+            . '<p>'
+            . sprintf($view->translate('See %1$sreadme%3$s or %2$sthe original help%3$s for more informations.'), // @translate
+                '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-Ark/" target="_blank" rel="noopener">', '<a href="https://n2t.net/e/ark_ids.html" target="_blank" rel="noopener">', '</a>')
             . '</p>';
 
         $services = $this->getServiceLocator();

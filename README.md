@@ -6,7 +6,10 @@ Ark & Noid (module for Omeka S)
 > than the previous repository.__
 
 [Ark & Noid] is a module for [Omeka S] that creates and manages [ark identifiers].
-They can be used in urls the admin and the public sides with the module [Clean Url].
+They can be used in urls the admin and the public sides directly. For example,
+the url of an item may be https://example.com/s/site/ark:/99999/bapZs2 instead
+of https://example.com/s/site/item/1. Combined with module [Clean Url], all
+item urls can be used anywhere.
 
 The [ark identifiers] can replace the default [cool URIs] of each record, that
 corresponds to the simple number of a row in a table of the database.
@@ -150,11 +153,15 @@ See other [templates] for more explanation and examples.
 Installation
 ------------
 
-The module uses an external library, [Noid], so use the release zip to install
-it, or use and init the source.
+See general end user documentation for [installing a module].
 
-The module only creates ark identifier. To use them as url in public site or in
-admin, use the module [Clean Url].
+This module requires the module [Common], that should be installed first.
+
+The module uses an external library to create the list of identifiers, [Noid4php],
+so use the release zip to install it, or use and init the source.
+
+To convert any item urls into ark links in public site or inadmin, use the
+module [Clean Url].
 
 * From the zip
 
@@ -182,7 +189,7 @@ the case on the majority of the servers (based on Debian or Windows), else
 install the  module "php-bcmath", or don’t use this format.
 
 With the format "Noid for php", the plugin requires the php extension "dba",
-that uses to be installed by default with Php, and the BerkeleyDB library, that
+that uses to be installed by default with php, and the BerkeleyDB library, that
 is installed by default too on standard web servers and any Linux distribution
 (package libdb5.3 on Debian), because it is used in many basic tools.
 
@@ -198,12 +205,17 @@ php are no more supported.
 
 ### Automatic test
 
-For testing and debugging, phpunit 5.7 is required. If you don’t have it:
+For testing and debugging, phpunit is required. It should be installed with
+composer in Omeka directory, else download it. Of course, the test database
+should be set first in the Omeka file application/test/config/database.ini.
 
-```
-cd tests
-wget https://phar.phpunit.de/phpunit-5.7.phar
-php phpunit-5.7.phar
+```sh
+cd /path/to/omeka/modules/Ark/test
+# If phpunit is installed in Omeka (via `composer install`).
+php ../../../vendor/phpunit/phpunit/phpunit
+# Else download and run it.
+wget https://phar.phpunit.de/phpunit-9.6.phar
+php phpunit-9.6.phar
 ```
 
 
@@ -223,7 +235,7 @@ To set arks to existing records, simply select them in admin/items/browse and
 batch edit them, without any change.
 
 You can run the command line tool too (not integrated in Omeka S version currently):
-```
+```sh
 php -f modules/Ark/create_arks.php
 ```
 
@@ -287,7 +299,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2023 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2015-2024 (see [Daniel-KM] on GitLab)
 * Copyright BibLibre, 2016-2017
 
 First version of this plugin has been built for [Mines ParisTech]. The upgrade
@@ -301,11 +313,11 @@ for Omeka S has been built for [Paris Sciences et Lettres (PSL)] by [BibLibre].
 [Omeka]: https://omeka.org/classic
 [ark and noid management]: https://gitlab.com/Daniel-KM/Omeka-plugin-ArkAndNoid
 [Clean Url]: https://gitlab.com/Daniel-KM/Omeka-S-module-CleanUrl
-[Noid]: https://gitlab.com/Daniel-KM/Noid4Php
 [Ark.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Ark/-/releases
 [Cool URIs]: https://www.w3.org/TR/cooluris
 [N2T]: http://n2t.org
 [Noid]: https://wiki.ucop.edu/display/Curation/NOID
+[Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [Noid4Php]: https://gitlab.com/Daniel-KM/Noid4Php
 [Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
 [Mines ParisTech]: http://mines-paristech.fr
