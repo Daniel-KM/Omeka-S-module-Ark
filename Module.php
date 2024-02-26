@@ -271,9 +271,11 @@ class Module extends AbstractModule
         $easyMeta = $services->get('EasyMeta');
 
         // 10 is dcterms:identifier id in default hard coded install.
+        $property = $settings->get('ark_property') ?: 'dcterms:identifier';
+        $propertyId = $easyMeta->propertyId($property) ?: 10;
 
         $entityManager = $services->get('Omeka\EntityManager');
-        $property = $entityManager->getReference(\Omeka\Entity\Property::class, 10);
+        $property = $entityManager->getReference(\Omeka\Entity\Property::class, $propertyId);
 
         $adapter = $event->getTarget();
         $result = $this->addArk($resource, $property, $adapter);

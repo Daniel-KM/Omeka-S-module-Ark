@@ -21,6 +21,16 @@ class ArkManager
     protected $naan;
 
     /**
+     * @string int
+     */
+    protected $propertyId;
+
+        /**
+     * @string string
+     */
+    protected $propertyTerm;
+
+    /**
      * @string string
      */
     protected $namePluginName;
@@ -73,6 +83,8 @@ class ArkManager
         ?string $namePluginName,
         ?string $qualifierPluginName,
         bool $qualifierStatic,
+        int $propertyId,
+        string $propertyTerm,
         ApiManager $api,
         Connection $connection,
         EasyMeta $easyMeta,
@@ -84,6 +96,8 @@ class ArkManager
         $this->namePluginName = $namePluginName;
         $this->qualifierPluginName = $qualifierPluginName;
         $this->qualifierStatic = $qualifierStatic;
+        $this->propertyId = $propertyId;
+        $this->propertyTerm = $propertyTerm;
         $this->api = $api;
         $this->easyMeta = $easyMeta;
         $this->connection = $connection;
@@ -157,8 +171,8 @@ class ArkManager
             )
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
-            // Property 10 = dcterms:identifier.
-            ->where('value.property_id = 10')
+            ->where('value.property_id = :property_id')
+            ->setParameter('property_id', $this->propertyId)
             ->andWhere('value.type = "literal"')
             ->groupBy([
                 'value.resource_id',
@@ -236,7 +250,7 @@ class ArkManager
         }
 
         $ark = null;
-        $identifiers = $resource->value('dcterms:identifier', ['type' => 'literal', 'all' => true, 'default' => []]);
+        $identifiers = $resource->value($this->propertyTerm, ['type' => 'literal', 'all' => true, 'default' => []]);
         $protocol = 'ark:';
         $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
         foreach ($identifiers as $identifier) {
@@ -262,7 +276,7 @@ class ArkManager
 
         $media = $resource;
         $resource = $media->item();
-        $identifiers = $resource->value('dcterms:identifier', ['type' => 'literal', 'all' => true, 'default' => []]);
+        $identifiers = $resource->value($this->propertyTerm, ['type' => 'literal', 'all' => true, 'default' => []]);
         $protocol = 'ark:';
         $base = $this->naan ? "$protocol/{$this->naan}/" : "$protocol/";
         foreach ($identifiers as $identifier) {
@@ -307,8 +321,8 @@ class ArkManager
         $qb
             ->select('value.value')
             ->from('value', 'value')
-            // Property 10 = dcterms:identifier.
-            ->where('value.property_id = 10')
+            ->where('value.property_id = :property_id')
+            ->setParameter('property_id', $this->propertyId)
             ->andWhere('value.type = "literal"');
 
         if ($entityClass) {
@@ -552,8 +566,8 @@ class ArkManager
             )
             ->from('value', 'value')
             ->innerJoin('value', 'resource', 'resource', 'resource.id = value.resource_id')
-            // Property 10 = dcterms:identifier.
-            ->where('value.property_id = 10')
+            ->where('value.property_id = :property_id')
+            ->setParameter('property_id', $this->propertyId)
             ->andWhere('value.type = "literal"')
             ->andWhere('value.value = :value')
             ->setParameter('value', $ark)

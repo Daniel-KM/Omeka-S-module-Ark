@@ -3,6 +3,7 @@
 namespace Ark\Form;
 
 use Ark\ArkManager;
+use Omeka\Form\Element as OmekaElement;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
 
@@ -113,6 +114,19 @@ class ConfigForm extends Form
                 ],
                 'attributes' => [
                     'id' => 'ark_qualifier_static',
+                ],
+            ])
+            ->add([
+                'name' => 'ark_property',
+                'type' => OmekaElement\PropertySelect::class,
+                'options' => [
+                    'label' => 'Property where to store the identifier (usually dcterms:identifier)', // @translate
+                    'info' => 'If changed, you will need to move all existing identifiers to the new property via module Bulk Edit.', // @translate
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'ark_property',
+                    'class' => 'chosen-select',
                 ],
             ])
             ->add([

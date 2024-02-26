@@ -176,6 +176,7 @@ return [
             'ark_qualifier' => 'internal',
             'ark_qualifier_position_format' => '',
             'ark_qualifier_static' => false,
+            'ark_property' => 'dcterms:identifier',
             'ark_policy_statement' => 'erc-support:
 who: Our Institution
 what: Permanent: Stable Content:
