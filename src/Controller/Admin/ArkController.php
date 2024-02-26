@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ark\Controller\Admin;
 
 use Ark\Form\CreateArksForm;
 use Common\Stdlib\PsrMessage;
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
+use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\View\Model\ViewModel;
 
 class ArkController extends AbstractActionController
 {
@@ -39,8 +39,8 @@ class ArkController extends AbstractActionController
             }
         }
 
-        $view = new ViewModel;
-        $view->setVariable('form', $form);
-        return $view;
+        return new ViewModel([
+            'form' => $form,
+        ]);
     }
 }

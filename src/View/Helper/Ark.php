@@ -14,12 +14,12 @@ use Traversable;
 class Ark extends AbstractHelper
 {
     /**
-     * @var ArkManager
+     * @var \Ark\ArkManager
      */
     protected $arkManager;
 
     /**
-     * @var AbstractResourceEntityRepresentation
+     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation
      */
     protected $resource;
 
@@ -30,11 +30,8 @@ class Ark extends AbstractHelper
 
     /**
      * Return this helper for ark.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return self
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    public function __invoke(AbstractResourceEntityRepresentation $resource): self
     {
         $this->resource = $resource;
         return $this;
@@ -42,10 +39,8 @@ class Ark extends AbstractHelper
 
     /**
      * Get the ark for a resource.
-     *
-     * @return Ark|null
      */
-    public function identifier()
+    public function identifier(): ?ArkArk
     {
         return $this->arkManager
             ->getArk($this->resource);
@@ -56,9 +51,8 @@ class Ark extends AbstractHelper
      *
      * @param array|Traversable $options Url options. Params are reused.
      * @param bool|null $admin If null, determined from the params.
-     * @return string|null
      */
-    public function url(array $options = [], $admin = null)
+    public function url(array $options = [], ?bool $admin = null): ?string
     {
         $ark = $this->identifier($this->resource);
         return empty($ark)
@@ -72,9 +66,8 @@ class Ark extends AbstractHelper
      * @param ArkArk $ark
      * @param array|Traversable $options Url options. Params are reused.
      * @param bool|null $admin If null, determined from the params.
-     * @return string
      */
-    protected function urlFromArk(ArkArk $ark, array $options = [], $admin = null)
+    protected function urlFromArk(ArkArk $ark, array $options = [], $admin = null): string
     {
         $view = $this->getView();
         $isAdmin = is_null($admin)

@@ -1,43 +1,42 @@
 <?php declare(strict_types=1);
-/**
- * Php Noid format for Ark name.
- */
-namespace Ark\Name\Plugin;
 
-// Use Noid via composer.
+namespace Ark\Name\Plugin;
 
 use Laminas\Log\Logger;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 
+/**
+ * Php Noid format for Ark name.
+ *
+ * @todo Use Noid via composer.
+ */
 class Internal implements PluginInterface
 {
     /**
-     * @var Omeka\Settings\Settings
-     */
-    protected $settings;
-
-    /**
-     * @var Logger
+     * @var \Laminas\Log\Logger
      */
     protected $logger;
 
     /**
-     * @param Settings $settings
-     * @param Logger $logger
+     * @var \Omeka\Settings\Settings
      */
-    public function __construct(Settings $settings, Logger $logger)
-    {
-        $this->settings = $settings;
+    protected $settings;
+
+    public function __construct(
+        Logger $logger,
+        Settings $settings
+    ) {
         $this->logger = $logger;
+        $this->settings = $settings;
     }
 
-    public function isFullArk()
+    public function isFullArk(): bool
     {
         return true;
     }
 
-    public function create(AbstractResourceEntityRepresentation $resource)
+    public function create(AbstractResourceEntityRepresentation $resource): string
     {
         return $this->settings->get('ark_naan') . '/' . $resource->id();
     }
@@ -45,7 +44,7 @@ class Internal implements PluginInterface
     /**
      * @todo Include the creation of the noid database in the interface or in another plugin.
      */
-    public function isDatabaseCreated()
+    public function isDatabaseCreated(): bool
     {
         return true;
     }
@@ -53,7 +52,7 @@ class Internal implements PluginInterface
     /**
      * @todo Include the creation of the noid database in the interface or in another plugin.
      */
-    public function createDatabase()
+    public function createDatabase(): bool
     {
         return true;
     }
@@ -64,7 +63,7 @@ class Internal implements PluginInterface
      * @param string $level "meta" (default), "admin", "brief", "full", or "dump".
      * @return array|string
      */
-    public function infoDatabase($level = 'meta')
+    public function infoDatabase($level = 'meta'): ?array
     {
         $arkNaan = $this->settings->get('ark_naan');
         $arkNaa = $this->settings->get('ark_naa');

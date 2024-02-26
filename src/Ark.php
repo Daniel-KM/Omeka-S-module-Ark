@@ -20,83 +20,57 @@ class Ark
     protected $qualifier;
 
     /**
-     * @param string $naan
-     * @param string $name
-     * @param string|null $qualifier
+     * @param string|int|null $qualifier
      */
-    public function __construct($naan, $name, $qualifier = null)
+    public function __construct(string $naan, string $name, $qualifier = null)
     {
         $this->naan = $naan;
         $this->name = $name;
-        $this->qualifier = is_null($qualifier) ? null : (string) $qualifier;
+        $this->qualifier = $qualifier === null ? null : (string) $qualifier;
     }
 
-    /**
-     * @param string $naan
-     * @return self
-     */
-    public function setNaan($naan)
+    public function setNaan(?string $naan): self
     {
         $this->naan = $naan;
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getNaan()
+    public function getNaan(): string
     {
         return $this->naan;
     }
 
-    /**
-     * @param string $name
-     * @return self
-     */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = $name;
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param string $qualifier
-     * @return self
+     * @param string|int|null $qualifier
      */
-    public function setQualifier($qualifier)
+    public function setQualifier($qualifier): self
     {
         $this->qualifier = is_null($qualifier) ? null : (string) $qualifier;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getQualifier()
+    public function getQualifier(): ?string
     {
         return $this->qualifier;
     }
 
-    /**
-     * @return string
-     */
-    public function asString()
+    public function asString(): string
     {
         return sprintf('ark:/%s/%s%s', $this->naan, $this->name, $this->qualifier ? '/' . $this->qualifier : '');
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->asString();
     }

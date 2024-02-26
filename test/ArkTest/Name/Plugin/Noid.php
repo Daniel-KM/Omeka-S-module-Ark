@@ -26,7 +26,6 @@ class Noid extends \Ark\Name\Plugin\Noid
                 unlink("$dir/$file");
             }
         }
-
         return rmdir($dir);
     }
 }

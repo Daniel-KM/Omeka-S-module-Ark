@@ -13,8 +13,8 @@ class NoidFactory implements FactoryInterface
         $basePath = $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $databaseDir = $basePath . '/arkandnoid';
         return new Noid(
-            $services->get('Omeka\Settings'),
             $services->get('Omeka\Logger'),
+            $services->get('Omeka\Settings'),
             $databaseDir
         );
     }

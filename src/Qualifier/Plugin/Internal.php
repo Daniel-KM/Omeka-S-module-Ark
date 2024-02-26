@@ -11,13 +11,10 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 class Internal implements PluginInterface
 {
     /**
-     * @var ApiManager
+     * @var \Omeka\Api\Manager
      */
     protected $api;
 
-    /**
-     * @param ApiManager $api
-     */
     public function __construct(ApiManager $api)
     {
         $this->api = $api;

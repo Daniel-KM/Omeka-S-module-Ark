@@ -6,14 +6,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 interface PluginInterface
 {
-    /**
-     * @return bool
-     */
-    public function isFullArk();
+    public function isFullArk(): bool;
 
-    /**
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string|null
-     */
-    public function create(AbstractResourceEntityRepresentation $resource);
+    public function create(AbstractResourceEntityRepresentation $resource): ?string;
 }

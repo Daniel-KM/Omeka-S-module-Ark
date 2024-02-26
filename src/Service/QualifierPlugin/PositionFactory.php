@@ -11,10 +11,10 @@ class PositionFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $name, array $options = null)
     {
         return new Position(
-            $services->get('Omeka\Settings')->get('ark_qualifier_position_format'),
-            $services->get('Omeka\Logger'),
             $services->get('Omeka\ApiManager'),
-            $services->get('Omeka\EntityManager')
+            $services->get('Omeka\EntityManager'),
+            $services->get('Omeka\Logger'),
+            (string) $services->get('Omeka\Settings')->get('ark_qualifier_position_format')
         );
     }
 }

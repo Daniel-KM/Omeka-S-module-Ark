@@ -605,7 +605,7 @@ class ArkManager
     protected function getQualifier(AbstractResourceEntityRepresentation $resource): ?string
     {
         $result = $this->getQualifierPlugin()->create($resource);
-        return is_null($result) ? null : (string) $result;
+        return $result === null ? null : (string) $result;
     }
 
     public function getArkNamePlugin(): \Ark\Name\Plugin\PluginInterface

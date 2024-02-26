@@ -11,7 +11,7 @@ use Laminas\Mvc\MvcEvent;
 use Laminas\Router\Http\RouteMatch;
 
 /**
- * @todo Remove this listener and use CleanUrl only (so this module will only create and check identifiers)? See new module template.
+ * @todo Remove this listener and use CleanUrl only (so this module will only create and check identifiers)? See new module Advanced Resource Template.
  */
 class MvcListeners extends AbstractListenerAggregate
 {

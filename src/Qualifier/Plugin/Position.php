@@ -13,37 +13,35 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 class Position implements PluginInterface
 {
     /**
-     * @var string
-     */
-    protected $format;
-
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
-    /**
-     * @var ApiManager
+     * @var \Omeka\Api\Manager
      */
     protected $api;
 
     /**
-     * @var EntityManager
+     * @var \Doctrine\ORM\EntityManager
      */
     protected $entityManager;
 
     /**
-     * @param string $format
-     * @param Logger $logger
-     * @param ApiManager $api
-     * @param EntityManager $entityManager
+     * @var \Laminas\Log\Logger
      */
-    public function __construct($format, Logger $logger, ApiManager $api, EntityManager $entityManager)
-    {
-        $this->format = mb_strlen((string) $format) ? $format : 'p%d';
-        $this->logger = $logger;
+    protected $logger;
+
+    /**
+     * @var string
+     */
+    protected $format;
+
+    public function __construct(
+        ApiManager $api,
+        EntityManager $entityManager,
+        Logger $logger,
+        string $format
+    ) {
         $this->api = $api;
         $this->entityManager = $entityManager;
+        $this->logger = $logger;
+        $this->format = mb_strlen($format) ? $format : 'p%d';
     }
 
     public function create(AbstractResourceEntityRepresentation $resource): ?string

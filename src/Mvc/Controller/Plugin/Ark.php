@@ -4,11 +4,12 @@ namespace Ark\Mvc\Controller\Plugin;
 
 use Ark\ArkManager;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class Ark extends AbstractPlugin
 {
     /**
-     * @var ArkManager
+     * @var \Ark\ArkManager
      */
     protected $arkManager;
 
@@ -20,7 +21,7 @@ class Ark extends AbstractPlugin
     /**
      * @return \Ark\Mvc\Controller\Plugin\Ark
      */
-    public function __invoke()
+    public function __invoke(): self
     {
         return $this;
     }
@@ -29,9 +30,8 @@ class Ark extends AbstractPlugin
      * Find a resource by its ark.
      *
      * @param string|array $ark
-     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null
      */
-    public function find($ark)
+    public function find($ark): ?AbstractResourceEntityRepresentation
     {
         if (is_array($ark)) {
             $ark = $this->buildArkFromArgs($ark);
@@ -41,11 +41,8 @@ class Ark extends AbstractPlugin
 
     /**
      * Convert an ark from an associative array into a string.
-     *
-     * @param array $args
-     * @return string
      */
-    protected function buildArkFromArgs(array $args)
+    protected function buildArkFromArgs(array $args): string
     {
         $naan = $args['naan'];
         $name = $args['name'];

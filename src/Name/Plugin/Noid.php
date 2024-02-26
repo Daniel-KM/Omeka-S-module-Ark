@@ -14,38 +14,36 @@ use Omeka\Stdlib\Message;
 class Noid implements PluginInterface
 {
     /**
-     * @var Omeka\Settings\Settings
-     */
-    protected $settings;
-
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
-    /**
      * @var string
      */
     protected $databaseDir;
 
     /**
-     * @param Settings $settings
-     * @param Logger $logger
-     * @param string $databaseDir
+     * @var \Laminas\Log\Logger
      */
-    public function __construct(Settings $settings, Logger $logger, $databaseDir)
-    {
-        $this->settings = $settings;
+    protected $logger;
+
+    /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    public function __construct(
+        Logger $logger,
+        Settings $settings,
+        $databaseDir
+    ) {
         $this->logger = $logger;
+        $this->settings = $settings;
         $this->databaseDir = $databaseDir;
     }
 
-    public function isFullArk()
+    public function isFullArk(): bool
     {
         return true;
     }
 
-    public function create(AbstractResourceEntityRepresentation $resource)
+    public function create(AbstractResourceEntityRepresentation $resource): ?string
     {
         $noid = $this->openDatabase(\Noid::DB_WRITE);
         if (empty($noid)) {
@@ -111,7 +109,7 @@ class Noid implements PluginInterface
     /**
      * @todo Include the creation of the noid database in the interface or in another plugin.
      */
-    public function isDatabaseCreated()
+    public function isDatabaseCreated(): bool
     {
         $noid = $this->openDatabase();
         if (empty($noid)) {
@@ -160,7 +158,7 @@ class Noid implements PluginInterface
             return '';
         }
 
-        $levelNoid = in_array($level, ['meta', 'admin'])? 'brief' : $level;
+        $levelNoid = in_array($level, ['meta', 'admin']) ? 'brief' : $level;
         ob_start();
         $result = \Noid::dbinfo($noid, $levelNoid);
         $info = ob_get_contents();

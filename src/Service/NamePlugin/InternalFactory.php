@@ -11,8 +11,8 @@ class InternalFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $name, array $options = null)
     {
         return new Internal(
-            $services->get('Omeka\Settings'),
-            $services->get('Omeka\Logger')
+            $services->get('Omeka\Logger'),
+            $services->get('Omeka\Settings')
         );
     }
 }
