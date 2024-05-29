@@ -184,7 +184,7 @@ class Noid implements PluginInterface
                 $result['naan'] = $matches[1];
                 preg_match('~^  :/naa:\s+(.+)$~m', $info, $matches);
                 $result['naa'] = $matches[1];
-                preg_match('~^  :/subnaa:\s+(.+)$~m', $info, $matches);
+                preg_match('~^  :/subnaa:[^\S\r\n]+(.*)$~m', $info, $matches);
                 $result['subnaa'] = $matches[1];
                 preg_match('~^Template:\s+([\w\d.]+)$~m', $info, $matches);
                 $result['template'] = $matches[1];
