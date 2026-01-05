@@ -9,7 +9,6 @@ namespace Ark\Name\Plugin;
 use Laminas\Log\Logger;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
-use Omeka\Stdlib\Message;
 
 class Noid implements PluginInterface
 {
@@ -47,11 +46,10 @@ class Noid implements PluginInterface
     {
         $noid = $this->openDatabase(\Noid::DB_WRITE);
         if (empty($noid)) {
-            $message = new Message(
-                'Cannot open database: %s', // @translate
-                \Noid::errmsg(null, 1) ?: 'No database'  // @translate
+            $this->logger->err(
+                'Cannot open database: {message}', // @translate
+                ['message' => \Noid::errmsg(null, 1) ?: 'No database']  // @translate
             );
-            $this->logger->err($message);
             return null;
         }
 
@@ -69,13 +67,12 @@ class Noid implements PluginInterface
         $contact = $this->getContact();
 
         $ark = \Noid::mint($noid, $contact);
-        if (!strlen($ark)) {
+        if (!strlen((string) $ark)) {
             \Noid::dbclose($noid);
-            $message = new Message(
-                'Cannot create an Ark for %1$s #%2$d: %3$s', // @translate
-                $resource->getControllerName(), $resource->id(), \Noid::errmsg($noid)
+            $this->logger->err(
+                'Cannot create an Ark for {resource} #{resource_id}: {message}', // @translate
+                ['resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => \Noid::errmsg($noid)]
             );
-            $this->logger->err($message);
             return null;
         }
 
@@ -83,22 +80,20 @@ class Noid implements PluginInterface
         $locations = implode('|', $resourceIds);
         $result = \Noid::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
         if (empty($result)) {
-            $message = new Message(
-                'Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s', // @translate
-                $ark, $resource->getControllerName(), $resource->id(), \Noid::errmsg($noid)
+            $this->logger->warn(
+                'Ark set, but not bound [{ark}, {resource} #{resource_id}]: {message}', // @translate
+                ['ark' => $ark, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => \Noid::errmsg($noid)]
             );
-            $this->logger->warn($message);
         }
 
         // Save the reverse bind on Omeka id to find it instantly, as a "note".
         // If needed, other urls can be find in a second step via the ark.
         $result = \Noid::note($noid, $contact, 'locations/' . $resource->id(), $ark);
         if (empty($result)) {
-            $message = new Message(
-                'Ark set, but no reverse bind [%1$s, %2$s #%3$d]: %4$s',
-                $ark, $resource->getControllerName(), $resource->id(), \Noid::errmsg($noid)
+            $this->logger->warn(
+                'Ark set, but no reverse bind [{ark}, {resource} #{resource_id}]: {message}', // @translate
+                ['ark' => $ark, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => \Noid::errmsg($noid)]
             );
-            $this->logger->warn($message);
         }
 
         \Noid::dbclose($noid);
@@ -166,11 +161,10 @@ class Noid implements PluginInterface
         \Noid::dbclose($noid);
 
         if (!$result) {
-            $message = new Message(
-                'Cannot get database info: %s', // @translate
-                \Noid::errmsg($noid, 1)
+            $this->logger->err(
+                'Cannot get database info: {message}', // @translate
+                ['message' => \Noid::errmsg($noid, 1)]
             );
-            $this->logger->err($message);
             return '';
         }
 

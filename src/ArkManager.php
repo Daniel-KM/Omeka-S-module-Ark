@@ -11,7 +11,6 @@ use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Stdlib\Message;
 
 class ArkManager
 {
@@ -386,21 +385,19 @@ class ArkManager
 
         // Check the result.
         if (empty($ark)) {
-            $message = new Message(
-                'No Ark created: check your processor "%1$s" [%2$s #%3$d].', // @translate
-                $this->namePluginName, $resource->getControllerName(), $resource->id()
+            $this->logger->err(
+                'No Ark created: check your processor "{name}" [{resource} #{resource_id}].', // @translate
+                ['name' => $this->namePluginName, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id()]
             );
-            $this->logger->err($message);
             return null;
         }
 
         // Check ark (useful only for external process).
         if (!$this->checkFullArk($ark)) {
-            $message = new Message(
-                'Ark "%1$s" is not correct: check your naan "%2$s", your template, and your processor [%3$s].', // @translate
-                $ark, $this->naan, $this->namePluginName
+            $this->logger->err(
+                'Ark "{ark}" is not correct: check your naan "{naan}", your template, and your processor [{name}].', // @translate
+                ['ark' => $ark, 'naan' => $this->naan, 'name' => $this->namePluginName]
             );
-            $this->logger->err($message);
             return null;
         }
 
@@ -410,19 +407,17 @@ class ArkManager
         // Check if the ark is single.
         if ($this->arkExists($ark)) {
             if ($this->getArkNamePlugin()->isFullArk()) {
-                $message = new Message(
-                    'The proposed ark "%1$s" by the processor "%2$s" is not unique [%3$s #%4$d].', // @translate
-                    $ark, $this->namePluginName, $resource->getControllerName(), $resource->id()
+                $this->logger->err(
+                    'The proposed ark "{ark}" by the processor "{name}" is not unique [{resource} #{resource_id}].', // @translate
+                    ['ark' => $ark, 'name' => $this->namePluginName, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id()]
                 );
-                $this->logger->err($message);
                 return null;
             }
 
-            $message = new Message(
-                'Unable to create a unique ark. Check parameters of the processor "%1$s" [%2$s #%3$d].', // @translate
-                $this->namePluginName, $resource->getControllerName(), $resource->id()
+            $this->logger->err(
+                'Unable to create a unique ark. Check parameters of the processor "{name}" [{resource} #{resource_id}].', // @translate
+                ['name' => $this->namePluginName, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id()]
             );
-            $this->logger->err($message);
             return null;
         }
 
@@ -435,30 +430,27 @@ class ArkManager
         // for a media.
         $ark = $this->getArk($media->item());
         if (!$ark) {
-            $message = new Message(
-                'No Ark qualfiier created for media #%1$d: the item #%2$d does not have an ark. Update it first.', // @translate
-                $media->id(), $media->item()->id()
+            $this->logger->err(
+                'No Ark qualfiier created for media #{media_id}: the item #{item_id} does not have an ark. Update it first.', // @translate
+                ['media_id' => $media->id(), 'item_id' => $media->item()->id()]
             );
-            $this->logger->err($message);
             return null;
         }
 
         if (!$this->qualifierStatic) {
-            $message = new Message(
-                'Unable to create a qualifier for media #%1$d: option is "dynamic qualifier".', // @translate
-                $media->id()
+            $this->logger->err(
+                'Unable to create a qualifier for media #{media_id}: option is "dynamic qualifier".', // @translate
+                ['media_id' => $media->id()]
             );
-            $this->logger->err($message);
             return null;
         }
 
         $qualifier = $this->getQualifier($media);
         if (!$qualifier) {
-            $message = new Message(
+            $this->logger->err(
                 'Unable to create a qualifier for media #%1$d. Check the processor "%2$s".', // @translate
-                $media->id(), $this->qualifierPluginName
+                ['media_id' => $media->id(), 'name' => $this->qualifierPluginName]
             );
-            $this->logger->err($message);
             return null;
         }
 
@@ -466,11 +458,10 @@ class ArkManager
 
         // Check if the ark is single.
         if ($this->arkExists($ark)) {
-            $message = new Message(
-                'Unable to create a unique ark. Check the processor "%1$s" [%2$s #%3$d].', // @translate
-                $this->qualifierPluginName, $media->getControllerName(), $media->id()
+            $this->logger->err(
+                'Unable to create a unique ark. Check the processor "{name}" [media #{media_id}].', // @translate
+                ['name' => $this->qualifierPluginName, 'media_id' => $media->id()]
             );
-            $this->logger->err($message);
             return null;
         }
 
