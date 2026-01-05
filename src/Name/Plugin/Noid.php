@@ -268,7 +268,7 @@ class Noid implements PluginInterface
     {
         $contact = $this->getContact();
 
-        $settings = $this->buildSettings();
+        $settings = $this->buildSettings(true);
 
         $template = $this->settings->get('ark_name_noid_template');
         $naan = $this->settings->get('ark_naan');
@@ -339,9 +339,10 @@ class Noid implements PluginInterface
     /**
      * Build settings array for the Noid library.
      *
+     * @param bool $forCreation When true, includes generator setting for new databases.
      * @return array
      */
-    protected function buildSettings(): array
+    protected function buildSettings(bool $forCreation = false): array
     {
         $dataDir = $this->getDatabaseDir();
         $storageConfig = [
@@ -361,12 +362,19 @@ class Noid implements PluginInterface
             ]);
         }
 
-        return [
+        $settings = [
             'db_type' => $this->dbType,
             'storage' => [
                 $this->dbType => $storageConfig,
             ],
         ];
+
+        // Only set generator when creating new databases (library default is drand48).
+        if ($forCreation) {
+            $settings['generator'] = 'mt_rand';
+        }
+
+        return $settings;
     }
 
     protected function openDatabase($mode = DatabaseInterface::DB_RDONLY)
