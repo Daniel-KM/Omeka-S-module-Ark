@@ -373,6 +373,72 @@ class ArkManager
     }
 
     /**
+     * Create arks for multiple resources in batch.
+     *
+     * This method is more efficient than calling createName() multiple times
+     * when processing many resources.
+     *
+     * @param AbstractResourceEntityRepresentation[] $resources
+     * @return array Associative array of resource id => ark (or null on failure)
+     */
+    public function createNames(array $resources): array
+    {
+        if (empty($resources)) {
+            return [];
+        }
+
+        // Separate media from non-media resources.
+        // Media requires special handling (need parent item's ark first).
+        $nonMediaResources = [];
+        $mediaResources = [];
+        foreach ($resources as $resource) {
+            if ($resource->resourceName() === 'media') {
+                $mediaResources[$resource->id()] = $resource;
+            } else {
+                $nonMediaResources[$resource->id()] = $resource;
+            }
+        }
+
+        $result = [];
+
+        // Process non-media resources with batch method if available.
+        if (!empty($nonMediaResources)) {
+            $plugin = $this->getArkNamePlugin();
+            if (method_exists($plugin, 'createMany')) {
+                $arks = $plugin->createMany($nonMediaResources);
+                foreach ($arks as $resourceId => $ark) {
+                    if ($ark) {
+                        // Validate and format ark.
+                        if ($this->checkFullArk($ark)) {
+                            $result[$resourceId] = 'ark:/' . $ark;
+                        } else {
+                            $this->logger->err(
+                                'Ark "{ark}" is not correct: check your naan "{naan}", your template, and your processor [{name}].', // @translate
+                                ['ark' => $ark, 'naan' => $this->naan, 'name' => $this->namePluginName]
+                            );
+                            $result[$resourceId] = null;
+                        }
+                    } else {
+                        $result[$resourceId] = null;
+                    }
+                }
+            } else {
+                // Fallback to individual creation.
+                foreach ($nonMediaResources as $resourceId => $resource) {
+                    $result[$resourceId] = $this->createName($resource);
+                }
+            }
+        }
+
+        // Process media resources individually (they need parent item's ark).
+        foreach ($mediaResources as $resourceId => $media) {
+            $result[$resourceId] = $this->createName($media);
+        }
+
+        return $result;
+    }
+
+    /**
      * Create the ark for a resource.
      */
     public function createName(AbstractResourceEntityRepresentation $resource): ?string

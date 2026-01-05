@@ -4,9 +4,13 @@
  */
 namespace Ark\Name\Plugin;
 
-// Use Noid via composer.
+// Use Noid via composer (daniel-km/noid ^1.4).
 
 use Laminas\Log\Logger;
+use Noid\Lib\Db;
+use Noid\Lib\Log;
+use Noid\Noid as NoidLib;
+use Noid\Storage\DatabaseInterface;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 
@@ -27,6 +31,16 @@ class Noid implements PluginInterface
      */
     protected $settings;
 
+    /**
+     * Database type to use (lmdb, sqlite, xml, pdo, bdb).
+     *
+     * Since Noid4Php 1.3, lmdb is the default and recommended backend.
+     * Requires php-dba with lmdb handler (available by default on Debian 10+).
+     *
+     * @var string
+     */
+    protected $dbType = 'lmdb';
+
     public function __construct(
         Logger $logger,
         Settings $settings,
@@ -44,20 +58,20 @@ class Noid implements PluginInterface
 
     public function create(AbstractResourceEntityRepresentation $resource): ?string
     {
-        $noid = $this->openDatabase(\Noid::DB_WRITE);
+        $noid = $this->openDatabase(DatabaseInterface::DB_WRITE);
         if (empty($noid)) {
             $this->logger->err(
                 'Cannot open database: {message}', // @translate
-                ['message' => \Noid::errmsg(null, 1) ?: 'No database']  // @translate
+                ['message' => Log::errmsg(null, 1) ?: 'No database']  // @translate
             );
             return null;
         }
 
         // Check if the url is already set (only the Omeka id: the other ids are
         // not automatic and can't be checked the same).
-        $ark = \Noid::get_note($noid, 'locations/' . $resource->id());
+        $ark = Log::get_note($noid, 'locations/' . $resource->id());
         if ($ark) {
-            \Noid::dbclose($noid);
+            Db::dbclose($noid);
             return $ark;
         }
 
@@ -66,39 +80,165 @@ class Noid implements PluginInterface
 
         $contact = $this->getContact();
 
-        $ark = \Noid::mint($noid, $contact);
+        $ark = NoidLib::mint($noid, $contact);
         if (!strlen((string) $ark)) {
-            \Noid::dbclose($noid);
+            Db::dbclose($noid);
             $this->logger->err(
                 'Cannot create an Ark for {resource} #{resource_id}: {message}', // @translate
-                ['resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => \Noid::errmsg($noid)]
+                ['resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => Log::errmsg($noid)]
             );
             return null;
         }
 
         // Bind the ark and the record.
         $locations = implode('|', $resourceIds);
-        $result = \Noid::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
+        $result = NoidLib::bind($noid, $contact, 1, 'set', $ark, 'locations', $locations);
         if (empty($result)) {
             $this->logger->warn(
                 'Ark set, but not bound [{ark}, {resource} #{resource_id}]: {message}', // @translate
-                ['ark' => $ark, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => \Noid::errmsg($noid)]
+                ['ark' => $ark, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => Log::errmsg($noid)]
             );
         }
 
         // Save the reverse bind on Omeka id to find it instantly, as a "note".
         // If needed, other urls can be find in a second step via the ark.
-        $result = \Noid::note($noid, $contact, 'locations/' . $resource->id(), $ark);
+        $result = Log::note($noid, $contact, 'locations/' . $resource->id(), $ark);
         if (empty($result)) {
             $this->logger->warn(
                 'Ark set, but no reverse bind [{ark}, {resource} #{resource_id}]: {message}', // @translate
-                ['ark' => $ark, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => \Noid::errmsg($noid)]
+                ['ark' => $ark, 'resource' => $resource->getControllerName(), 'resource_id' => $resource->id(), 'message' => Log::errmsg($noid)]
             );
         }
 
-        \Noid::dbclose($noid);
+        Db::dbclose($noid);
 
         return $ark;
+    }
+
+    /**
+     * Create arks for multiple resources in batch.
+     *
+     * This method is more efficient than calling create() multiple times as it:
+     * - Opens the database once
+     * - Uses mintMultiple() for batch minting
+     * - Uses bindMultiple() for batch bindings
+     *
+     * @param AbstractResourceEntityRepresentation[] $resources
+     * @return array Associative array of resource id => ark (or null on failure)
+     */
+    public function createMany(array $resources): array
+    {
+        if (empty($resources)) {
+            return [];
+        }
+
+        $noid = $this->openDatabase(DatabaseInterface::DB_WRITE);
+        if (empty($noid)) {
+            $this->logger->err(
+                'Cannot open database: {message}', // @translate
+                ['message' => Log::errmsg(null, 1) ?: 'No database']  // @translate
+            );
+            return [];
+        }
+
+        $result = [];
+        $toMint = [];
+
+        // Check which resources already have arks.
+        foreach ($resources as $resource) {
+            $resourceId = $resource->id();
+            $existingArk = Log::get_note($noid, 'locations/' . $resourceId);
+            if ($existingArk) {
+                $result[$resourceId] = $existingArk;
+            } else {
+                $toMint[$resourceId] = $resource;
+            }
+        }
+
+        if (empty($toMint)) {
+            Db::dbclose($noid);
+            return $result;
+        }
+
+        $contact = $this->getContact();
+        $count = count($toMint);
+
+        // Mint multiple arks at once.
+        $arks = NoidLib::mintMultiple($noid, $contact, $count);
+        if (empty($arks)) {
+            $this->logger->err(
+                'Cannot create Arks for {count} resources: {message}', // @translate
+                ['count' => $count, 'message' => Log::errmsg($noid)]
+            );
+            Db::dbclose($noid);
+            return $result;
+        }
+
+        if (count($arks) < $count) {
+            $this->logger->warn(
+                'Minter exhausted: requested {count} arks, received {received}.', // @translate
+                ['count' => $count, 'received' => count($arks)]
+            );
+        }
+
+        // Prepare bindings for all arks.
+        $bindings = [];
+        $arkIndex = 0;
+        $resourceArks = [];
+
+        foreach ($toMint as $resourceId => $resource) {
+            if (!isset($arks[$arkIndex])) {
+                $this->logger->err(
+                    'No ark available for {resource} #{resource_id}.', // @translate
+                    ['resource' => $resource->getControllerName(), 'resource_id' => $resourceId]
+                );
+                $result[$resourceId] = null;
+                continue;
+            }
+
+            $ark = $arks[$arkIndex++];
+            $resourceArks[$resourceId] = $ark;
+
+            // Prepare binding for locations.
+            $bindings[] = [
+                'how' => 'set',
+                'id' => $ark,
+                'elem' => 'locations',
+                'value' => (string) $resourceId,
+            ];
+        }
+
+        // Bind all arks at once.
+        if (!empty($bindings)) {
+            $bindResults = NoidLib::bindMultiple($noid, $contact, 1, $bindings);
+            foreach ($bindResults as $i => $bindResult) {
+                if ($bindResult === null) {
+                    $resourceId = array_keys($resourceArks)[$i] ?? null;
+                    if ($resourceId) {
+                        $this->logger->warn(
+                            'Ark set, but not bound [{ark}, resource #{resource_id}]: {message}', // @translate
+                            ['ark' => $resourceArks[$resourceId], 'resource_id' => $resourceId, 'message' => Log::errmsg($noid)]
+                        );
+                    }
+                }
+            }
+        }
+
+        // Save reverse binds (notes) for instant lookup.
+        foreach ($resourceArks as $resourceId => $ark) {
+            $noteResult = Log::note($noid, $contact, 'locations/' . $resourceId, $ark);
+            if (empty($noteResult)) {
+                $this->logger->warn(
+                    'Ark set, but no reverse bind [{ark}, resource #{resource_id}]: {message}', // @translate
+                    ['ark' => $ark, 'resource_id' => $resourceId, 'message' => Log::errmsg($noid)]
+                );
+            }
+            $result[$resourceId] = $ark;
+        }
+
+        Db::dbclose($noid);
+
+        return $result;
     }
 
     /**
@@ -110,7 +250,7 @@ class Noid implements PluginInterface
         if (empty($noid)) {
             return false;
         }
-        \Noid::dbclose($noid);
+        Db::dbclose($noid);
         return true;
     }
 
@@ -121,7 +261,7 @@ class Noid implements PluginInterface
     {
         $contact = $this->getContact();
 
-        $database = $this->getDatabaseDir();
+        $settings = $this->buildSettings();
 
         $template = $this->settings->get('ark_name_noid_template');
         $naan = $this->settings->get('ark_naan');
@@ -130,10 +270,10 @@ class Noid implements PluginInterface
 
         $term = ($naan && $naa && $subnaa) ? 'long' : 'medium';
 
-        $erc = \Noid::dbcreate($database, $contact, $template, $term, $naan, $naa, $subnaa);
+        $erc = Db::dbcreate($settings, $contact, $template, $term, $naan, $naa, $subnaa);
 
         if (empty($erc)) {
-            return \Noid::errmsg(null, 1);
+            return Log::errmsg(null, 1);
         }
         // dbcreate() closes the database automatically.
 
@@ -155,15 +295,15 @@ class Noid implements PluginInterface
 
         $levelNoid = in_array($level, ['meta', 'admin']) ? 'brief' : $level;
         ob_start();
-        $result = \Noid::dbinfo($noid, $levelNoid);
+        $result = Db::dbinfo($noid, $levelNoid);
         $info = ob_get_contents();
         ob_end_clean();
-        \Noid::dbclose($noid);
+        Db::dbclose($noid);
 
         if (!$result) {
             $this->logger->err(
                 'Cannot get database info: {message}', // @translate
-                ['message' => \Noid::errmsg($noid, 1)]
+                ['message' => Log::errmsg($noid, 1)]
             );
             return '';
         }
@@ -189,16 +329,40 @@ class Noid implements PluginInterface
         return $info;
     }
 
-    protected function openDatabase($mode = \Noid::DB_RDONLY)
+    /**
+     * Build settings array for the Noid library.
+     *
+     * @return array
+     */
+    protected function buildSettings(): array
+    {
+        $dataDir = $this->getDatabaseDir();
+        return [
+            'db_type' => $this->dbType,
+            'storage' => [
+                $this->dbType => [
+                    'data_dir' => $dataDir,
+                    'db_name' => 'NOID',
+                ],
+            ],
+        ];
+    }
+
+    protected function openDatabase($mode = DatabaseInterface::DB_RDONLY)
     {
         $database = $this->getDatabaseDir();
-        if (empty($database) || !is_dir($database)) {
+        if (empty($database)) {
             return false;
         }
 
-        $database = $database . '/NOID/noid.bdb';
+        // Create directory if it doesn't exist.
+        if (!is_dir($database)) {
+            return false;
+        }
 
-        return \Noid::dbopen($database, $mode);
+        $settings = $this->buildSettings();
+
+        return Db::dbopen($settings, $mode);
     }
 
     protected function getContact()
@@ -212,5 +376,27 @@ class Noid implements PluginInterface
     protected function getDatabaseDir()
     {
         return $this->databaseDir;
+    }
+
+    /**
+     * Enable persistent database connection mode.
+     *
+     * When enabled, dbclose() calls will not actually close the connection,
+     * allowing multiple operations to reuse the same connection. This is
+     * useful for batch operations across multiple calls.
+     *
+     * Call disablePersistence() when done to close the connection.
+     */
+    public function enablePersistence(): void
+    {
+        Db::dbpersist(true);
+    }
+
+    /**
+     * Disable persistent mode and close the database connection.
+     */
+    public function disablePersistence(): void
+    {
+        Db::dbunpersist();
     }
 }

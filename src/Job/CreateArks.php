@@ -12,11 +12,26 @@ class CreateArks extends AbstractJob
     {
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
+        $arkManager = $services->get('Ark\ArkManager');
 
-        $this->processResources('item_sets');
-        $this->processResources('items');
-        if ($settings->get('ark_qualifier_static')) {
-            $this->processResources('media');
+        // Enable persistent connection for batch processing.
+        $plugin = $arkManager->getArkNamePlugin();
+        $hasPersistence = method_exists($plugin, 'enablePersistence');
+        if ($hasPersistence) {
+            $plugin->enablePersistence();
+        }
+
+        try {
+            $this->processResources('item_sets');
+            $this->processResources('items');
+            if ($settings->get('ark_qualifier_static')) {
+                $this->processResources('media');
+            }
+        } finally {
+            // Ensure connection is closed even if an error occurs.
+            if ($hasPersistence) {
+                $plugin->disablePersistence();
+            }
         }
     }
 
@@ -62,17 +77,28 @@ DQL;
             // Get it one time by loop to avoid issues with doctrine.
             $identifierProperty = $this->getDctermsIdentifierProperty();
 
+            // Build representations for batch processing.
+            $representations = [];
+            $resourceMap = [];
             foreach ($resources as $resource) {
                 $representation = $adapter->getRepresentation($resource);
-                $ark = $arkManager->createName($representation);
+                $representations[] = $representation;
+                $resourceMap[$resource->getId()] = $resource;
+            }
+
+            // Create arks in batch for better performance.
+            $arks = $arkManager->createNames($representations);
+
+            foreach ($arks as $resourceId => $ark) {
                 if (!$ark) {
                     $logger->err(
                         '{resource} #{resource_id}: Failed to create ARK identifier.', // @translate
-                        ['resource' => $adapter->getResourceName(), 'resource_id' => $resource->getId()]
+                        ['resource' => $adapter->getResourceName(), 'resource_id' => $resourceId]
                     );
                     continue;
                 }
 
+                $resource = $resourceMap[$resourceId];
                 $value = new Value();
                 $value->setResource($resource);
                 $value->setProperty($identifierProperty);
@@ -83,7 +109,7 @@ DQL;
                 $entityManager->persist($value);
                 $logger->info(
                     '{resource} #{resource_id}: Created ARK identifier {identifier}.', // @translate
-                    ['resource' => $adapter->getResourceName(), 'resource_id' => $resource->getId(), 'identifier' => $ark]
+                    ['resource' => $adapter->getResourceName(), 'resource_id' => $resourceId, 'identifier' => $ark]
                 );
             }
 
