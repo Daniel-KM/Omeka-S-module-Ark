@@ -269,7 +269,7 @@ class Module extends AbstractModule
             return;
         }
 
-        $easyMeta = $services->get('EasyMeta');
+        $easyMeta = $services->get('Common\EasyMeta');
 
         // 10 is dcterms:identifier id in default hard coded install.
         $property = $settings->get('ark_property') ?: 'dcterms:identifier';

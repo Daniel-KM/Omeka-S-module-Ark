@@ -16,6 +16,6 @@ Bootstrap::enableModule('Common');
 @require_once dirname(__DIR__, 2) . '/Common/src/Service/Stdlib/EasyMetaFactory.php';
 /** @var Laminas\ServiceManager\ServiceManager $services */
 $services = Bootstrap::getApplication()->getServiceManager();
-$services->setFactory('EasyMeta', \Common\Service\Stdlib\EasyMetaFactory::class);
+$services->setFactory('Common\EasyMeta', \Common\Service\Stdlib\EasyMetaFactory::class);
 
 Bootstrap::enableModule('Ark');

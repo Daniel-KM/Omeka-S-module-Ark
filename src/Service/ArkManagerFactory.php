@@ -16,7 +16,7 @@ class ArkManagerFactory implements FactoryInterface
          *
          * 10 is dcterms:identifier id in default hard coded install.
          */
-        $easyMeta = $services->get('EasyMeta');
+        $easyMeta = $services->get('Common\EasyMeta');
         $settings = $services->get('Omeka\Settings');
         $propertyTerm = $settings->get('ark_property') ?: 'dcterms:identifier';
         $propertyId = $easyMeta->propertyId($propertyTerm) ?: 10;
@@ -29,7 +29,7 @@ class ArkManagerFactory implements FactoryInterface
             $propertyTerm,
             $services->get('Omeka\ApiManager'),
             $services->get('Omeka\Connection'),
-            $services->get('EasyMeta'),
+            $easyMeta,
             $services->get('Omeka\Logger'),
             $services->get('Ark\NamePluginManager'),
             $services->get('Ark\QualifierPluginManager')
