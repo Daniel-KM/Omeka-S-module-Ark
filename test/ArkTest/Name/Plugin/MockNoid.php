@@ -5,11 +5,11 @@ namespace ArkTest\Name\Plugin;
 class MockNoid extends \Ark\Name\Plugin\Noid
 {
     /**
-     * Override the default path to the original ark database.
+     * Override the default path to use system temp directory.
      */
     protected function getDatabaseDir()
     {
-        return dirname(__DIR__, 3) . '/files/arkandnoid';
+        return sys_get_temp_dir() . '/arktest/arkandnoid';
     }
 
     public function deleteDatabase(): void

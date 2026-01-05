@@ -2,14 +2,23 @@
 <!DOCTYPE phpunit>
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/9.6/phpunit.xsd"
-    bootstrap="bootstrap.php"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/9.5/phpunit.xsd"
     colors="true"
     backupGlobals="false"
+    bootstrap="./bootstrap.php"
     >
     <testsuites>
+        <!-- Controller tests (HTTP dispatch) -->
+        <testsuite name="controller">
+            <directory suffix="Test.php">tests/ArkTest/Controller</directory>
+        </testsuite>
+        <!-- All tests -->
         <testsuite name="Ark">
-            <directory>ArkTest</directory>
+            <directory suffix="Test.php">tests/ArkTest</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <env name="APPLICATION_ENV" value="testing"/>
+        <includePath>.</includePath>
+    </php>
 </phpunit>

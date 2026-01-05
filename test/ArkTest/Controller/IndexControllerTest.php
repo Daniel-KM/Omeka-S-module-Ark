@@ -15,12 +15,7 @@ class IndexControllerTest extends ArkControllerTestCase
         $namePlugin->deleteDatabase();
         $namePlugin->createDatabase();
 
-        $this->site = $this->api()->create('sites', [
-            'o:title' => 'default',
-            'o:slug' => 'default',
-            'o:theme' => 'default',
-            'o:is_public' => '1',
-        ])->getContent();
+        $this->site = $this->createSite('default', 'default');
 
         /** @var \Omeka\Settings\SiteSettings $siteSettings */
         $siteSettings = $this->getServiceLocator()->get('Omeka\Settings\Site');
@@ -34,7 +29,7 @@ class IndexControllerTest extends ArkControllerTestCase
 
     public function tearDown(): void
     {
-        $this->api()->delete('sites', $this->site->id());
+        $this->cleanupResources();
     }
 
     public function testArkUrlShouldDisplayCorrectItem(): void
