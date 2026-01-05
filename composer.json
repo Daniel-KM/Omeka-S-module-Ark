@@ -27,25 +27,14 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "ext-dba": "*",
-        "daniel-km/noid4php": "1.1.2"
+        "daniel-km/noid": "^1.4"
     },
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "daniel-km/noid4php",
-                "version": "1.1.2",
-                "dist": {
-                    "type": "tar",
-                    "url": "https://gitlab.com/Daniel-KM/Noid4Php/-/archive/1.1.2/Noid4Php-1.1.2.tar.gz"
-                },
-                "autoload": {
-                    "classmap": ["lib/"]
-                }
-            }
-        }
-    ],
+    "suggest": {
+        "ext-dba": "Required for LMDB (default) or BerkeleyDB storage backend",
+        "ext-pdo": "Required for PDO storage backend (MySQL, PostgreSQL, SQLite)",
+        "ext-sqlite3": "Required for SQLite3 storage backend",
+        "ext-simplexml": "Required for XML storage backend"
+    },
     "autoload": {
         "psr-4": {
             "Ark\\": "src/"

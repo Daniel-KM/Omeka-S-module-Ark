@@ -4,21 +4,81 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2cadea633efeb4aa471bce24b33fc6ea",
+    "content-hash": "af696d29e635ad5ed1f0d4334592a543",
     "packages": [
         {
-            "name": "daniel-km/noid4php",
-            "version": "1.1.2",
+            "name": "daniel-km/noid",
+            "version": "1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.com/Daniel-KM/Noid4Php.git",
+                "reference": "09422b8377794bd8dd812da3a574a54951d692b8"
+            },
             "dist": {
-                "type": "tar",
-                "url": "https://gitlab.com/Daniel-KM/Noid4Php/-/archive/1.1.2/Noid4Php-1.1.2.tar.gz"
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/Daniel-KM%2FNoid4php/repository/archive.zip?sha=09422b8377794bd8dd812da3a574a54951d692b8",
+                "reference": "09422b8377794bd8dd812da3a574a54951d692b8",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "ext-dba": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-posix": "*",
+                "ext-simplexml": "*",
+                "ext-sqlite3": "*",
+                "phpunit/phpunit": "^9"
+            },
+            "suggest": {
+                "ext-bcmath": "Optional for drand48 generator float operations (not used for minting)",
+                "ext-dba": "Required for LMDB (default) or BerkeleyDB storage backend",
+                "ext-mysqli": "Deprecated: use ext-pdo_mysql instead",
+                "ext-pdo": "Required for PDO storage backend (MySQL, PostgreSQL, SQLite)",
+                "ext-pdo_mysql": "Required for PDO MySQL/MariaDB support",
+                "ext-pdo_pgsql": "Required for PDO PostgreSQL support",
+                "ext-pdo_sqlite": "Required for PDO SQLite support",
+                "ext-simplexml": "Required for XML storage backend",
+                "ext-sqlite3": "Required for SQLite3 storage backend (alternative to PDO)"
             },
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "lib/"
-                ]
-            }
+                "psr-4": {
+                    "Noid\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CECILL-B"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Berthereau",
+                    "email": "Daniel.packagist@Berthereau.net"
+                },
+                {
+                    "name": "John A. Kunze",
+                    "email": "jak@ucop.edu"
+                }
+            ],
+            "description": "Create and manage temporary or permanent nice opaque identifiers for physical or digital objects like `12025/654xz321` (port of a perl utility).",
+            "homepage": "https://gitlab.com/Daniel-KM/Noid4Php",
+            "keywords": [
+                "Noid4Php",
+                "identifier",
+                "nice opaque identifier",
+                "noid",
+                "persistent identifier",
+                "tool",
+                "utility"
+            ],
+            "support": {
+                "issues": "https://gitlab.com/Daniel-KM/Noid4Php/-/issues",
+                "source": "https://gitlab.com/Daniel-KM/Noid4Php/-/tree/1.4.0"
+            },
+            "time": "2024-07-15T00:00:00+00:00"
         }
     ],
     "packages-dev": [],
@@ -27,9 +87,7 @@
     "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
-    "platform": {
-        "ext-dba": "*"
-    },
+    "platform": {},
     "platform-dev": {},
     "platform-overrides": {
         "php": "7.4"
