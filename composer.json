@@ -53,7 +53,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "ArkTest\\": "test/ArkTest/"
+            "ArkTest\\": "tests/ArkTest/"
         }
     },
     "config": {

@@ -5,7 +5,7 @@
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/9.5/phpunit.xsd"
     colors="true"
     backupGlobals="false"
-    bootstrap="./bootstrap.php"
+    bootstrap="./tests/bootstrap.php"
     >
     <testsuites>
         <!-- Controller tests (HTTP dispatch) -->
@@ -19,6 +19,6 @@
     </testsuites>
     <php>
         <env name="APPLICATION_ENV" value="testing"/>
-        <includePath>.</includePath>
+        <includePath>./tests</includePath>
     </php>
 </phpunit>
