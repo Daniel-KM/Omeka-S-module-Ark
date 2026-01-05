@@ -99,6 +99,21 @@ class ConfigForm extends Form
                 ],
             ])
             ->add([
+                'name' => 'ark_name_noid_generator',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Random generator for the noid database when template is random', // @translate
+                    'value_options' => [
+                        'mt_rand' => 'Mersenne Twister, better random distribution', // @translate
+                        'drand48' => 'Linear Congruential Generator, better compatibility', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'ark_name_noid_generator',
+                    'disabled' => $databaseCreated,
+                ],
+            ])
+            ->add([
                 'name' => 'ark_qualifier',
                 'type' => Element\Radio::class,
                 'options' => [
@@ -186,6 +201,10 @@ class ConfigForm extends Form
         $this->getInputFilter()
             ->add([
                 'name' => 'ark_store',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'ark_name_noid_generator',
                 'required' => false,
             ])
             ->add([

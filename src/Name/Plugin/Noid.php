@@ -371,7 +371,7 @@ class Noid implements PluginInterface
 
         // Only set generator when creating new databases (library default is drand48).
         if ($forCreation) {
-            $settings['generator'] = 'mt_rand';
+            $settings['generator'] = $this->settings->get('ark_name_noid_generator', 'mt_rand');
         }
 
         return $settings;

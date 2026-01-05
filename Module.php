@@ -172,6 +172,7 @@ class Module extends AbstractModule
         $params = array_intersect_key($params, $defaultSettings);
 
         // Avoid to reset existing settings from the disabled fields.
+        /** @var \Ark\Name\Plugin\Internal|\Ark\Name\Plugin\Noid $namePlugin */
         $namePlugin = $arkManager->getArkNamePlugin();
         if ($namePlugin->isDatabaseCreated()) {
             unset(
@@ -179,7 +180,8 @@ class Module extends AbstractModule
                 $params['ark_naan'],
                 $params['ark_naa'],
                 $params['ark_subnaa'],
-                $params['ark_name_noid_template']
+                $params['ark_name_noid_template'],
+                $params['ark_name_noid_generator']
             );
         }
         foreach ($params as $name => $value) {

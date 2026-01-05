@@ -175,6 +175,7 @@ return [
             'ark_subnaa' => 'sub',
             'ark_name' => 'noid',
             'ark_name_noid_template' => 'b.rllllk',
+            'ark_name_noid_generator' => 'mt_rand',
             'ark_qualifier' => 'internal',
             'ark_qualifier_position_format' => '',
             'ark_qualifier_static' => false,
