@@ -70,7 +70,7 @@ class Ark extends AbstractHelper
     protected function urlFromArk(ArkArk $ark, array $options = [], $admin = null): string
     {
         $view = $this->getView();
-        $isAdmin = is_null($admin)
+        $isAdmin = $admin === null
             ? $view->status()->isAdminRequest()
             : $admin;
         if ($isAdmin) {

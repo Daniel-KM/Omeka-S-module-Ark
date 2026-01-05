@@ -56,7 +56,7 @@ class Ark
      */
     public function setQualifier($qualifier): self
     {
-        $this->qualifier = is_null($qualifier) ? null : (string) $qualifier;
+        $this->qualifier = $qualifier === null ? null : (string) $qualifier;
         return $this;
     }
 
