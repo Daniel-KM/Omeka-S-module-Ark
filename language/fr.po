@@ -1,13 +1,10 @@
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-#
 # Daniel Berthereau <Daniel.github@Berthereau.net>, 2020.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-26 00:00+0000"
-"MI+ZONE\n"
+"POT-Creation-Date: 2026-01-05 00:00+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
@@ -16,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.6\n"
 
 #: data/scripts/upgrade.php:31 Module.php:67
 #, php-format
@@ -27,29 +24,33 @@ msgstr "Le module %1$s doit être mis à niveau à la version %2$s ou supérieur
 msgid ""
 "Noid requires the extension \"Database (dbm-style) Abstraction Layer\" (dba)."
 msgstr ""
-"Noid nécessite l’extension php « Database (dbm-style) Abstraction "
-"Layer » (dba)."
+"Noid a besoin de l’extension php « Database (dbm-style) Abstraction Layer » "
+"(dba)."
 
-#: Module.php:83
-msgid "Noid requires BerkeleyDB: not installed."
-msgstr "Noid nécessite BerkeleyDB : non installé."
+#: Module.php:84
+msgid ""
+"Noid requires a compatible dba handler (BerkeleyDB, GDBM, or LMDB): not "
+"installed."
+msgstr ""
+"Noid a besoin d’un gestionnaire dba compatible (BerkeleyDB, GDBM ou LMDB) : "
+"non installé."
 
-#: Module.php:97
+#: Module.php:98
 msgid ""
 "Ark allows to create and manage unique, universel and persistent ark "
 "identifiers."
 msgstr ""
 "Ark permet de créer et de gérer des identifiants uniques, universels et "
-"permanents."
+"pérennes."
 
-#: Module.php:100
+#: Module.php:101
 #, php-format
 msgid "See %1$sreadme%3$s or %2$sthe original help%3$s for more informations."
 msgstr ""
-"Voir %1$sl’aide officielle%3$s ou %2$sl’aide originale%3$s pour davantage "
+"Voir %1$sle readme%3$s ou %2$sl’aide originale%3$s pour davantage "
 "d’informations."
 
-#: Module.php:122
+#: Module.php:123
 msgid ""
 "NOID database is already created, which means some settings are not "
 "modifiable."
@@ -57,7 +58,7 @@ msgstr ""
 "La base de données NOID est déjà créée, ce qui implique qu’il n’est plus "
 "possible de modifier les paramètres."
 
-#: Module.php:124 Module.php:132
+#: Module.php:125 Module.php:133
 #, php-format
 msgid ""
 "To be able to modify them, you have to manually remove the database (located "
@@ -66,7 +67,7 @@ msgstr ""
 "Pour pouvoir les modifier, vous devez supprimer la base manuellement (située "
 "dans %s)."
 
-#: Module.php:129
+#: Module.php:130
 msgid ""
 "NOID database is already created, but the settings are not the same than in "
 "the Omeka database."
@@ -74,7 +75,7 @@ msgstr ""
 "La base de données NOID est déjà créée, mais les paramètres ne correspondent "
 "pas avec ceux de la base Omeka."
 
-#: Module.php:136
+#: Module.php:137
 #, php-format
 msgid "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s."
 msgstr "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Modèle: %4$s."
@@ -94,113 +95,267 @@ msgstr ""
 "seront pas automatiquement déplacés dans la nouvelle propriété (utiliser le "
 "module {link}Bulk Edit{link_end} pour cela)."
 
-#: src/Name/Plugin/Noid.php:51
-#, php-format
-msgid "Cannot open database: %s"
-msgstr "Impossible d’ouvrir la base : %s"
+#: data/scripts/upgrade.php:190
+msgid "Failed to dump BerkeleyDB database using db_dump."
+msgstr "Échec de l’export de la base de données BerkeleyDB via db_dump."
 
-#: src/Name/Plugin/Noid.php:52
+#: data/scripts/upgrade.php:199
+msgid ""
+"No data found in BerkeleyDB dump. You may remove existing files in noid "
+"directory."
+msgstr ""
+"Aucune donnée n’a été trouvée dans le dumping BerkeleyDB. Vous pouvez "
+"supprimer les fichiers existants dans le répertoire noid."
+
+#: data/scripts/upgrade.php:209
+msgid "Failed to import Noid database: {error}"
+msgstr "Échec d’import de la base de données Noid : {error}"
+
+#: data/scripts/upgrade.php:219
+msgid ""
+"The Noid database has been migrated from BerkeleyDB to {format} using "
+"db_dump."
+msgstr ""
+"La base de données Noid a été migrée de BerkeleyDB vers {format} à l’aide de "
+"db_dump."
+
+#: data/scripts/upgrade.php:229
+msgid "Cannot read JSON file: {file}"
+msgstr "Impossible de lire le fichier JSON : {file}"
+
+#: data/scripts/upgrade.php:238
+msgid "Invalid JSON in file {file}: {error}"
+msgstr "Json invalide dans le fichier {file} : {error}"
+
+#: data/scripts/upgrade.php:246
+msgid "No data found in JSON file."
+msgstr "Aucune donnée n’a été trouvée dans le fichier JSON."
+
+#: data/scripts/upgrade.php:256
+msgid "Failed to import Noid database from JSON: {error}"
+msgstr "Échec d’import de la base de données Noid à partir de JSON : {error}"
+
+#: data/scripts/upgrade.php:266
+msgid ""
+"The Noid database has been migrated from BerkeleyDB to {format} using "
+"noid_data.json."
+msgstr ""
+"La base de données Noid a été migrée de BerkeleyDB à {format} en utilisant "
+"noid_data.json."
+
+#: data/scripts/upgrade.php:273
+msgid ""
+"A BerkeleyDB Noid database was found but cannot be migrated automatically.\n"
+"Option 1: Install db-util and retry: \n"
+"    - With Debian/Ubuntu: `apt install db-util`\n"
+"    - With RedHat/Fedora: `dnf install libdb-utils`\n"
+"Option 2: Export to JSON manually and retry:\n"
+"    - Use Perl: `perl vendor/daniel-km/noid/scripts/export_bdb_to_json.pl "
+"{bdb_file} {json_file}`\n"
+"    - Use Python: `python3 vendor/daniel-km/noid/scripts/"
+"export_bdb_to_json.py {bdb_file} {json_file}`\n"
+"See {link}Noid4Php documentation{link_end} for details."
+msgstr ""
+"Une base de données BerkeleyDB Noid a été trouvée mais ne peut pas être "
+"migrée automatiquement.\n"
+"Option 1 : Installer db-util et réessayer :\n"
+"    - Avec Debian/Ubuntu : `apt install db-util`\n"
+"    - Avec RedHat/Fedora : `dnf install libdb-utils`\n"
+"Option 2 : Exporter manuellement vers JSON et réessayer :\n"
+"    - Utiliser Perl : `perl vendor/daniel-km/noid/scripts/"
+"export_bdb_to_json.pl {bdb_file} {json_file}`\n"
+"    - Utiliser Python : `python3 vendor/daniel-km/noid/scripts/"
+"export_bdb_to_json.py {bdb_file} {json_file}`\n"
+"Voir la documentation {link}Noid4Php{link_end} pour plus de détails."
+
+#: data/scripts/upgrade.php:312
+msgid "Cannot open BerkeleyDB database for migration."
+msgstr "Impossible d’ouvrir la base de données BerkeleyDB pour la migration."
+
+#: data/scripts/upgrade.php:361
+msgid "The Noid database has been migrated from BerkeleyDB to {format}."
+msgstr "La base de données Noid a été migrée de BerkeleyDB vers {format}."
+
+#: data/scripts/upgrade.php:377
+msgid "Migration from BerkeleyDB failed: {error}"
+msgstr "La migration depuis BerkeleyDB a échoué : {error}"
+
+#: src/Name/Plugin/Noid.php:71 src/Name/Plugin/Noid.php:145
+msgid "Cannot open database: {message}"
+msgstr "Impossible d’ouvrir la base : {message}"
+
+#: src/Name/Plugin/Noid.php:72 src/Name/Plugin/Noid.php:146
 msgid "No database"
 msgstr "Pas base de données"
 
-#: src/Name/Plugin/Noid.php:75
-#, php-format
-msgid "Cannot create an Ark for %1$s #%2$d: %3$s"
-msgstr "Impossible de créer un ark pour %1$s #%2$d: %3$s"
+#: src/Name/Plugin/Noid.php:94
+msgid "Cannot create an Ark for {resource} #{resource_id}: {message}"
+msgstr ""
+"Impossible de créer un ark pour la [{resource} #{resource_id}] : {message}"
 
-#: src/Name/Plugin/Noid.php:87
-#, php-format
-msgid "Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s"
-msgstr "Ark mis, mais non lié [%1$s, %2$s #%3$d]: %4$s"
+#: src/Name/Plugin/Noid.php:105
+msgid "Ark set, but not bound [{ark}, {resource} #{resource_id}]: {message}"
+msgstr ""
+"Ark défini, mais non lié [{ark}, {resource} #{resource_id}] : {message}"
 
-#: src/Name/Plugin/Noid.php:170
-#, php-format
-msgid "Cannot get database info: %s"
-msgstr "Impossible de récupérer les informations de la base : %s"
+#: src/Name/Plugin/Noid.php:115
+msgid ""
+"Ark set, but no reverse bind [{ark}, {resource} #{resource_id}]: {message}"
+msgstr ""
+"Ark défini, mais sans lien inverse [{ark}, {resource} #{resource_id}] : "
+"{message}"
 
-#: src/Name/Plugin/Noid.php:214
+#: src/Name/Plugin/Noid.php:177
+msgid "Cannot create Arks for {count} resources: {message}"
+msgstr "Impossible de créer des arks pour {count} resources : {message}"
+
+#: src/Name/Plugin/Noid.php:186
+msgid "Minter exhausted: requested {count} arks, received {received}."
+msgstr "Mineur épuisé : a demandé {count} arks, reçu {received}."
+
+#: src/Name/Plugin/Noid.php:199
+msgid "No ark available for {resource} #{resource_id}."
+msgstr "Aucun ark disponible pour la {resource} #{resource_id}."
+
+#: src/Name/Plugin/Noid.php:226
+msgid "Ark set, but not bound [{ark}, resource #{resource_id}]: {message}"
+msgstr "Ark défini, mais non lié [{ark}, resource #{resource_id}] : {message}"
+
+#: src/Name/Plugin/Noid.php:239
+msgid ""
+"Ark set, but no reverse bind [{ark}, resource #{resource_id}]: {message}"
+msgstr ""
+"Ark défini, mais sans lien inverse [{ark}, resource #{resource_id}] : "
+"{message}"
+
+#: src/Name/Plugin/Noid.php:312
+msgid "Cannot get database info: {message}"
+msgstr "Impossible de récupérer les informations de la base : {message}"
+
+#: src/Name/Plugin/Noid.php:401
 msgid "[Unknown user]"
 msgstr "[Utilisateur inconnu]"
 
-#: src/Job/CreateArks.php:70
+#: src/Job/CreateArks.php:95
 msgid "{resource} #{resource_id}: Failed to create ARK identifier."
 msgstr "{resource} #{resource_id} : échec de la création de l’identifiant ark."
 
-#: src/Job/CreateArks.php:85
+#: src/Job/CreateArks.php:111
 msgid "{resource} #{resource_id}: Created ARK identifier {identifier}."
 msgstr ""
 "{resource} #{resource_id} : succès de la création de l’identifiant ark "
 "{identifier}."
 
 #: src/Form/ConfigForm.php:27
+msgid "Storage backend for the noid database"
+msgstr "Stockage de la base de données noid"
+
+#: src/Form/ConfigForm.php:29
+msgid "Default (lmdb if available, else xml)"
+msgstr "Défaut (lmdb si disponible, sinon xml)"
+
+#: src/Form/ConfigForm.php:30
+msgid "Lmdb (fast, bdb replacement)"
+msgstr "Lmdb (rapide, remplace bdb)"
+
+#: src/Form/ConfigForm.php:31
+msgid "Xml (portable)"
+msgstr "Xml (portable)"
+
+#: src/Form/ConfigForm.php:32
+msgid "Omeka database (simpler)"
+msgstr "Base de données Omeka (plus simple)"
+
+#: src/Form/ConfigForm.php:33
+msgid "Sqlite (portable)"
+msgstr "Sqlite (portable)"
+
+#: src/Form/ConfigForm.php:34
+msgid "BerkeleyDb (deprecated, no more fully free)"
+msgstr "BerkeleyDb (obsolète, plus entièrement libre)"
+
+#: src/Form/ConfigForm.php:46
 msgid "NAAN"
 msgstr "NAAN"
 
-#: src/Form/ConfigForm.php:38
+#: src/Form/ConfigForm.php:57
 msgid "NAA"
 msgstr "NAA"
 
-#: src/Form/ConfigForm.php:49
+#: src/Form/ConfigForm.php:68
 msgid "Sub NAA"
 msgstr "Sub NAA"
 
-#: src/Form/ConfigForm.php:60
+#: src/Form/ConfigForm.php:79
 msgid "Name processor for resource"
 msgstr "Processeur pour le nom ark"
 
-#: src/Form/ConfigForm.php:62
+#: src/Form/ConfigForm.php:81
 msgid "Internal resource id"
 msgstr "Id interne de la ressource"
 
-#: src/Form/ConfigForm.php:63
+#: src/Form/ConfigForm.php:82
 msgid "Noid"
 msgstr "Noid"
 
-#: src/Form/ConfigForm.php:75
+#: src/Form/ConfigForm.php:94
 msgid "Noid Template"
 msgstr "Modèle noid"
 
-#: src/Form/ConfigForm.php:86
+#: src/Form/ConfigForm.php:105
+msgid "Random generator for the noid database when template is random"
+msgstr ""
+"Générateur aléatoire pour la base de données noid avec un modèle aléatoire"
+
+#: src/Form/ConfigForm.php:107
+msgid "Mersenne Twister, better random distribution"
+msgstr "Mersenne Twister, meilleure distribution aléatoire"
+
+#: src/Form/ConfigForm.php:108
+msgid "Linear Congruential Generator, better compatibility"
+msgstr "Générateur congruentiel linéaire, meilleure compatibilité"
+
+#: src/Form/ConfigForm.php:120
 msgid "Qualifier for media"
 msgstr "Qualifiant pour le média"
 
-#: src/Form/ConfigForm.php:88
+#: src/Form/ConfigForm.php:122
 msgid "Internal media id"
 msgstr "Id interne du média"
 
-#: src/Form/ConfigForm.php:89
+#: src/Form/ConfigForm.php:123
 msgid "Position of the media"
 msgstr "Position du média"
 
-#: src/Form/ConfigForm.php:101
+#: src/Form/ConfigForm.php:135
 msgid "Format of position for qualifier"
 msgstr "Format pour la position du qualifiant"
 
-#: src/Form/ConfigForm.php:102
+#: src/Form/ConfigForm.php:136
 msgid ""
-"A \"sprintf\" string that will format the media position. It is recommended "
-"to use a format with a leading letter to avoid confusion with numeric media "
-"id. Furthermore, the position may not be stable: a scanned image may be "
-"missing. Finally, if the first media is not marked \"1\" in the database, "
-"use module \"Bulk Check\" to fix positions."
+"A `sprintf` string that will format the media position. It is recommended to "
+"use a format with a leading letter to avoid confusion with numeric media id. "
+"Furthermore, the position may not be stable: a scanned image may be missing. "
+"Finally, if the first media is not marked \"1\" in the database, use module "
+"Easy Admin to fix positions."
 msgstr ""
-"Une chaîne \"sprintf\" pour formater la position du média. Il est recommandé "
+"Une chaîne `sprintf` pour formater la position du média. Il est recommandé "
 "d’utiliser un format avec une lettre initiale pour éviter de confondre avec "
 "un numéro de média. De plus, la position peut ne pas être stable : une image "
-"scannée peut avoir été oubliée. Enfin, si le premier média n'est pas marqué "
-"\"1\" dans la base de données, utiliser le module \"Bulk Check\" pour "
-"corriger les positions."
+"scannée peut avoir été oubliée. Enfin, si le premier média n’est pas marqué "
+"\"1\" dans la base de données, utiliser le module Easy Admin pour corriger "
+"les positions."
 
-#: src/Form/ConfigForm.php:113
+#: src/Form/ConfigForm.php:147
 msgid "Save the ark with qualifier for media"
 msgstr "Enregistrer l’ark avec le qualifiant pour le média"
 
-#: src/Form/ConfigForm.php:123
+#: src/Form/ConfigForm.php:157
 msgid "Property where to store the identifier (usually dcterms:identifier)"
 msgstr ""
 "Propriété où enregistrer l’identifiant (généralement dcterms:identifier)"
 
-#: src/Form/ConfigForm.php:124
+#: src/Form/ConfigForm.php:158
 msgid ""
 "If changed, you will need to move all existing identifiers to the new "
 "property via module Bulk Edit."
@@ -208,11 +363,11 @@ msgstr ""
 "Si la propriété est modifiée, vous devrez déplacer tous les identifiants "
 "existants dans la nouvelle propriété via le module Bulk Edit."
 
-#: src/Form/ConfigForm.php:136
+#: src/Form/ConfigForm.php:170
 msgid "Policy statement"
 msgstr "Déclaration de politique"
 
-#: src/Form/ConfigForm.php:147
+#: src/Form/ConfigForm.php:181
 msgid "Main policy"
 msgstr "Politique générale"
 
@@ -220,57 +375,53 @@ msgstr "Politique générale"
 msgid "Create ARKs"
 msgstr "Créer les ARKs"
 
-#: src/ArkManager.php:386
-#, php-format
-msgid "No Ark created: check your processor \"%1$s\" [%2$s #%3$d]."
-msgstr "Ark non créé : vérifier le processeur \"%1$s\" [%2$s #%3$d]."
-
-#: src/ArkManager.php:396
-#, php-format
+#: src/ArkManager.php:416 src/ArkManager.php:464
 msgid ""
-"Ark \"%1$s\" is not correct: check your naan \"%2$s\", your template, and "
-"your processor [%3$s]."
+"Ark \"{ark}\" is not correct: check your naan \"{naan}\", your template, and "
+"your processor [{name}]."
 msgstr ""
-"L’ark \"%1$s\" n’est pas correct : vérifiez votre naan \"%2$s\", votre "
-"modèle de format et votre processeurs [%3$s]."
+"L’ark « {ark} » n’est pas correct : vérifiez votre naan « {naan} », votre "
+"modèle de format et votre processeurs [{name}]."
 
-#: src/ArkManager.php:410
-#, php-format
+#: src/ArkManager.php:455
 msgid ""
-"The proposed ark \"%1$s\" by the processor \"%2$s\" is not unique [%3$s "
-"#%4$d]."
+"No Ark created: check your processor \"{name}\" [{resource} #{resource_id}]."
 msgstr ""
-"L’ark proposé \"%1$s\" par le processeur \"%2$s\" n’est pas unique [%3$s "
-"#%4$d]."
+"Ark non créé : vérifier le processeur « {name} » [{resource} #{resource_id}]."
 
-#: src/ArkManager.php:418
-#, php-format
+#: src/ArkManager.php:477
 msgid ""
-"Unable to create a unique ark. Check parameters of the processor "
-"\"%1$s\" [%2$s #%3$d]."
+"The proposed ark \"{ark}\" by the processor \"{name}\" is not unique "
+"[{resource} #{resource_id}]."
+msgstr ""
+"L’ark proposé « {ark} » par le processeur « {name} » n’est pas unique "
+"[{resource} #{resource_id}]."
+
+#: src/ArkManager.php:484
+msgid ""
+"Unable to create a unique ark. Check parameters of the processor \"{name}\" "
+"[{resource} #{resource_id}]."
 msgstr ""
 "Impossible de créer un ark unique. Vérifiez les paramètres du processeur "
-"\"%1$s\" [%2$s #%3$d]."
+"« {name} » [{resource} #{resource_id}]."
 
-#: src/ArkManager.php:435
-#, php-format
+#: src/ArkManager.php:500
 msgid ""
-"No Ark qualfiier created for media #%1$d: the item #%2$d does not have an "
-"ark. Update it first."
+"No Ark qualfiier created for media #{media_id}: the item #{item_id} does not "
+"have an ark. Update it first."
 msgstr ""
-"Qualifiant ark non créé pour le média #%1$d: l’item #%2$d ne dispose pas "
-"d’ark. Mettez-le à jour d’abord."
+"Qualifiant ark non créé pour le média #{media_id} : l’item #{item_id} ne "
+"dispose pas d’ark. Mettez-le à jour d’abord."
 
-#: src/ArkManager.php:444
-#, php-format
+#: src/ArkManager.php:508
 msgid ""
-"Unable to create a qualifier for media #%1$d: option is \"dynamic "
+"Unable to create a qualifier for media #{media_id}: option is \"dynamic "
 "qualifier\"."
 msgstr ""
-"Impossible de créer un qualifiant pour le média #%1$d: l’option est "
-"\"dynamic qualifier\"."
+"Impossible de créer un qualifiant pour le média #{media_id} : l’option est "
+"« dynamic qualifier »."
 
-#: src/ArkManager.php:454
+#: src/ArkManager.php:517
 #, php-format
 msgid ""
 "Unable to create a qualifier for media #%1$d. Check the processor \"%2$s\"."
@@ -278,13 +429,13 @@ msgstr ""
 "Impossible de créer un qualifiant pour le média #%1$d. Vérifiez le "
 "processeur \"%2$s\"."
 
-#: src/ArkManager.php:466
-#, php-format
+#: src/ArkManager.php:528
 msgid ""
-"Unable to create a unique ark. Check the processor \"%1$s\" [%2$s #%3$d]."
+"Unable to create a unique ark. Check the processor \"{name}\" [media "
+"#{media_id}]."
 msgstr ""
-"Impossible de créer un ark unique. Vérifiez le processeur \"%1$s\" [%2$s "
-"#%3$d]."
+"Impossible de créer un ark unique. Vérifiez le processeur « {name} » [media "
+"#{media_id}]."
 
 #: src/Controller/Admin/ArkController.php:23
 msgid ""
@@ -293,6 +444,37 @@ msgid ""
 msgstr ""
 "La création des arks est lancé dans la tâche {link_job}#{job_id}{link_end} "
 "({link_log}journaux{link_end})."
+
+#~ msgid ""
+#~ "It is now possible to store the map of persistent identifiers and digital "
+#~ "objects in BerkeleyDB (current), mysql/mariadb, sqlite or xml for new "
+#~ "install. It will be possible to convert the base in next version."
+#~ msgstr ""
+#~ "Il est désormais possible d’enregistrer l’alignement entre les "
+#~ "identifiants pérennes et les objets digitaux dans une base BerkeleyDB "
+#~ "(actuel), mysql/mariadb, sqlite ou xml pour les nouvelles installations. "
+#~ "Il sera possible de les convertir dans la prochaine version."
+
+#~ msgid "Persistant storage of the map of identifiers and digital objects"
+#~ msgstr ""
+#~ "Stockage pérenne de l’alignement entre les identifiants et les objets "
+#~ "numériques"
+
+#~ msgid "Berkeley DB"
+#~ msgstr "Berkeley DB"
+
+#~ msgid "MySQL/MariaDB"
+#~ msgstr "MySQL/MariaDB"
+
+#~ msgid "SQLite"
+#~ msgstr "SQLite"
+
+#~ msgid "XML"
+#~ msgstr "XML"
+
+#, php-format
+#~ msgid "Ark set, but not bound [%1$s, %2$s #%3$d]: %4$s"
+#~ msgstr "Ark mis, mais non lié [%1$s, %2$s #%3$d]: %4$s"
 
 #, php-format
 #~ msgid "This module requires the module \"%s\"."
