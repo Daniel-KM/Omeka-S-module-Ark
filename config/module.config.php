@@ -142,7 +142,7 @@ return [
                         ],
                     ],
                     'ark-admin' => [
-                        'type' => \Zend\Router\Http\Literal::class,
+                        'type' => \Laminas\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/ark',
                             'defaults' => [
