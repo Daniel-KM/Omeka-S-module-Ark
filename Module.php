@@ -175,6 +175,7 @@ class Module extends AbstractModule
         $namePlugin = $arkManager->getArkNamePlugin();
         if ($namePlugin->isDatabaseCreated()) {
             unset(
+                $params['ark_store'],
                 $params['ark_naan'],
                 $params['ark_naa'],
                 $params['ark_subnaa'],

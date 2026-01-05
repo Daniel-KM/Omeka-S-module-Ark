@@ -1,10 +1,6 @@
 <?php declare(strict_types=1);
-/**
- * Php Noid format for Ark name.
- */
-namespace Ark\Name\Plugin;
 
-// Use Noid via composer (daniel-km/noid ^1.4).
+namespace Ark\Name\Plugin;
 
 use Laminas\Log\Logger;
 use Noid\Lib\Db;
@@ -14,6 +10,9 @@ use Noid\Storage\DatabaseInterface;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Settings\Settings;
 
+/**
+ * Php Noid format for Ark name.
+ */
 class Noid implements PluginInterface
 {
     /**
@@ -32,23 +31,31 @@ class Noid implements PluginInterface
     protected $settings;
 
     /**
-     * Database type to use (lmdb, sqlite, xml, pdo, bdb).
-     *
-     * Since Noid4Php 1.3, lmdb is the default and recommended backend.
-     * Requires php-dba with lmdb handler (available by default on Debian 10+).
+     * Database type to use (xml, pdo, sqlite, lmdb, bdb).
      *
      * @var string
      */
-    protected $dbType = 'lmdb';
+    protected $dbType;
+
+    /**
+     * Connection configuration for PDO storage (host, user, password, dbname).
+     *
+     * @var array
+     */
+    protected $connectionConfig = [];
 
     public function __construct(
         Logger $logger,
         Settings $settings,
-        $databaseDir
+        string $databaseDir,
+        string $dbType = 'xml',
+        array $connectionConfig = []
     ) {
         $this->logger = $logger;
         $this->settings = $settings;
         $this->databaseDir = $databaseDir;
+        $this->dbType = $dbType;
+        $this->connectionConfig = $connectionConfig;
     }
 
     public function isFullArk(): bool
@@ -337,13 +344,27 @@ class Noid implements PluginInterface
     protected function buildSettings(): array
     {
         $dataDir = $this->getDatabaseDir();
+        $storageConfig = [
+            'data_dir' => $dataDir,
+            'db_name' => 'NOID',
+        ];
+
+        // Add PDO-specific configuration (uses Omeka database).
+        if ($this->dbType === 'pdo' && !empty($this->connectionConfig)) {
+            $storageConfig = array_merge($storageConfig, [
+                'driver' => 'mysql',
+                'host' => $this->connectionConfig['host'] ?? 'localhost',
+                'user' => $this->connectionConfig['user'] ?? '',
+                'password' => $this->connectionConfig['password'] ?? '',
+                'db_name' => $this->connectionConfig['dbname'] ?? '',
+                'table_name' => 'noid',
+            ]);
+        }
+
         return [
             'db_type' => $this->dbType,
             'storage' => [
-                $this->dbType => [
-                    'data_dir' => $dataDir,
-                    'db_name' => 'NOID',
-                ],
+                $this->dbType => $storageConfig,
             ],
         ];
     }

@@ -21,6 +21,25 @@ class ConfigForm extends Form
 
         $this
             ->add([
+                'name' => 'ark_store',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Storage backend for the noid database', // @translate
+                    'value_options' => [
+                        '' => 'Default (lmdb if available, else xml)', // @translate
+                        'lmdb' => 'Lmdb (fast, bdb replacement)', // @translate
+                        'xml' => 'Xml (portable)', // @translate
+                        'pdo' => 'Omeka database (simpler)', // @translate
+                        'sqlite' => 'Sqlite (portable)', // @translate
+                        'bdb' => 'BerkeleyDb (deprecated, no more fully free)', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'ark_store',
+                    'disabled' => $databaseCreated,
+                ],
+            ])
+            ->add([
                 'name' => 'ark_naan',
                 'type' => Element\Text::class,
                 'options' => [
@@ -99,7 +118,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Format of position for qualifier', // @translate
-                    'info' => 'A "sprintf" string that will format the media position. It is recommended to use a format with a leading letter to avoid confusion with numeric media id. Furthermore, the position may not be stable: a scanned image may be missing. Finally, if the first media is not marked "1" in the database, use module "Bulk Check" to fix positions.', // @translate
+                    'info' => 'A `sprintf` string that will format the media position. It is recommended to use a format with a leading letter to avoid confusion with numeric media id. Furthermore, the position may not be stable: a scanned image may be missing. Finally, if the first media is not marked "1" in the database, use module Easy Admin to fix positions.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'ark_qualifier_position_format',
@@ -161,9 +180,14 @@ class ConfigForm extends Form
                     'id' => 'ark_note',
                     'rows' => 6,
                 ],
-            ]);
+            ])
+        ;
 
         $this->getInputFilter()
+            ->add([
+                'name' => 'ark_store',
+                'required' => false,
+            ])
             ->add([
                 'name' => 'ark_qualifier',
                 'required' => false,

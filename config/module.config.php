@@ -168,6 +168,7 @@ return [
     ],
     'ark' => [
         'config' => [
+            'ark_store' => '',
             // 12345 means example and 99999 means test.
             'ark_naan' => '99999',
             'ark_naa' => 'example.org',
