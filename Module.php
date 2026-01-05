@@ -2,7 +2,7 @@
 
 namespace Ark;
 
-if (!class_exists(\Common\TraitModule::class)) {
+if (!class_exists('Common\TraitModule', false)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
@@ -18,13 +18,14 @@ use Omeka\Entity\Property;
 use Omeka\Entity\Resource;
 use Omeka\Entity\Value;
 use Omeka\Module\AbstractModule;
+use Common\Stdlib\PsrMessage;
 
 /**
  * Ark.
  *
  * Creates and manages unique, universel and persistent ark identifiers.
  *
- * @copyright Daniel Berthereau, 2015-2024
+ * @copyright Daniel Berthereau, 2015-2026
  * @copyright biblibre, 2016-2017
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
@@ -60,7 +61,9 @@ class Module extends AbstractModule
     protected function preInstall(): void
     {
         $services = $this->getServiceLocator();
-        $translate = $services->get('ControllerPluginManager')->get('translate');
+        $plugins = $services->get('ControllerPluginManager');
+        $messenger = $plugins->get('messenger');
+        $translate = $plugins->get('translate');
 
         if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.76')) {
             $message = new \Omeka\Stdlib\Message(
@@ -70,19 +73,11 @@ class Module extends AbstractModule
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
-        // Check if dba is installed.
+        // Check if dba is installed (lmdb is available by default in that case)..
         if (!extension_loaded('dba')) {
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                $translate('Noid requires the extension "Database (dbm-style) Abstraction Layer" (dba).') // @ŧranslate
-            );
-        }
-
-        // Check if a compatible dba handler is installed (db4, gdbm, or lmdb).
-        $handlers = dba_handlers();
-        if (!in_array('db4', $handlers) && !in_array('gdbm', $handlers) && !in_array('lmdb', $handlers)) {
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                $translate('Noid requires a compatible dba handler (BerkeleyDB, GDBM, or LMDB): not installed.') // @translate
-            );
+            $messenger->addWarning(new PsrMessage(
+                'If extension dba is installed, you may store noid inside a lmdb database. For now, you can use omeka database, sqlite or xml.' // @translate
+            ));
         }
     }
 
