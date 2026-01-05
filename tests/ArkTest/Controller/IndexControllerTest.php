@@ -10,6 +10,9 @@ class IndexControllerTest extends ArkControllerTestCase
     {
         parent::setUp();
 
+        // Use drand48 generator to get deterministic ark values for testing.
+        $this->settings()->set('ark_name_noid_generator', 'drand48');
+
         $arkManager = $this->getServiceLocator()->get('Ark\ArkManager');
         $namePlugin = $arkManager->getArkNamePlugin();
         $namePlugin->deleteDatabase();
