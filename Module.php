@@ -77,10 +77,11 @@ class Module extends AbstractModule
             );
         }
 
-        // Check if BerkeleyDB is installed.
-        if (!in_array('db4', dba_handlers())) {
+        // Check if a compatible dba handler is installed (db4, gdbm, or lmdb).
+        $handlers = dba_handlers();
+        if (!in_array('db4', $handlers) && !in_array('gdbm', $handlers) && !in_array('lmdb', $handlers)) {
             throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                $translate('Noid requires BerkeleyDB: not installed.') // @translate
+                $translate('Noid requires a compatible dba handler (BerkeleyDB, GDBM, or LMDB): not installed.') // @translate
             );
         }
     }

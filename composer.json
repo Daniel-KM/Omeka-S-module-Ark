@@ -1,11 +1,34 @@
 {
+    "name": "daniel-km/omeka-s-module-ark",
+    "description": "Module for Omeka S to create short, unique, meaningless, universal and persistent identifiers (ark and/or noid) and use them as urls for records.",
+    "type": "library",
+    "license": "CECILL-2.1",
+    "authors": [
+        {
+            "name": "Daniel Berthereau",
+            "email": "Daniel.packagist@Berthereau.net"
+        }
+    ],
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-Ark",
+    "support": {
+        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-Ark/-/issues",
+        "forum": "https://forum.omeka.org/"
+    },
+    "keywords": [
+        "Omeka S",
+        "module",
+        "identifier",
+        "utility",
+        "nice opaque identifier",
+        "persistent identifier",
+        "digital object",
+        "noid"
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "ext-dba": "*",
         "daniel-km/noid4php": "1.1.2"
-    },
-    "require-dev": {
-        "biblibre/omeka-s-test-helper": "dev-master"
     },
     "repositories": [
         {
@@ -22,5 +45,23 @@
                 }
             }
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "Ark\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ArkTest\\": "test/ArkTest/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    },
+    "extra": {
+        "installer-name": "Ark"
+    }
 }
