@@ -59,19 +59,24 @@ class Position implements PluginInterface
         // Don't use $item->media() to avoid a different position for
         // public/private.
         // Media are automatically ordered (cf. item entity).
+        // Use DBAL updates to avoid a global flush that could conflict with
+        // pending entities in the UnitOfWork (Doctrine 3 does not support
+        // flush($entity)).
+        $conn = $this->entityManager->getConnection();
         $position = 0;
         $positionResource = 0;
         foreach ($resource->getItem()->getMedia() as $media) {
             ++$position;
             if ($media->getPosition() !== $position) {
+                $conn->update('media', [
+                    'position' => $position,
+                ], ['id' => $media->getId()]);
                 $media->setPosition($position);
-                $this->entityManager->persist($media);
             }
             if ($media->getId() === $resource->getId()) {
                 $positionResource = $position;
             }
         }
-        $this->entityManager->flush();
 
         return sprintf($this->format, $positionResource);
     }
