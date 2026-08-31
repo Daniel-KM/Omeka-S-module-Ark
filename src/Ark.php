@@ -5,7 +5,7 @@ namespace Ark;
 class Ark
 {
     /**
-     * @var string
+     * @var string|null
      */
     protected $naan;
 
@@ -22,7 +22,7 @@ class Ark
     /**
      * @param string|int|null $qualifier
      */
-    public function __construct(string $naan, string $name, $qualifier = null)
+    public function __construct(?string $naan, string $name, $qualifier = null)
     {
         $this->naan = $naan;
         $this->name = $name;
@@ -35,7 +35,7 @@ class Ark
         return $this;
     }
 
-    public function getNaan(): string
+    public function getNaan(): ?string
     {
         return $this->naan;
     }
@@ -65,9 +65,17 @@ class Ark
         return $this->qualifier;
     }
 
+    /**
+     * The naan may be empty, like in the base used to search arks.
+     */
     public function asString(): string
     {
-        return sprintf('ark:/%s/%s%s', $this->naan, $this->name, $this->qualifier ? '/' . $this->qualifier : '');
+        return sprintf(
+            'ark:/%s%s%s',
+            $this->naan ? $this->naan . '/' : '',
+            $this->name,
+            $this->qualifier ? '/' . $this->qualifier : ''
+        );
     }
 
     public function __toString(): string

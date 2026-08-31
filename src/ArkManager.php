@@ -15,32 +15,32 @@ use Omeka\Api\Representation\MediaRepresentation;
 class ArkManager
 {
     /**
-     * @string string
+     * @var string|null
      */
     protected $naan;
 
     /**
-     * @string int
+     * @var int
      */
     protected $propertyId;
 
-        /**
-     * @string string
+    /**
+     * @var string
      */
     protected $propertyTerm;
 
     /**
-     * @string string
+     * @var string|null
      */
     protected $namePluginName;
 
     /**
-     * @string string
+     * @var string|null
      */
     protected $qualifierPluginName;
 
     /**
-     * @string bool
+     * @var bool
      */
     protected $qualifierStatic;
 
@@ -298,7 +298,7 @@ class ArkManager
      *
      * @param string $resourceType "items", "item_sets" or "media" or variants.
      */
-    public function getArkFromResourceId($resourceId, ?string $resourceType = null): Ark
+    public function getArkFromResourceId($resourceId, ?string $resourceType = null): ?Ark
     {
         $resourceId = (int) $resourceId;
         if (empty($resourceId)) {
@@ -309,7 +309,8 @@ class ArkManager
         if (!$entityClass) {
             return null;
         }
-        if ($entityClass = \Omeka\Entity\Resource::class) {
+        // The generic resource class does not filter anything.
+        if ($entityClass === \Omeka\Entity\Resource::class) {
             $entityClass = null;
         }
 
@@ -361,12 +362,14 @@ class ArkManager
 
         $ark = $this->connection->executeQuery($qb, $qb->getParameters())->fetchOne();
 
-        if ($ark) {
-            $ark = new Ark($this->naan, substr($ark, strlen($base)));
-            if ($entityClass === \Omeka\Entity\Media::class) {
-                $qualifier = $this->getQualifierFromResourceId($resourceId);
-                $ark->setQualifier($qualifier);
-            }
+        if (!$ark) {
+            return null;
+        }
+
+        $ark = new Ark($this->naan, substr($ark, strlen($base)));
+        if ($entityClass === \Omeka\Entity\Media::class) {
+            $qualifier = $this->getQualifierFromResourceId($resourceId);
+            $ark->setQualifier($qualifier);
         }
 
         return $ark;
