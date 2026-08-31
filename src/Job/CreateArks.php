@@ -52,30 +52,49 @@ class CreateArks extends AbstractJob
         $adapter = $apiAdapters->get($resourceName);
         $entityClass = $adapter->getEntityClass();
 
-        $identifierProperty = $this->getDctermsIdentifierProperty();
+        $identifierProperty = $this->getIdentifierProperty();
+        if (!$identifierProperty) {
+            $logger->err(
+                'The property "{property}" set to store arks does not exist.', // @translate
+                ['property' => $this->getIdentifierPropertyTerm()]
+            );
+            return;
+        }
 
+        // The resources without ark are skipped by the query once processed,
+        // but a resource whose ark cannot be created stays in the results, so
+        // the last id is used to avoid an infinite loop on failing resources.
         $dql = <<<DQL
 SELECT r
 FROM $entityClass r
-WHERE NOT EXISTS (
-    SELECT v.value
-    FROM Omeka\Entity\Value v
-    WHERE v.resource = r.id
-        AND v.property = :property
-        AND v.value LIKE 'ark:%'
+WHERE r.id > :lastId
+    AND NOT EXISTS (
+        SELECT v.value
+        FROM Omeka\Entity\Value v
+        WHERE v.resource = r.id
+            AND v.property = :property
+            AND v.value LIKE 'ark:%'
     )
 ORDER BY r.id
 DQL;
         $query = $entityManager->createQuery($dql);
         $query->setParameter('property', $identifierProperty->getId());
         $query->setMaxResults(100);
-        while (!empty($resources = $query->getResult())) {
+
+        $lastId = 0;
+        while (true) {
             if ($this->shouldStop()) {
                 return;
             }
 
+            $query->setParameter('lastId', $lastId);
+            $resources = $query->getResult();
+            if (empty($resources)) {
+                return;
+            }
+
             // Get it one time by loop to avoid issues with doctrine.
-            $identifierProperty = $this->getDctermsIdentifierProperty();
+            $identifierProperty = $this->getIdentifierProperty();
 
             // Build representations for batch processing.
             $representations = [];
@@ -113,6 +132,9 @@ DQL;
                 );
             }
 
+            // Keep the greatest id before the entity manager is cleared.
+            $lastId = (int) max(array_keys($resourceMap));
+
             $entityManager->flush();
             $entityManager->clear();
 
@@ -121,18 +143,38 @@ DQL;
         }
     }
 
-    protected function getDctermsIdentifierProperty(): ?Property
+    /**
+     * Get the term of the property used to store the arks.
+     */
+    protected function getIdentifierPropertyTerm(): string
+    {
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        return $settings->get('ark_property') ?: 'dcterms:identifier';
+    }
+
+    /**
+     * Get the property used to store the arks, that may be configured.
+     */
+    protected function getIdentifierProperty(): ?Property
     {
         $services = $this->getServiceLocator();
         $entityManager = $services->get('Omeka\EntityManager');
 
-        $vocabularyRepository = $entityManager->getRepository('Omeka\Entity\Vocabulary');
-        $propertyRepository = $entityManager->getRepository('Omeka\Entity\Property');
+        $term = $this->getIdentifierPropertyTerm();
+        [$prefix, $localName] = array_pad(explode(':', $term, 2), 2, null);
+        if (!$prefix || !$localName) {
+            return null;
+        }
 
-        $dctermsVocabulary = $vocabularyRepository->findOneBy(['prefix' => 'dcterms']);
-        return $propertyRepository->findOneBy([
-            'localName' => 'identifier',
-            'vocabulary' => $dctermsVocabulary->getId(),
+        $vocabulary = $entityManager->getRepository(\Omeka\Entity\Vocabulary::class)
+            ->findOneBy(['prefix' => $prefix]);
+        if (!$vocabulary) {
+            return null;
+        }
+
+        return $entityManager->getRepository(Property::class)->findOneBy([
+            'localName' => $localName,
+            'vocabulary' => $vocabulary->getId(),
         ]);
     }
 }
