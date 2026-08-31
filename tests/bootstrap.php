@@ -12,7 +12,9 @@
 require dirname(__DIR__, 3) . '/modules/Common/tests/Bootstrap.php';
 
 \CommonTest\Bootstrap::bootstrap(
-    ['Common', 'Ark'],
+    // ?DigitalObject: registered globally via STI on resource, its table must
+    // exist for resource value queries (linked resources).
+    ['Common', 'Ark', '?DigitalObject'],
     'ArkTest',
     __DIR__ . '/ArkTest'
 );
