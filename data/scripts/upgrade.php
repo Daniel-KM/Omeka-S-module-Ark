@@ -4,8 +4,11 @@ namespace Ark;
 
 use Common\Stdlib\PsrMessage;
 
-// Load Noid library autoloader for upgrade operations.
-require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+// Load the module dependencies when installed as a zip. With composer,
+// libraries are stored in omeka vendor/ and the module has none.
+if (file_exists(dirname(__DIR__, 2) . '/vendor/autoload.php')) {
+    require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+}
 
 /**
  * @var Module $this
@@ -25,16 +28,23 @@ $url = $services->get('ViewHelperManager')->get('url');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
 $translate = $plugins->get('translate');
+$translator = $services->get('MvcTranslator');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 $entityManager = $services->get('Omeka\EntityManager');
+
+$config = $services->get('Config');
+$basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+$databaseDir = $basePath . '/arkandnoid';
+$noidDir = $databaseDir . '/NOID';
 
 if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.91')) {
     $message = new \Omeka\Stdlib\Message(
         $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
         'Common', '3.4.91'
     );
-    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+    $messenger->addError($message);
+    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
 }
 
 if (version_compare($oldVersion, '3.5.7', '<')) {
@@ -61,26 +71,28 @@ if (version_compare($oldVersion, '3.5.14', '<')) {
 }
 
 if (version_compare($oldVersion, '3.5.16', '<')) {
-    // Migrate from BerkeleyDB to LMDB or XML if needed.
-    // BerkeleyDB is deprecated and unavailable on recent Linux distributions.
+    // Migrate from BerkeleyDB to LMDB or XML if needed. BerkeleyDB is
+    // deprecated and unavailable on recent Linux distributions.
 
-    $config = $services->get('Config');
-    $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-    $databaseDir = $basePath . '/arkandnoid';
-    $bdbFile = $databaseDir . '/NOID/noid.bdb';
+    $bdbFile = $noidDir . '/noid.bdb';
 
     // Check if a bdb database exists that needs migration.
     $hasBdbDatabase = file_exists($bdbFile);
 
     if ($hasBdbDatabase) {
-        // Check if migration was already done to avoid overwriting existing data.
-        $noidDir = $databaseDir . '/NOID';
+        // Check if migration was already done to avoid overwriting existing
+        // data. A store set to another backend, in particular a database
+        // without file, means that it was configured manually, so the migration
+        // would override a working setting.
         $xmlFile = $noidDir . '/noid.xml';
         $lmdbFile = $noidDir . '/noid.lmdb';
         $sqliteFile = $noidDir . '/noid.sqlite';
-        if (file_exists($xmlFile) || file_exists($lmdbFile) || file_exists($sqliteFile)) {
+        $currentStore = (string) $settings->get('ark_store');
+        if (file_exists($xmlFile) || file_exists($lmdbFile) || file_exists($sqliteFile)
+            || !in_array($currentStore, ['', 'bdb'], true)
+        ) {
             $message = new PsrMessage(
-                'A Noid database (xml, lmdb or sqlite) already exists. Skipping BerkeleyDB migration. You may remove noid.bdb manually if migration was successful.' // @translate
+                'A Noid database other than BerkeleyDB already exists. Skipping migration. You may remove noid.bdb manually if migration was successful.' // @translate
             );
             $messenger->addWarning($message);
         } else {
@@ -92,11 +104,28 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
             /** @var \Omeka\Stdlib\Cli $cli */
             $cli = $services->get('Omeka\Cli');
 
-            if (!$hasBdbHandler) {
-                // db4 handler not available: cannot read the bdb database directly.
-                // Try alternative migration methods.
+            // The target database is created before the data are imported, so a
+            // partial file remains when the import fails. It must be removed,
+            // else the next upgrade would take it for a successful migration
+            // and would skip it, loosing all arks.
+            $removeTargetFile = function (string $format) use ($noidDir): void {
+                $extensions = [
+                    'lmdb' => 'lmdb',
+                    'xml' => 'xml',
+                    'sqlite' => 'sqlite',
+                ];
+                if (isset($extensions[$format])) {
+                    $file = $noidDir . '/noid.' . $extensions[$format];
+                    if (file_exists($file)) {
+                        @unlink($file);
+                    }
+                }
+            };
 
-                $noidDir = $databaseDir . '/NOID';
+            if (!$hasBdbHandler) {
+                // db4 handler not available: cannot read the bdb database
+                // directly. Try alternative migration methods.
+
                 $jsonFile = $noidDir . '/noid_data.json';
 
                 // Check if db_dump command is available using Omeka CLI service.
@@ -121,8 +150,9 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                  *    value2
                  *   DATA=END
                  *
-                 * Each key and value line starts with a single space.
-                 * Special characters are escaped as \xx (hex).
+                 * Each key and value line starts with a single space. Special
+                 * characters are escaped as \xx (hex) and a literal backslash
+                 * is escaped as a double backslash.
                  */
                 $parseDumpOutput = function (string $dumpOutput): array {
                     $data = [];
@@ -143,13 +173,16 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         if ($line === '') {
                             continue;
                         }
-                        if (strlen($line) > 0 && $line[0] === ' ') {
+                        if ($line[0] === ' ') {
                             $value = substr($line, 1);
-                            // Decode escaped characters (\xx hex format).
+                            // Decode a double backslash and the \xx hex format
+                            // in a single pass, else a literal backslash
+                            // followed by two hex digits would be decoded
+                            // twice.
                             $value = preg_replace_callback(
-                                '/\\\\([0-9a-fA-F]{2})/',
+                                '/\\\\(\\\\|[0-9a-fA-F]{2})/',
                                 function ($matches) {
-                                    return chr(hexdec($matches[1]));
+                                    return $matches[1] === '\\' ? '\\' : chr(hexdec($matches[1]));
                                 },
                                 $value
                             );
@@ -168,8 +201,85 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     return $data;
                 };
 
-                // Helper function to import data to target format using Noid storage classes.
-                $importToTarget = function (array $data, string $noidDir, string $format) use ($databaseDir): void {
+                /**
+                 * Wrap an array of keys/values as a read-only source database.
+                 *
+                 * This allows to use the import of the storage classes, that
+                 * writes the keys directly, instead of a loop on set(), that
+                 * checks the existence of each key: on xml, that lookup is a
+                 * xpath on the whole document, so the import of a big database
+                 * takes hours instead of seconds.
+                 */
+                $arraySource = function (array $data): \Noid\Storage\DatabaseInterface {
+                    return new class($data) implements \Noid\Storage\DatabaseInterface {
+                        private $data;
+
+                        public function __construct(array $data)
+                        {
+                            $this->data = $data;
+                        }
+
+                        public function open($settings, $mode)
+                        {
+                            return $this;
+                        }
+
+                        public function close()
+                        {
+                        }
+
+                        public function import($src_db)
+                        {
+                            return false;
+                        }
+
+                        public function get($key)
+                        {
+                            return $this->data[$key] ?? false;
+                        }
+
+                        public function set($key, $value)
+                        {
+                            $this->data[$key] = $value;
+                            return true;
+                        }
+
+                        public function delete($key)
+                        {
+                            unset($this->data[$key]);
+                            return true;
+                        }
+
+                        public function exists($key)
+                        {
+                            return isset($this->data[$key]);
+                        }
+
+                        public function get_range($pattern, $limit = 0)
+                        {
+                            $result = [];
+                            foreach ($this->data as $key => $value) {
+                                if ((string) $pattern !== '' && strpos((string) $key, (string) $pattern) !== 0) {
+                                    continue;
+                                }
+                                $result[$key] = $value;
+                                if ($limit > 0 && count($result) >= $limit) {
+                                    break;
+                                }
+                            }
+                            return $result;
+                        }
+
+                        public function isOpen()
+                        {
+                            return true;
+                        }
+                    };
+                };
+
+                // Helper function to import data to target format using Noid
+                // storage classes.
+                $importToTarget = function (array $data, string $noidDir, string $format) use ($databaseDir, $arraySource, $removeTargetFile): void {
                     $storageClass = \Noid\Lib\Globals::DB_TYPES[$format] ?? null;
                     if (!$storageClass || !class_exists($storageClass)) {
                         throw new \Exception("Unknown or unavailable storage format: $format");
@@ -193,10 +303,14 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     if (!$storage->isOpen()) {
                         throw new \Exception("Cannot create $format database in $noidDir: database not open");
                     }
-                    foreach ($data as $key => $value) {
-                        $storage->set($key, (string) $value);
-                    }
+                    $imported = $storage->import($arraySource($data));
+                    // The database is written on close, so it must be closed
+                    // before the partial file can be removed.
                     $storage->close();
+                    if (!$imported) {
+                        $removeTargetFile($format);
+                        throw new \Exception("No data imported into the $format database in $noidDir");
+                    }
                 };
 
                 if ($hasDbDump) {
@@ -208,7 +322,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         $message = new PsrMessage(
                             'Failed to dump BerkeleyDB database using db_dump.' // @translate
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     // Parse dump output.
@@ -217,7 +331,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         $message = new PsrMessage(
                             'No data found in BerkeleyDB dump. You may remove existing files in noid directory.' // @translate
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     // Normalize generator_random key to new names.
@@ -242,11 +356,12 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     try {
                         $importToTarget($data, $noidDir, $targetFormat);
                     } catch (\Throwable $e) {
+                        $removeTargetFile($targetFormat);
                         $message = new PsrMessage(
                             'Failed to import Noid database: {error}', // @translate
                             ['error' => $e->getMessage()]
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     // Update setting to use new format.
@@ -266,7 +381,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                             'Cannot read JSON file: {file}', // @translate
                             ['file' => $jsonFile]
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     $data = json_decode($jsonContent, true);
@@ -275,25 +390,26 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                             'Invalid JSON in file {file}: {error}', // @translate
                             ['file' => $jsonFile, 'error' => json_last_error_msg()]
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     if (empty($data)) {
                         $message = new PsrMessage(
                             'No data found in JSON file.' // @translate
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     // Import to target format using Noid storage classes.
                     try {
                         $importToTarget($data, $noidDir, $targetFormat);
                     } catch (\Throwable $e) {
+                        $removeTargetFile($targetFormat);
                         $message = new PsrMessage(
                             'Failed to import Noid database from JSON: {error}', // @translate
                             ['error' => $e->getMessage()]
                         );
-                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                     }
 
                     // Update setting to use new format.
@@ -325,7 +441,8 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         ]
                     );
                     $message->setEscapeHtml(false);
-                    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                    $messenger->addError($message);
+                    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
                 }
             } else {
                 // db4 handler is available: automatic migration possible.
@@ -348,7 +465,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     $message = new PsrMessage(
                         'Cannot open BerkeleyDB database for migration.' // @translate
                     );
-                    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                 }
 
                 $template = \Noid\Lib\Db::getCached('template');
@@ -388,8 +505,13 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                             throw new \Exception('Cannot create database: ' . \Noid\Lib\Log::errmsg(null, 1));
                         }
 
-                        // Import data from bdb to target.
-                        \Noid\Lib\Db::dbimport($targetSettings, 'bdb');
+                        // Import data from bdb to target. The import erases the
+                        // destination first, so a false result means that the
+                        // target database is empty and that all arks are lost.
+                        $imported = \Noid\Lib\Db::dbimport($targetSettings, 'bdb');
+                        if (!$imported) {
+                            throw new \Exception('No data imported from the BerkeleyDB database.');
+                        }
 
                         // Update setting to use new format.
                         $settings->set('ark_store', $targetFormat);
@@ -404,6 +526,8 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         break;
 
                     } catch (\Throwable $e) {
+                        // Remove the partial database before the next format.
+                        $removeTargetFile($targetFormat);
                         $lastError .= $e->getMessage();
                         // Continue to try next format.
                     }
@@ -414,7 +538,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         'Migration from BerkeleyDB failed: {error}', // @translate
                         ['error' => $lastError]
                     );
-                    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+                    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
                 }
             }
         }
@@ -423,5 +547,86 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
     // Initialize new setting if not set.
     if ($settings->get('ark_store') === null) {
         $settings->set('ark_store', '');
+    }
+
+}
+
+// Repair a store pointing to a backend that the server cannot use, for example
+// bdb when the extension dba was removed by a system upgrade: any page creating
+// a resource would fail. The existing database is preferred to the default one,
+// in order to keep the minted arks.
+$currentStore = (string) $settings->get('ark_store');
+if (strlen($currentStore) && !\Ark\Stdlib\NoidStore::isAvailable($currentStore)) {
+    $newStore = '';
+    foreach (['lmdb', 'xml', 'sqlite'] as $format) {
+        if (file_exists($noidDir . '/noid.' . $format) && \Ark\Stdlib\NoidStore::isAvailable($format)) {
+            $newStore = $format;
+            break;
+        }
+    }
+    $settings->set('ark_store', $newStore);
+    $message = new PsrMessage(
+        'The storage backend "{old}" of the noid database is not available on this server. It has been replaced by "{new}". Check the config of the module.', // @translate
+        ['old' => $currentStore, 'new' => $newStore ?: 'default']
+    );
+    $messenger->addWarning($message);
+}
+
+if (version_compare($oldVersion, '3.5.17', '<') && $settings->get('ark_name') === 'noid') {
+    // Version 3.5.16 did not check the result of the import, that erases the
+    // destination before reading the source, so a failed migration could leave
+    // a new database with the counter reset. This check is done for any old
+    // version, because such a database may have been created by a version
+    // 3.5.16 that was rolled back: the module version stored in the database is
+    // not reverted with the files, so the migration above is skipped.
+    $store = (string) $settings->get('ark_store');
+    if ($store === '') {
+        $store = extension_loaded('dba') && in_array('lmdb', dba_handlers()) ? 'lmdb' : 'xml';
+    }
+
+    $storageClass = \Noid\Lib\Globals::DB_TYPES[$store] ?? null;
+    if ($storageClass && class_exists($storageClass) && \Ark\Stdlib\NoidStore::isAvailable($store)) {
+        // The counter is the number of identifiers minted since the creation.
+        $counter = null;
+        try {
+            /** @var \Noid\Storage\DatabaseInterface $storage */
+            $storage = new $storageClass();
+            $storage->open([
+                'db_type' => $store,
+                'storage' => [
+                    $store => [
+                        'data_dir' => $databaseDir,
+                        'db_name' => 'NOID',
+                    ],
+                ],
+            ], \Noid\Storage\DatabaseInterface::DB_RDONLY);
+            if ($storage->isOpen()) {
+                $counter = $storage->get(':/oacounter');
+                $storage->close();
+            }
+        } catch (\Throwable $e) {
+            // There is no database to check yet.
+        }
+
+        // Only the arks that the minter can issue may become duplicates: arks
+        // imported from another institution have another naan, and arks stored
+        // in another property are not managed by the module.
+        $naan = (string) $settings->get('ark_naan');
+        $propertyTerm = $settings->get('ark_property') ?: 'dcterms:identifier';
+        $propertyId = (int) $services->get('Common\EasyMeta')->propertyId($propertyTerm);
+        $totalArks = $propertyId
+            ? (int) $connection->executeQuery(
+                'SELECT COUNT(*) FROM `value` WHERE `property_id` = :property_id AND `type` = "literal" AND `value` LIKE :base',
+                ['property_id' => $propertyId, 'base' => strlen($naan) ? 'ark:/' . $naan . '/%' : 'ark:/%']
+            )->fetchOne()
+            : 0;
+
+        if ($counter !== null && $counter !== false && (int) $counter === 0 && $totalArks) {
+            $message = new PsrMessage(
+                'The noid database contains no minted identifier, but {count} arks with the naan "{naan}" are stored in Omeka. A previous migration emptied it, so the next arks would be duplicates of existing ones. Restore the noid database from a backup, or remove the arks of the resources, then upgrade again.', // @translate
+                ['count' => $totalArks, 'naan' => $naan]
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
+        }
     }
 }
