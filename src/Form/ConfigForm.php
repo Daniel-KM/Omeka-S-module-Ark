@@ -3,6 +3,7 @@
 namespace Ark\Form;
 
 use Ark\ArkManager;
+use Ark\Stdlib\NoidStore;
 use Omeka\Form\Element as OmekaElement;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
@@ -19,20 +20,34 @@ class ConfigForm extends Form
         $arkNamePlugin = $this->arkManager->getArkNamePlugin();
         $databaseCreated = $arkNamePlugin->isDatabaseCreated();
 
+        $storeOptions = [
+            '' => 'Default (lmdb if available, else xml)', // @translate
+            'lmdb' => 'Lmdb (fast, bdb replacement)', // @translate
+            'xml' => 'Xml (portable)', // @translate
+            'pdo' => 'Omeka database (simpler)', // @translate
+            'sqlite' => 'Sqlite (portable)', // @translate
+            'bdb' => 'BerkeleyDb (deprecated, no more fully free)', // @translate
+        ];
+
+        // Disable the backends whose php extension or dba handler is missing.
+        foreach ($storeOptions as $store => $label) {
+            if ($store !== '' && !NoidStore::isAvailable($store)) {
+                $storeOptions[$store] = [
+                    'value' => $store,
+                    'label' => $label,
+                    'attributes' => ['disabled' => true],
+                ];
+            }
+        }
+
         $this
             ->add([
                 'name' => 'ark_store',
                 'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Storage backend for the noid database', // @translate
-                    'value_options' => [
-                        '' => 'Default (lmdb if available, else xml)', // @translate
-                        'lmdb' => 'Lmdb (fast, bdb replacement)', // @translate
-                        'xml' => 'Xml (portable)', // @translate
-                        'pdo' => 'Omeka database (simpler)', // @translate
-                        'sqlite' => 'Sqlite (portable)', // @translate
-                        'bdb' => 'BerkeleyDb (deprecated, no more fully free)', // @translate
-                    ],
+                    'info' => 'The backends that require a missing php extension or dba handler are disabled.', // @translate
+                    'value_options' => $storeOptions,
                 ],
                 'attributes' => [
                     'id' => 'ark_store',

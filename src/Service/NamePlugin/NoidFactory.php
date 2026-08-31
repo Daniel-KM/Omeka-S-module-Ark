@@ -3,6 +3,7 @@
 namespace Ark\Service\NamePlugin;
 
 use Ark\Name\Plugin\Noid;
+use Ark\Stdlib\NoidStore;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
@@ -58,55 +59,9 @@ class NoidFactory implements FactoryInterface
      */
     protected function checkExtension(string $dbType): void
     {
-        $requirements = [
-            'xml' => [
-                'extension' => 'simplexml',
-                'message' => 'The XML database format requires the php-xml extension.',
-            ],
-            'pdo' => [
-                'extension' => 'pdo',
-                'message' => 'The PDO database format requires the php-pdo extension.',
-            ],
-            'sqlite' => [
-                'extension' => 'sqlite3',
-                'message' => 'The SQLite database format requires the php-sqlite3 extension.',
-            ],
-            'lmdb' => [
-                'extension' => 'dba',
-                'handler' => 'lmdb',
-                'message' => 'The LMDB database format requires the php-dba extension with lmdb handler.',
-            ],
-            'bdb' => [
-                'extension' => 'dba',
-                'handler' => 'db4',
-                'message' => 'The BerkeleyDB database format requires the php-dba extension with db4 handler (deprecated and unavailable on recent systems).',
-            ],
-        ];
-
-        if (!isset($requirements[$dbType])) {
-            throw new \RuntimeException(sprintf(
-                'Unknown Noid database type "%1$s". Supported types: %2$s.',
-                $dbType,
-                implode(', ', array_keys($requirements))
-            ));
-        }
-
-        $req = $requirements[$dbType];
-
-        if (!extension_loaded($req['extension'])) {
-            throw new \RuntimeException($req['message']);
-        }
-
-        // For dba-based backends, check if the specific handler is available.
-        if (isset($req['handler'])) {
-            $handlers = dba_handlers();
-            if (!in_array($req['handler'], $handlers)) {
-                throw new \RuntimeException(sprintf(
-                    '%1$s Available dba handlers: %2$s.',
-                    $req['message'],
-                    implode(', ', $handlers) ?: 'none'
-                ));
-            }
+        $message = NoidStore::unavailability($dbType);
+        if ($message !== null) {
+            throw new \RuntimeException($message);
         }
     }
 }
