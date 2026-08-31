@@ -113,8 +113,7 @@ class Position implements PluginInterface
         $stmt = $this->entityManager->getConnection()->prepare($sql);
         $stmt->bindValue('item_id', $resourceId);
         $stmt->bindValue('position', $position);
-        $stmt->execute();
-        $id = $stmt->fetchOne();
+        $id = $stmt->executeQuery()->fetchOne();
 
         if (!$id) {
             return null;
