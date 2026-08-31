@@ -187,7 +187,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     ];
                     try {
                         $storage->open($storageSettings, \Noid\Storage\DatabaseInterface::DB_CREATE);
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         throw new \Exception("Cannot create $format database in $noidDir: " . $e->getMessage());
                     }
                     if (!$storage->isOpen()) {
@@ -241,7 +241,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     // Import to target format using Noid storage classes.
                     try {
                         $importToTarget($data, $noidDir, $targetFormat);
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         $message = new PsrMessage(
                             'Failed to import Noid database: {error}', // @translate
                             ['error' => $e->getMessage()]
@@ -288,7 +288,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                     // Import to target format using Noid storage classes.
                     try {
                         $importToTarget($data, $noidDir, $targetFormat);
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         $message = new PsrMessage(
                             'Failed to import Noid database from JSON: {error}', // @translate
                             ['error' => $e->getMessage()]
@@ -403,7 +403,7 @@ if (version_compare($oldVersion, '3.5.16', '<')) {
                         $migrated = true;
                         break;
 
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         $lastError .= $e->getMessage();
                         // Continue to try next format.
                     }
