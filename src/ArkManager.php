@@ -262,7 +262,7 @@ class ArkManager
         // Clean the ark and add the qualifer if any.
         if ($ark) {
             $name = strtok(mb_substr($ark, mb_strlen($base)), '/');
-            $qualifier = $resource->resourceName() === 'media'
+            $qualifier = in_array($resource->resourceName(), ['media', 'digital_objects'], true)
                 ? strtok('/')
                 : null;
             return new Ark($this->naan, $name, $qualifier);

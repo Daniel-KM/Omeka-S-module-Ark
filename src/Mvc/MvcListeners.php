@@ -61,7 +61,7 @@ class MvcListeners extends AbstractListenerAggregate
             return $this->triggerDispatchError($event);
         }
 
-        if ($resource->resourceName() === 'media' && strpos($qualifier, '.') !== false) {
+        if (in_array($resource->resourceName(), ['media', 'digital_objects'], true) && strpos($qualifier, '.') !== false) {
             $variant = substr($qualifier, strpos($qualifier, '.') + 1);
             $variants = ['large', 'medium', 'square'];
             if ($variant === 'original') {
@@ -77,16 +77,32 @@ class MvcListeners extends AbstractListenerAggregate
         $isAdmin = $routeMatch->getParam('__ADMIN__');
         $controllerName = $resource->getControllerName();
 
+        // Resources provided by modules may live outside the Omeka namespace
+        // and use their own routes (digital objects, etc.). Map them; core
+        // resources fall back to the Omeka namespace and generic routes.
+        $moduleControllers = [
+            'digital-object' => [
+                'admin' => ['DigitalObject\Controller\Admin', 'DigitalObject\Controller\Admin\DigitalObject', 'admin/digital-object/id'],
+                'site' => ['DigitalObject\Controller\Site', 'DigitalObject\Controller\Site\DigitalObject', 'site/digital-object'],
+            ],
+        ];
+
         if ($isAdmin) {
+            if (isset($moduleControllers[$controllerName])) {
+                [$namespace, $controller, $routeName] = $moduleControllers[$controllerName]['admin'];
+            } else {
+                $namespace = 'Omeka\Controller\Admin';
+                $controller = 'Omeka\Controller\Admin\\' . StaticFilter::execute($controllerName, 'WordDashToCamelCase');
+                $routeName = 'admin/id';
+            }
             $params = [
-                '__NAMESPACE__' => 'Omeka\Controller\Admin',
+                '__NAMESPACE__' => $namespace,
                 '__ADMIN__' => true,
-                'controller' => 'Omeka\Controller\Admin\\' . StaticFilter::execute($controllerName, 'WordDashToCamelCase'),
+                'controller' => $controller,
                 'action' => 'show',
                 'id' => $resource->id(),
                 '__CONTROLLER__' => $controllerName,
             ];
-            $routeName = 'admin/id';
         } else {
             $siteSlug = $routeMatch->getParam('site-slug');
             if ($controllerName === 'item-set') {
@@ -101,16 +117,22 @@ class MvcListeners extends AbstractListenerAggregate
                 ];
                 $routeName = 'site/item-set';
             } else {
+                if (isset($moduleControllers[$controllerName])) {
+                    [$namespace, $controller, $routeName] = $moduleControllers[$controllerName]['site'];
+                } else {
+                    $namespace = 'Omeka\Controller\Site';
+                    $controller = 'Omeka\Controller\Site\\' . StaticFilter::execute($controllerName, 'WordDashToCamelCase');
+                    $routeName = 'site/resource-id';
+                }
                 $params = [
-                    '__NAMESPACE__' => 'Omeka\Controller\Site',
+                    '__NAMESPACE__' => $namespace,
                     '__SITE__' => true,
                     'site-slug' => $siteSlug,
-                    'controller' => 'Omeka\Controller\Site\\' . StaticFilter::execute($controllerName, 'WordDashToCamelCase'),
+                    'controller' => $controller,
                     'action' => 'show',
                     'id' => $resource->id(),
                     '__CONTROLLER__' => $controllerName,
                 ];
-                $routeName = 'site/resource-id';
             }
         }
 
