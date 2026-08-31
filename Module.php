@@ -251,6 +251,14 @@ class Module extends AbstractModule
      */
     public function handleSaveResource(Event $event): void
     {
+        // An ark is a persistent identifier: never mint one on a dry run (for
+        // example the validation of a contribution by module Contribute), else
+        // an identifier would be consumed and the entity manager flushed for a
+        // resource that is not persisted.
+        if ($event->getParam('request')?->getOption('validateOnly')) {
+            return;
+        }
+
         /**
          * @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter
          * @var \Omeka\Settings\Settings $settings
