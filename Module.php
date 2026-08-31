@@ -96,7 +96,7 @@ class Module extends AbstractModule
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
-        // Check if dba is installed (lmdb is available by default in that case)..
+        // Check if dba is installed (lmdb is available by default in that case).
         if (!extension_loaded('dba')) {
             $messenger->addWarning(new PsrMessage(
                 'If extension dba is installed, you may store noid inside a lmdb database. For now, you can use omeka database, sqlite or xml.' // @translate

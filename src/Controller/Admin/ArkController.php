@@ -22,12 +22,12 @@ class ArkController extends AbstractActionController
                 $message = new PsrMessage(
                     'ARK creation started in job {link_job}#{job_id}{link_end} ({link_log}logs{link_end}).', // @translate
                     [
-                        'link_job' => sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()])),
+                        'link_job' => sprintf('<a href="%1$s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
                         'job_id' => $job->getId(),
                         'link_end' => '</a>',
-                        'link_log' => sprintf('<a href="%1$s">', class_exists('Log\Module', false)
+                        'link_log' => sprintf('<a href="%1$s">', htmlspecialchars(class_exists('Log\Module', false)
                             ? $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])
-                            : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+                            : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()]))),
                     ]
                 );
                 $message->setEscapeHtml(false);
