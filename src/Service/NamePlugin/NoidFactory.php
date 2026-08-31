@@ -9,7 +9,7 @@ use Psr\Container\ContainerInterface;
 
 class NoidFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $services, $name, array $options = null)
+    public function __invoke(ContainerInterface $services, $name, ?array $options = null)
     {
         $settings = $services->get('Omeka\Settings');
         $dbType = $settings->get('ark_store', '');
