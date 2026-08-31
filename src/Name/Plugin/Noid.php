@@ -319,16 +319,19 @@ class Noid implements PluginInterface
             $info = mb_substr($info, strpos($info, 'Admin Values' . PHP_EOL) + 13);
 
             if ($level === 'meta') {
+                // A database created without naan has no naan and no subnaa, so
+                // the keys are always set, but may be null.
+                $patterns = [
+                    'naan' => '~^NAAN:\s*(\d{5})$~m',
+                    'naa' => '~^  :/naa:\s+(.+)$~m',
+                    'subnaa' => '~^  :/subnaa:[^\S\r\n]+(.*)$~m',
+                    'template' => '~^Template:\s+([\w\d.]+)$~m',
+                ];
                 $result = [];
-                $matches = [];
-                preg_match('~^NAAN:\s*(\d{5})$~m', $info, $matches);
-                $result['naan'] = $matches[1];
-                preg_match('~^  :/naa:\s+(.+)$~m', $info, $matches);
-                $result['naa'] = $matches[1];
-                preg_match('~^  :/subnaa:[^\S\r\n]+(.*)$~m', $info, $matches);
-                $result['subnaa'] = $matches[1];
-                preg_match('~^Template:\s+([\w\d.]+)$~m', $info, $matches);
-                $result['template'] = $matches[1];
+                foreach ($patterns as $key => $pattern) {
+                    $matches = [];
+                    $result[$key] = preg_match($pattern, $info, $matches) ? $matches[1] : null;
+                }
                 $info = $result;
             }
         }
@@ -350,7 +353,8 @@ class Noid implements PluginInterface
             'db_name' => 'NOID',
         ];
 
-        // Add PDO-specific configuration (uses Omeka database).
+        // Add PDO-specific configuration (uses Omeka database). The driver is
+        // hard coded, since Omeka supports only MySQL/MariaDB.
         if ($this->dbType === 'pdo' && !empty($this->connectionConfig)) {
             $storageConfig = array_merge($storageConfig, [
                 'driver' => 'mysql',
@@ -369,7 +373,7 @@ class Noid implements PluginInterface
             ],
         ];
 
-        // Only set generator when creating new databases (library default is drand48).
+        // Only set generator when creating new databases.
         if ($forCreation) {
             $settings['generator'] = $this->settings->get('ark_name_noid_generator', 'mt_rand');
         }
@@ -380,12 +384,7 @@ class Noid implements PluginInterface
     protected function openDatabase($mode = DatabaseInterface::DB_RDONLY)
     {
         $database = $this->getDatabaseDir();
-        if (empty($database)) {
-            return false;
-        }
-
-        // Create directory if it doesn't exist.
-        if (!is_dir($database)) {
+        if (empty($database) || !is_dir($database)) {
             return false;
         }
 

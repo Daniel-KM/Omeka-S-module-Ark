@@ -100,9 +100,8 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $arkManager = $services->get('Ark\ArkManager');
         $name = $arkManager->getArkNamePlugin();
-        if ($name->isDatabaseCreated()) {
-            $info = $name->infoDatabase('meta');
-
+        $info = $name->isDatabaseCreated() ? $name->infoDatabase('meta') : '';
+        if (is_array($info)) {
             $settings = $services->get('Omeka\Settings');
             $arkNaan = $settings->get('ark_naan');
             $arkNaa = $settings->get('ark_naa');

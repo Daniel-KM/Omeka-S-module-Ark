@@ -49,7 +49,8 @@ class MvcListeners extends AbstractListenerAggregate
         $arkPlugin = $controllerPlugins->get('ark');
 
         $name = $routeMatch->getParam('name');
-        $qualifier = $routeMatch->getParam('qualifier');
+        // The qualifier is an optional route segment, so it may be null.
+        $qualifier = (string) $routeMatch->getParam('qualifier');
         $resource = $arkPlugin->find([
             'naan' => $naan,
             'name' => $name,
