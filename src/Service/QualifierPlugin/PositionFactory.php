@@ -3,7 +3,7 @@
 namespace Ark\Service\QualifierPlugin;
 
 use Ark\Qualifier\Plugin\Position;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class PositionFactory implements FactoryInterface

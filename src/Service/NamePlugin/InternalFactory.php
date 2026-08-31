@@ -3,7 +3,7 @@
 namespace Ark\Service\NamePlugin;
 
 use Ark\Name\Plugin\Internal;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class InternalFactory implements FactoryInterface

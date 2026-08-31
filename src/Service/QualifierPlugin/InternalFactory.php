@@ -3,7 +3,7 @@
 namespace Ark\Service\QualifierPlugin;
 
 use Ark\Qualifier\Plugin\Internal;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class InternalFactory implements FactoryInterface

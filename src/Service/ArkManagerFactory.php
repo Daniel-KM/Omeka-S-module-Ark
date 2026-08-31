@@ -3,7 +3,7 @@
 namespace Ark\Service;
 
 use Ark\ArkManager;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ArkManagerFactory implements FactoryInterface

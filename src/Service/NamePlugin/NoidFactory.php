@@ -4,8 +4,8 @@ namespace Ark\Service\NamePlugin;
 
 use Ark\Name\Plugin\Noid;
 use Ark\Stdlib\NoidStore;
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class NoidFactory implements FactoryInterface
 {
