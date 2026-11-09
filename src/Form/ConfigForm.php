@@ -26,9 +26,11 @@ class ConfigForm extends Form
     {
         $arkNamePlugin = $this->arkManager->getArkNamePlugin();
         $isNoid = $arkNamePlugin instanceof Noid;
-        // The settings of a BerkeleyDB database to migrate are kept too.
-        $databaseCreated = $arkNamePlugin->isDatabaseCreated()
-            || ($isNoid && $this->noidMaintenance->isMigrationNeeded());
+        $migrationNeeded = $isNoid && $this->noidMaintenance->isMigrationNeeded();
+        // The settings of a BerkeleyDB database to migrate are kept too, except
+        // the store, where the database is migrated.
+        $storeFixed = $arkNamePlugin->isDatabaseCreated();
+        $databaseCreated = $storeFixed || $migrationNeeded;
 
         if ($isNoid) {
             $this->addNoidMaintenance();
@@ -60,12 +62,14 @@ class ConfigForm extends Form
                 'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Storage backend for the noid database', // @translate
-                    'info' => 'The backends that require a missing php extension or dba handler are disabled.', // @translate
+                    'info' => $migrationNeeded
+                        ? 'The BerkeleyDB database will be migrated to this backend. The backends that require a missing php extension or dba handler are disabled.' // @translate
+                        : 'The backends that require a missing php extension or dba handler are disabled.', // @translate
                     'value_options' => $storeOptions,
                 ],
                 'attributes' => [
                     'id' => 'ark_store',
-                    'disabled' => $databaseCreated,
+                    'disabled' => $storeFixed,
                 ],
             ])
             ->add([

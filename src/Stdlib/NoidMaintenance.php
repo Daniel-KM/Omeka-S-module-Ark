@@ -148,15 +148,18 @@ class NoidMaintenance
     /**
      * Check if a BerkeleyDB database should be migrated.
      *
-     * A store set to another backend, in particular a database without file,
-     * means that it was configured manually, so a migration would override a
-     * working setting.
+     * When the store is set to another backend, the migration is needed while
+     * its database does not exist, so an existing database is never replaced.
      */
     public function isMigrationNeeded(): bool
     {
-        return $this->hasBdbDatabase()
-            && !$this->hasMigratedDatabase()
-            && in_array((string) $this->settings->get('ark_store'), ['', 'bdb'], true);
+        if (!$this->hasBdbDatabase()) {
+            return false;
+        }
+        $store = (string) $this->settings->get('ark_store');
+        return in_array($store, ['', 'bdb'], true)
+            ? !$this->hasMigratedDatabase()
+            : $this->counters($store) === null;
     }
 
     /**
@@ -176,10 +179,14 @@ class NoidMaintenance
 
     /**
      * Get the backends where to migrate the database, by order of preference.
+     *
+     * The store selected in the config is used, else lmdb, else xml.
      */
     public function migrationStores(): array
     {
-        return array_values(array_filter(['lmdb', 'xml'], [NoidStore::class, 'isAvailable']));
+        $store = (string) $this->settings->get('ark_store');
+        $stores = in_array($store, ['', 'bdb'], true) ? ['lmdb', 'xml'] : [$store];
+        return array_values(array_filter($stores, [NoidStore::class, 'isAvailable']));
     }
 
     /**

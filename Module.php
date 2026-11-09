@@ -211,11 +211,15 @@ class Module extends AbstractModule
         // particular the ones of a BerkeleyDB database to migrate.
         /** @var \Ark\Name\Plugin\Internal|\Ark\Name\Plugin\Noid $namePlugin */
         $namePlugin = $arkManager->getArkNamePlugin();
-        if ($namePlugin->isDatabaseCreated()
+        $storeFixed = $namePlugin->isDatabaseCreated();
+        if ($storeFixed
             || ($settings->get('ark_name') === 'noid' && $noidMaintenance->isMigrationNeeded())
         ) {
+            // The store of a BerkeleyDB database to migrate can be selected.
+            if ($storeFixed) {
+                unset($params['ark_store']);
+            }
             unset(
-                $params['ark_store'],
                 $params['ark_naan'],
                 $params['ark_naa'],
                 $params['ark_subnaa'],
