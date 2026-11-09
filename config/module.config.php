@@ -36,9 +36,11 @@ return [
         ],
     ],
     'controllers' => [
+        'factories' => [
+            'Ark\Controller\Admin\Ark' => Service\Controller\Admin\ArkControllerFactory::class,
+        ],
         'invokables' => [
             Controller\ArkController::class => Controller\ArkController::class,
-            'Ark\Controller\Admin\Ark' => Controller\Admin\ArkController::class,
         ],
     ],
     'controller_plugins' => [
@@ -150,6 +152,17 @@ return [
                                 '__NAMESPACE__' => 'Ark\Controller\Admin',
                                 'controller' => 'Ark',
                                 'action' => 'index',
+                            ],
+                        ],
+                    ],
+                    'ark-admin-unbound' => [
+                        'type' => \Laminas\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/ark/unbound',
+                            'defaults' => [
+                                '__NAMESPACE__' => 'Ark\Controller\Admin',
+                                'controller' => 'Ark',
+                                'action' => 'unbound',
                             ],
                         ],
                     ],

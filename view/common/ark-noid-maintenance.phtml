@@ -56,8 +56,13 @@ $methods = [
 
     <?php if (!$locked): ?>
     <p><?= $escape($translate('The noid database is ready.')) ?></p>
+    <?php endif; ?>
 
-    <?php elseif ($status['migration_needed']): ?>
+    <?php if ($counters !== null && $counters['minted'] > $status['arks']): ?>
+    <p><a href="<?= $escape($this->url('admin/ark-admin-unbound')) ?>"><?= $escape($translate('Download the list of the identifiers issued without resource: arks of the removed resources and margin skipped by a rebuild.')) ?></a></p>
+    <?php endif; ?>
+
+    <?php if ($locked && $status['migration_needed']): ?>
     <p class="error"><?= $escape($translate('A BerkeleyDB database should be migrated: no ark will be created until then. Use one of the available methods with the action below.')) ?></p>
     <table class="tablesaw">
         <thead>
@@ -81,12 +86,12 @@ $methods = [
     <p><?= $escape($translate('If the BerkeleyDB database cannot be read at all, it can be rebuilt from the arks stored in Omeka.')) ?></p>
     <?php endif; ?>
 
-    <?php else: ?>
+    <?php elseif ($locked): ?>
     <p class="error"><?= $escape(sprintf($translate('The noid database does not know %d arks stored in Omeka that the minter can issue, so the next arks may be duplicates: no ark will be created until they are reserved, or the database is restored from a backup or rebuilt from the arks stored in Omeka.'), $status['unknown_arks'])) ?></p>
     <p><?= $escape($translate('When the database works and these arks were imported from another system, reserve them. When the database was replaced by an older backup, rebuild it.')) ?></p>
     <?php endif; ?>
 
     <?php if ($locked): ?>
-    <p><?= $escape($translate('A backup of the noid database is always better than a rebuild: the identifiers of the resources removed after the last ark stored in Omeka cannot be known, so they may be issued again to new resources. To avoid it, the rebuild can skip a margin of identifiers after the last ark: they will never be assigned. The only cost is a gap in the numbering.')) ?></p>
+    <p><?= $escape($translate('A backup of the noid database is always better than a rebuild: the arks of the resources removed after the last ark stored in Omeka cannot be known, so they may be assigned again to new resources. To avoid it, the rebuild can skip a margin of identifiers after the last ark: they will never be assigned. The only cost is a gap in the numbering.')) ?></p>
     <?php endif; ?>
 </fieldset>

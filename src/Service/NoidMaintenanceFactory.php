@@ -18,7 +18,8 @@ class NoidMaintenanceFactory implements FactoryInterface
             $services->get('Omeka\Settings'),
             $services->get('Omeka\Cli'),
             $basePath . '/arkandnoid',
-            $config['connection'] ?? []
+            $config['connection'] ?? [],
+            $services->get('Omeka\Logger')
         );
     }
 }

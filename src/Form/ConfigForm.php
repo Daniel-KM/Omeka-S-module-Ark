@@ -315,8 +315,8 @@ class ConfigForm extends Form
                     'name' => 'ark_noid_rebuild_margin',
                     'type' => Element\Number::class,
                     'options' => [
-                        'label' => 'Identifiers to reserve after the last ark when rebuilding', // @translate
-                        'info' => 'The arks of the last removed resources cannot be known, so they may be issued again. The identifiers reserved after the last ark stored in Omeka will never be issued, so set a number greater than the number of resources with an ark that may have been removed recently.', // @translate
+                        'label' => 'Margin of identifiers to skip after the last ark when rebuilding', // @translate
+                        'info' => 'The identifiers of the margin are skipped after the last ark stored in Omeka and will never be assigned. Resources removed after this ark may have had arks that cannot be known: the margin ensures that they will not be assigned again. Set a number greater than the number of resources with an ark that may have been removed recently. The only cost is a gap in the numbering.', // @translate
                     ],
                     'attributes' => [
                         'id' => 'ark_noid_rebuild_margin',

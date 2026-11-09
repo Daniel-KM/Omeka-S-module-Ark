@@ -47,8 +47,8 @@ class RebuildNoidDatabase extends AbstractJob
             ['count' => $result['replayed']]
         );
         $logger->notice(
-            'Identifiers issued before the last ark, but whose resources were removed from Omeka: {count}. They remain issued, so they will never be issued again.', // @translate
-            ['count' => $result['minted'] - $result['replayed']]
+            'Identifiers issued before the last ark, but whose resources were removed from Omeka: {count}. They remain issued, so they will never be issued again. List: {url}', // @translate
+            ['count' => $result['minted'] - $result['replayed'], 'url' => $this->unboundUrl()]
         );
         if ($result['held']) {
             $logger->warn(
@@ -57,7 +57,7 @@ class RebuildNoidDatabase extends AbstractJob
             );
         }
         $logger->notice(
-            'Margin of identifiers reserved after the last ark, for the arks of the last removed resources, that cannot be known: {count}.', // @translate
+            'Margin: {count} identifiers skipped after the last ark stored in Omeka, that will never be assigned. Resources removed after this ark may have had arks that cannot be known: the margin ensures that they will not be assigned again. The only cost is a gap in the numbering.', // @translate
             ['count' => $result['reserved']]
         );
         $logger->notice(
@@ -69,6 +69,19 @@ class RebuildNoidDatabase extends AbstractJob
                 'The previous database is kept as {backups}.', // @translate
                 ['backups' => implode(', ', $result['backups'])]
             );
+        }
+    }
+
+    /**
+     * Get the url of the list of the identifiers issued without resource.
+     */
+    protected function unboundUrl(): string
+    {
+        $url = $this->getServiceLocator()->get('ViewHelperManager')->get('url');
+        try {
+            return $url('admin/ark-admin-unbound', [], ['force_canonical' => true]);
+        } catch (\Throwable $e) {
+            return $url('admin/ark-admin-unbound');
         }
     }
 }

@@ -4,6 +4,7 @@ namespace Ark\Stdlib;
 
 use Common\Stdlib\EasyMeta;
 use Doctrine\DBAL\Connection;
+use Laminas\Log\LoggerInterface;
 use Noid\Lib\Db;
 use Noid\Lib\Globals;
 use Noid\Lib\Log;
@@ -78,13 +79,19 @@ class NoidMaintenance
      */
     protected $dbDumpPath;
 
+    /**
+     * @var \Laminas\Log\LoggerInterface|null
+     */
+    protected $logger;
+
     public function __construct(
         Connection $connection,
         EasyMeta $easyMeta,
         Settings $settings,
         ?Cli $cli,
         string $databaseDir,
-        array $connectionConfig = []
+        array $connectionConfig = [],
+        ?LoggerInterface $logger = null
     ) {
         $this->connection = $connection;
         $this->easyMeta = $easyMeta;
@@ -92,6 +99,7 @@ class NoidMaintenance
         $this->cli = $cli;
         $this->databaseDir = $databaseDir;
         $this->connectionConfig = $connectionConfig;
+        $this->logger = $logger;
     }
 
     public function getDatabaseDir(): string
@@ -214,13 +222,17 @@ class NoidMaintenance
         $data = [];
         $errors = [];
         foreach ($method === null ? array_keys($methods) : [$method] as $method) {
+            $this->log('notice', 'Migration of the noid database: reading the BerkeleyDB database with the method {method}.', ['method' => $method]); // @translate
+            $start = microtime(true);
             try {
                 $data = $this->readBdb($method);
             } catch (\Throwable $e) {
+                $this->log('warn', 'Migration of the noid database: the method {method} cannot read the BerkeleyDB database: {message}', ['method' => $method, 'message' => $e->getMessage()]); // @translate
                 $errors[] = $method . ': ' . $e->getMessage();
                 continue;
             }
             if ($data) {
+                $this->log('notice', 'Migration of the noid database: {count} keys read in {duration} seconds.', ['count' => count($data), 'duration' => round(microtime(true) - $start, 1)]); // @translate
                 break;
             }
             $errors[] = $method . ': no data found.';
@@ -313,6 +325,8 @@ class NoidMaintenance
         try {
             $best = null;
             foreach ($generators as $generator) {
+                $this->log('notice', 'Rebuild of the noid database: replay of the minting with the generator {generator} to find {count} arks.', ['generator' => $generator, 'count' => count($arks)]); // @translate
+                $start = microtime(true);
                 $settings = $this->storageSettings($store);
                 $settings['generator'] = $generator;
                 if (!Db::dbcreate($settings, $contact, $template, $term, $naan, $naa, $subnaa)) {
@@ -334,6 +348,8 @@ class NoidMaintenance
                     Db::$engine = $engine;
                     Db::dbclose($noid, true);
                 }
+
+                $this->log('notice', 'Rebuild of the noid database: with the generator {generator}, {replayed} arks found with {minted} identifiers in {duration} seconds.', ['generator' => $generator, 'replayed' => $result['replayed'], 'minted' => $result['minted'], 'duration' => round(microtime(true) - $start, 1)]); // @translate
 
                 // Keep the generator that finds most arks with less mintings.
                 if (!$best
@@ -384,7 +400,8 @@ class NoidMaintenance
         // The first identifiers may belong to removed resources, so the replay
         // stops only after a long series of identifiers that are not arks of
         // Omeka.
-        $maxMisses = max(100000, 2 * count($pending));
+        $total = count($pending);
+        $maxMisses = max(100000, 2 * $total);
         $minted = 0;
         $replayed = 0;
         $misses = 0;
@@ -398,6 +415,9 @@ class NoidMaintenance
                 break;
             }
             ++$minted;
+            if ($minted % 10000 === 0) {
+                $this->log('info', 'Rebuild of the noid database: {minted} identifiers issued, {replayed}/{total} arks found.', ['minted' => $minted, 'replayed' => $replayed, 'total' => $total]); // @translate
+            }
             if (isset($pending[$id])) {
                 $this->bindArk($noid, $contact, $id, $pending[$id], true);
                 unset($pending[$id]);
@@ -535,6 +555,10 @@ class NoidMaintenance
             throw new \RuntimeException(sprintf('The backend "%s" is not available.', $store));
         }
 
+        $total = count($data);
+        $this->log('notice', 'Noid database: writing {count} keys with the backend {store}.', ['count' => $total, 'store' => $store]); // @translate
+        $start = microtime(true);
+
         /** @var \Noid\Storage\DatabaseInterface $storage */
         $storage = new $storageClass();
         try {
@@ -542,13 +566,33 @@ class NoidMaintenance
             if (!$storage->isOpen()) {
                 throw new \RuntimeException('The database cannot be created.');
             }
-            $imported = $storage->import(new NoidMemoryStorage($data));
+            if ($store === 'xml') {
+                // A write in xml looks for the key in the whole document, so
+                // the import of the storage, that writes directly, is used.
+                $imported = $storage->import(new NoidMemoryStorage($data));
+            } else {
+                // The database is created empty, so the keys are written one by
+                // one, in order to check each write and to log the progress.
+                $imported = true;
+                $done = 0;
+                $step = max(1, (int) ceil($total / 10));
+                foreach ($data as $key => $value) {
+                    if (!$storage->set((string) $key, (string) $value)) {
+                        $imported = false;
+                        break;
+                    }
+                    if (++$done % $step === 0 && $done < $total) {
+                        $this->log('info', 'Noid database: {count}/{total} keys written ({percent}%) in {duration} seconds.', ['count' => $done, 'total' => $total, 'percent' => (int) round(100 * $done / $total), 'duration' => round(microtime(true) - $start, 1)]); // @translate
+                    }
+                }
+            }
             // Some backends write the database on close, so it must be closed
             // before the files can be removed.
             $storage->close();
             if (!$imported) {
-                throw new \RuntimeException('No data imported.');
+                throw new \RuntimeException('Some data cannot be written.');
             }
+            $this->log('notice', 'Noid database: {count} keys written in {duration} seconds.', ['count' => $total, 'duration' => round(microtime(true) - $start, 1)]); // @translate
         } catch (\Throwable $e) {
             if ($storage->isOpen()) {
                 $storage->close();
@@ -754,6 +798,7 @@ class NoidMaintenance
         }
 
         $arks = array_intersect_key($this->fetchArks(), $unknown);
+        $this->log('notice', 'Noid database: reservation of {count} arks unknown to the database.', ['count' => count($arks)]); // @translate
         $contact = (string) $this->settings->get('administrator_email', '[Unknown user]');
         $settings = $this->storageSettings($store);
 
@@ -789,6 +834,72 @@ class NoidMaintenance
             'reserved' => count($arks),
             'backups' => array_values($backups),
         ];
+    }
+
+    /**
+     * Get the identifiers issued whose ark is not stored in Omeka.
+     *
+     * They are the arks of the removed resources, and the margin skipped after
+     * the last ark by a rebuild, never assigned. In a working database, the
+     * ark of a removed resource remains bound to it, so its former resource is
+     * known, but not after a rebuild.
+     *
+     * @return array Arrays with keys "ark" (without "ark:/"), "position" (rank
+     *   of issue), "date", "resources" (former resource ids, if known) and
+     *   "type" ("removed" or "margin"), by position.
+     */
+    public function identifiersWithoutResource(): array
+    {
+        $store = $this->getStore();
+        if ($this->counters($store) === null) {
+            return [];
+        }
+
+        $storageClass = Globals::DB_TYPES[$store];
+        /** @var \Noid\Storage\DatabaseInterface $storage */
+        $storage = new $storageClass();
+        $storage->open($this->storageSettings($store), DatabaseInterface::DB_RDONLY);
+        $keys = $storage->get_range('');
+        $storage->close();
+
+        $arks = $this->fetchArks();
+
+        // The circulation record is "status|date|contact|position".
+        $circulation = "\t" . Globals::_RR . '/c';
+        $length = strlen($circulation);
+        $lastPresent = 0;
+        $rows = [];
+        foreach ($keys as $key => $value) {
+            $key = (string) $key;
+            if (substr($key, -$length) !== $circulation) {
+                continue;
+            }
+            $id = substr($key, 0, -$length);
+            $parts = explode('|', (string) $value);
+            $position = (int) end($parts);
+            if (isset($arks[$id])) {
+                $lastPresent = max($lastPresent, $position);
+                continue;
+            }
+            $date = $parts[1] ?? '';
+            $rows[] = [
+                'ark' => $id,
+                'position' => $position,
+                'date' => strlen($date) === 14
+                    ? substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2) . ' ' . substr($date, 8, 2) . ':' . substr($date, 10, 2) . ':' . substr($date, 12, 2)
+                    : $date,
+                'resources' => (string) ($keys[$id . "\tlocations"] ?? ''),
+            ];
+        }
+
+        usort($rows, fn ($a, $b) => $a['position'] <=> $b['position']);
+        foreach ($rows as &$row) {
+            // The margin is never bound and is after the last ark of Omeka.
+            $row['type'] = $row['resources'] !== '' || $row['position'] < $lastPresent ? 'removed' : 'margin';
+        }
+        unset($row);
+
+        return $rows;
     }
 
     /**
@@ -915,6 +1026,13 @@ class NoidMaintenance
             }
         }
         return $data;
+    }
+
+    protected function log(string $priority, string $message, array $context = []): void
+    {
+        if ($this->logger) {
+            $this->logger->{$priority}($message, $context);
+        }
     }
 
     protected function checkCounters(?array $counters, int $arks): bool
