@@ -14,8 +14,15 @@ class CreateArks extends AbstractJob
         $settings = $services->get('Omeka\Settings');
         $arkManager = $services->get('Ark\ArkManager');
 
-        // Enable persistent connection for batch processing.
         $plugin = $arkManager->getArkNamePlugin();
+        if (method_exists($plugin, 'isLocked') && $plugin->isLocked()) {
+            $services->get('Omeka\Logger')->err(
+                'No ark can be created until the noid database is migrated or rebuilt: see the config of the module.' // @translate
+            );
+            return;
+        }
+
+        // Enable persistent connection for batch processing.
         $hasPersistence = method_exists($plugin, 'enablePersistence');
         if ($hasPersistence) {
             $plugin->enablePersistence();

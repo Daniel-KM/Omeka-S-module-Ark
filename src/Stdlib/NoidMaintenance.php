@@ -356,6 +356,19 @@ class NoidMaintenance
     }
 
     /**
+     * Lock the minting when the database is not ready, so no duplicate is
+     * issued, or unlock it.
+     *
+     * @return bool True when the minting is locked.
+     */
+    public function updateLock(): bool
+    {
+        $locked = $this->isMigrationNeeded() || !$this->isConsistent();
+        $this->settings->set('ark_name_noid_locked', $locked);
+        return $locked;
+    }
+
+    /**
      * Get the full status of the noid database.
      */
     public function status(): array

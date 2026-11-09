@@ -205,9 +205,29 @@ class Module extends AbstractModule
             $settings->set($name, $value);
         }
 
-        if (!$namePlugin->isDatabaseCreated()) {
-            $namePlugin->createDatabase();
+        if ($settings->get('ark_name') !== 'noid') {
+            if (!$namePlugin->isDatabaseCreated()) {
+                $namePlugin->createDatabase();
+            }
+            return true;
         }
+
+        // A new noid database restarts the minting from the beginning, so it
+        // cannot be created when arks are already stored, else the next arks
+        // would be duplicates of existing ones.
+        /** @var \Ark\Stdlib\NoidMaintenance $noidMaintenance */
+        $noidMaintenance = $services->get('Ark\NoidMaintenance');
+        if (!$namePlugin->isDatabaseCreated()) {
+            if ($noidMaintenance->isMigrationNeeded() || $noidMaintenance->countArks()) {
+                $controller->messenger()->addWarning(new PsrMessage(
+                    'The noid database was not created, because arks are already stored in Omeka or a BerkeleyDB database should be migrated: a new database would issue duplicates. Use the maintenance of the noid database below.' // @translate
+                ));
+            } else {
+                $namePlugin->createDatabase();
+            }
+        }
+
+        $noidMaintenance->updateLock();
 
         return true;
     }

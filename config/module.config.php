@@ -177,6 +177,8 @@ return [
             'ark_name' => 'noid',
             'ark_name_noid_template' => 'b.rllllk',
             'ark_name_noid_generator' => 'mt_rand',
+            // Internal flag set when the noid database is not ready.
+            'ark_name_noid_locked' => false,
             'ark_qualifier' => 'internal',
             'ark_qualifier_position_format' => '',
             'ark_qualifier_static' => false,

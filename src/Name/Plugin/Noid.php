@@ -66,6 +66,11 @@ class Noid implements PluginInterface
 
     public function create(AbstractResourceEntityRepresentation $resource): ?string
     {
+        if ($this->isLocked()) {
+            $this->logLocked();
+            return null;
+        }
+
         $noid = $this->openDatabase(DatabaseInterface::DB_WRITE);
         if (empty($noid)) {
             $this->logger->err(
@@ -137,6 +142,11 @@ class Noid implements PluginInterface
     public function createMany(array $resources): array
     {
         if (empty($resources)) {
+            return [];
+        }
+
+        if ($this->isLocked()) {
+            $this->logLocked();
             return [];
         }
 
@@ -368,6 +378,23 @@ class Noid implements PluginInterface
         $settings = $this->buildSettings();
 
         return Db::dbopen($settings, $mode);
+    }
+
+    /**
+     * Check if the minting is locked, when the database is not ready.
+     *
+     * @see \Ark\Stdlib\NoidMaintenance::updateLock()
+     */
+    public function isLocked(): bool
+    {
+        return (bool) $this->settings->get('ark_name_noid_locked');
+    }
+
+    protected function logLocked(): void
+    {
+        $this->logger->err(
+            'No ark can be created until the noid database is migrated or rebuilt: see the config of the module.' // @translate
+        );
     }
 
     protected function getContact()
