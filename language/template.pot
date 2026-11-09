@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-31 00:00+0000\n"
+"POT-Creation-Date: 2026-11-09 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,308 +17,518 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:43 Module.php:93
+#: data/scripts/upgrade.php:54 Module.php:93
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: data/scripts/upgrade.php:47 data/scripts/upgrade.php:445
+#: data/scripts/upgrade.php:58
 msgid "Missing requirement. Unable to upgrade."
 msgstr ""
 
-#: Module.php:116
+#: Module.php:117
+#, php-format
+msgid "The module %1$s requires PHP %2$s or higher."
+msgstr ""
+
+#: Module.php:134
 msgid ""
 "Ark allows to create and manage unique, universel and persistent ark "
 "identifiers."
 msgstr ""
 
-#: Module.php:119
+#: Module.php:137
 #, php-format
 msgid "See %1$sreadme%3$s or %2$sthe original help%3$s for more informations."
 msgstr ""
 
-#: Module.php:140
+#: Module.php:158
 msgid ""
 "NOID database is already created, which means some settings are not "
 "modifiable."
 msgstr ""
 
-#: Module.php:142 Module.php:150
+#: Module.php:160 Module.php:168
 #, php-format
 msgid ""
 "To be able to modify them, you have to manually remove the database (located "
 "in %s)."
 msgstr ""
 
-#: Module.php:147
+#: Module.php:165
 msgid ""
 "NOID database is already created, but the settings are not the same than in "
 "the Omeka database."
 msgstr ""
 
-#: Module.php:154
+#: Module.php:172
 #, php-format
 msgid "Naan: %1$s; Naa: %2$s; Subnaa: %3$s; Template: %4$s."
+msgstr ""
+
+#: src/Controller/Admin/ArkController.php:65
+msgid ""
+"Only the administrators can download the identifiers issued without resource."
 msgstr ""
 
 #: view/ark/index/policy-html.phtml:9
 msgid "Ark Policy Statement"
 msgstr ""
 
-#: data/scripts/upgrade.php:66
+#: view/common/ark-noid-maintenance.phtml:19
+msgid "Extension php-dba with the handler db4"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:20
+msgid ""
+"Install the package php-dba of the distribution, that includes the handler "
+"db4 on Debian and Ubuntu."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:23
+msgid "Reader of the module, without extension"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:24
+msgid "The file noid.bdb should be readable by the server."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:27
+msgid "Command db_dump of BerkeleyDB"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:28
+msgid ""
+"Install the package db-util on Debian and Ubuntu, or libdb-utils on RedHat "
+"and Fedora."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:31
+msgid "Dump of the database created with db_dump"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:32
+#, php-format
+msgid ""
+"On any server with the command db_dump, run \"db_dump -p noid.bdb > "
+"noid.dump\", then copy the file to %s."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:35
+msgid "Export of the database in json"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:36
+#, php-format
+msgid ""
+"On any server with BerkeleyDB for Perl or Python, run the script "
+"export_bdb_to_json.pl or export_bdb_to_json.py of the noid library, then "
+"copy the file to %s."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:42
+msgid "Noid database"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:45
+msgid "Storage backend"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:46
+msgid "not available on this server"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:48
+msgid "Identifiers known by the database"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:50
+msgid "No database"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:51
+#, php-format
+msgid "%1$d issued, %2$d that will never be issued again"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:53
+#, php-format
+msgid "Arks with the naan \"%s\" stored in Omeka"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:58
+msgid "The noid database is ready."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:62
+msgid ""
+"Download the list of the identifiers issued without resource: arks of the "
+"removed resources and margin skipped by a rebuild."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:66
+msgid ""
+"A BerkeleyDB database should be migrated: no ark will be created until then. "
+"Use one of the available methods with the action below."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:70
+msgid "Method to read the BerkeleyDB database"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:71
+msgid "Available"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:72
+msgid "How to make it available"
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:86
+msgid ""
+"If the BerkeleyDB database cannot be read at all, it can be rebuilt from the "
+"arks stored in Omeka."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:90
+#, php-format
+msgid ""
+"The noid database does not know %d arks stored in Omeka that the minter can "
+"issue, so the next arks may be duplicates: no ark will be created until they "
+"are reserved, or the database is restored from a backup or rebuilt from the "
+"arks stored in Omeka."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:91
+msgid ""
+"When the database works and these arks were imported from another system, "
+"reserve them. When the database was replaced by an older backup, rebuild it."
+msgstr ""
+
+#: view/common/ark-noid-maintenance.phtml:95
+msgid ""
+"A backup of the noid database is always better than a rebuild: the arks of "
+"the resources removed after the last ark stored in Omeka cannot be known, so "
+"they may be assigned again to new resources. To avoid it, the rebuild can "
+"skip a margin of identifiers after the last ark: they will never be "
+"assigned. The only cost is a gap in the numbering."
+msgstr ""
+
+#: data/scripts/upgrade.php:79
 msgid ""
 "It is now possible to define a specific property to store arks. Warning: if "
 "you change it, old arks won’t be moved (use module {link}Bulk Edit{link_end} "
 "for that)."
 msgstr ""
 
-#: data/scripts/upgrade.php:95
+#: data/scripts/upgrade.php:96 Module.php:263
+msgid "The Noid database has been migrated from BerkeleyDB to {format}."
+msgstr ""
+
+#: data/scripts/upgrade.php:102 Module.php:268
+msgid "Migration from BerkeleyDB failed: {error}"
+msgstr ""
+
+#: data/scripts/upgrade.php:110
 msgid ""
 "A Noid database other than BerkeleyDB already exists. Skipping migration. "
 "You may remove noid.bdb manually if migration was successful."
 msgstr ""
 
-#: data/scripts/upgrade.php:323
-msgid "Failed to dump BerkeleyDB database using db_dump."
-msgstr ""
-
-#: data/scripts/upgrade.php:332
+#: data/scripts/upgrade.php:132
 msgid ""
-"No data found in BerkeleyDB dump. You may remove existing files in noid "
-"directory."
+"The directory of the noid database, {path}, is served by the web server, but "
+"the file .htaccess cannot be written to protect it. Deny the access to it in "
+"the config of the web server."
 msgstr ""
 
-#: data/scripts/upgrade.php:361
-msgid "Failed to import Noid database: {error}"
-msgstr ""
-
-#: data/scripts/upgrade.php:371
-msgid ""
-"The Noid database has been migrated from BerkeleyDB to {format} using "
-"db_dump."
-msgstr ""
-
-#: data/scripts/upgrade.php:381
-msgid "Cannot read JSON file: {file}"
-msgstr ""
-
-#: data/scripts/upgrade.php:390
-msgid "Invalid JSON in file {file}: {error}"
-msgstr ""
-
-#: data/scripts/upgrade.php:398
-msgid "No data found in JSON file."
-msgstr ""
-
-#: data/scripts/upgrade.php:409
-msgid "Failed to import Noid database from JSON: {error}"
-msgstr ""
-
-#: data/scripts/upgrade.php:419
-msgid ""
-"The Noid database has been migrated from BerkeleyDB to {format} using "
-"noid_data.json."
-msgstr ""
-
-#: data/scripts/upgrade.php:426
-msgid ""
-"A BerkeleyDB Noid database was found but cannot be migrated automatically.\n"
-"Option 1: Install db-util and retry:\n"
-"    - With Debian/Ubuntu: `apt install db-util`\n"
-"    - With RedHat/Fedora: `dnf install libdb-utils`\n"
-"Option 2: Export to JSON manually and retry:\n"
-"    - Use Perl: `perl vendor/daniel-km/noid/scripts/export_bdb_to_json.pl "
-"{bdb_file} {json_file}`\n"
-"    - Use Python: `python3 vendor/daniel-km/noid/scripts/"
-"export_bdb_to_json.py {bdb_file} {json_file}`\n"
-"See {link}Noid4Php documentation{link_end} for details."
-msgstr ""
-
-#: data/scripts/upgrade.php:466
-msgid "Cannot open BerkeleyDB database for migration."
-msgstr ""
-
-#: data/scripts/upgrade.php:520
-msgid "The Noid database has been migrated from BerkeleyDB to {format}."
-msgstr ""
-
-#: data/scripts/upgrade.php:538
-msgid "Migration from BerkeleyDB failed: {error}"
-msgstr ""
-
-#: data/scripts/upgrade.php:569
+#: data/scripts/upgrade.php:158
 msgid ""
 "The storage backend \"{old}\" of the noid database is not available on this "
 "server. It has been replaced by \"{new}\". Check the config of the module."
 msgstr ""
 
-#: data/scripts/upgrade.php:626
+#: data/scripts/upgrade.php:176
 msgid ""
-"The noid database contains no minted identifier, but {count} arks with the "
-"naan \"{naan}\" are stored in Omeka. A previous migration emptied it, so the "
-"next arks would be duplicates of existing ones. Restore the noid database "
-"from a backup, or remove the arks of the resources, then upgrade again."
+"The noid database should be migrated from BerkeleyDB: no ark will be created "
+"until then. See the {link}config of the module{link_end}."
 msgstr ""
 
-#: Module.php:102
+#: data/scripts/upgrade.php:181
+msgid ""
+"The noid database does not know {count} arks with the naan \"{naan}\" stored "
+"in Omeka that the minter can issue, so the next arks may be duplicates: no "
+"ark will be created until they are reserved, or the database is restored or "
+"rebuilt. See the {link}config of the module{link_end}."
+msgstr ""
+
+#: Module.php:104
 msgid ""
 "If extension dba is installed, you may store noid inside a lmdb database. "
 "For now, you can use omeka database, sqlite or xml."
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:71 src/Name/Plugin/Noid.php:145
+#: Module.php:278
+msgid ""
+"{count} arks unknown to the noid database were reserved, so they will never "
+"be issued."
+msgstr ""
+
+#: Module.php:283
+msgid "The unknown arks cannot be reserved: {error}"
+msgstr ""
+
+#: Module.php:291
+msgid ""
+"The noid database is being rebuilt in job {link_job}#{job_id}{link_end} "
+"({link_log}logs{link_end}). No ark is created until the end."
+msgstr ""
+
+#: Module.php:314
+msgid ""
+"The noid database was not created, because arks are already stored in Omeka "
+"or a BerkeleyDB database should be migrated: a new database would issue "
+"duplicates. Use the maintenance of the noid database below."
+msgstr ""
+
+#: Module.php:319
+msgid ""
+"The template \"{template}\" has no prefix, so the noid database was not "
+"created. A prefix is recommended: it allows to create parallel series, for "
+"example for several libraries or archive services, and, if the noid database "
+"is lost, a new prefix ensures that the new arks will never be the same than "
+"existing ones. Set a prefix, or confirm the creation without prefix."
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:85 src/Name/Plugin/Noid.php:164
 msgid "Cannot open database: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:72 src/Name/Plugin/Noid.php:146
-msgid "No database"
-msgstr ""
-
-#: src/Name/Plugin/Noid.php:94
+#: src/Name/Plugin/Noid.php:108
 msgid "Cannot create an Ark for {resource} #{resource_id}: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:105
+#: src/Name/Plugin/Noid.php:119
 msgid "Ark set, but not bound [{ark}, {resource} #{resource_id}]: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:115
+#: src/Name/Plugin/Noid.php:129
 msgid ""
 "Ark set, but no reverse bind [{ark}, {resource} #{resource_id}]: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:177
+#: src/Name/Plugin/Noid.php:196
 msgid "Cannot create Arks for {count} resources: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:186
+#: src/Name/Plugin/Noid.php:205
 msgid "Minter exhausted: requested {count} arks, received {received}."
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:199
+#: src/Name/Plugin/Noid.php:218
 msgid "No ark available for {resource} #{resource_id}."
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:226
+#: src/Name/Plugin/Noid.php:245
 msgid "Ark set, but not bound [{ark}, resource #{resource_id}]: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:239
+#: src/Name/Plugin/Noid.php:258
 msgid ""
 "Ark set, but no reverse bind [{ark}, resource #{resource_id}]: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:312
+#: src/Name/Plugin/Noid.php:342
 msgid "Cannot get database info: {message}"
 msgstr ""
 
-#: src/Name/Plugin/Noid.php:400
+#: src/Name/Plugin/Noid.php:415 src/Job/CreateArks.php:20
+msgid ""
+"No ark can be created until the noid database is migrated or rebuilt: see "
+"the config of the module."
+msgstr ""
+
+#: src/Name/Plugin/Noid.php:423
 msgid "[Unknown user]"
 msgstr ""
 
-#: src/Job/CreateArks.php:58
+#: src/Job/CreateArks.php:65
 msgid "The property \"{property}\" set to store arks does not exist."
 msgstr ""
 
-#: src/Job/CreateArks.php:114
+#: src/Job/CreateArks.php:121
 msgid "{resource} #{resource_id}: Failed to create ARK identifier."
 msgstr ""
 
-#: src/Job/CreateArks.php:130
+#: src/Job/CreateArks.php:137
 msgid "{resource} #{resource_id}: Created ARK identifier {identifier}."
 msgstr ""
 
-#: src/Form/ConfigForm.php:24
+#: src/Job/RebuildNoidDatabase.php:24
+msgid "Rebuilding the noid database from the {count} arks stored in Omeka."
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:32
+msgid "The noid database cannot be rebuilt: {message}"
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:42
+msgid ""
+"The noid database was rebuilt with the backend {store} and the generator "
+"{generator}, from the {count} arks stored in Omeka."
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:46
+msgid ""
+"Arks stored in Omeka found by the minter in the original order: {count}."
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:50
+msgid ""
+"Identifiers issued before the last ark, but whose resources were removed "
+"from Omeka: {count}. They remain issued, so they will never be issued again. "
+"List: {url}"
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:55
+msgid ""
+"Arks stored in Omeka that the minter cannot issue (another template or "
+"prefix): {count}. They are reserved."
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:60
+msgid ""
+"Margin: {count} identifiers skipped after the last ark stored in Omeka, that "
+"will never be assigned. Resources removed after this ark may have had arks "
+"that cannot be known: the margin ensures that they will not be assigned "
+"again. The only cost is a gap in the numbering."
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:64
+msgid ""
+"Identifiers known by the noid database, that will never be issued again: "
+"{count}. The next ark will be issued after them."
+msgstr ""
+
+#: src/Job/RebuildNoidDatabase.php:69
+msgid "The previous database is kept as {backups}."
+msgstr ""
+
+#: src/Form/ConfigForm.php:40
 msgid "Default (lmdb if available, else xml)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:25
+#: src/Form/ConfigForm.php:41
 msgid "Lmdb (fast, bdb replacement)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:26
+#: src/Form/ConfigForm.php:42
 msgid "Xml (portable)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:27
+#: src/Form/ConfigForm.php:43
 msgid "Omeka database (simpler)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:28
+#: src/Form/ConfigForm.php:44
 msgid "Sqlite (portable)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:29
+#: src/Form/ConfigForm.php:45
 msgid "BerkeleyDb (deprecated, no more fully free)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:48
+#: src/Form/ConfigForm.php:64
 msgid "Storage backend for the noid database"
 msgstr ""
 
-#: src/Form/ConfigForm.php:49
+#: src/Form/ConfigForm.php:66
+msgid ""
+"The BerkeleyDB database will be migrated to this backend. The backends that "
+"require a missing php extension or dba handler are disabled."
+msgstr ""
+
+#: src/Form/ConfigForm.php:67
 msgid ""
 "The backends that require a missing php extension or dba handler are "
 "disabled."
 msgstr ""
 
-#: src/Form/ConfigForm.php:61
+#: src/Form/ConfigForm.php:79
 msgid "NAAN"
 msgstr ""
 
-#: src/Form/ConfigForm.php:72
+#: src/Form/ConfigForm.php:90
 msgid "NAA"
 msgstr ""
 
-#: src/Form/ConfigForm.php:83
+#: src/Form/ConfigForm.php:101
 msgid "Sub NAA"
 msgstr ""
 
-#: src/Form/ConfigForm.php:94
+#: src/Form/ConfigForm.php:112
 msgid "Name processor for resource"
 msgstr ""
 
-#: src/Form/ConfigForm.php:96
+#: src/Form/ConfigForm.php:114
 msgid "Internal resource id"
 msgstr ""
 
-#: src/Form/ConfigForm.php:97
+#: src/Form/ConfigForm.php:115
 msgid "Noid"
 msgstr ""
 
-#: src/Form/ConfigForm.php:109
+#: src/Form/ConfigForm.php:127
 msgid "Noid Template"
 msgstr ""
 
-#: src/Form/ConfigForm.php:120
-msgid "Random generator for the noid database when template is random"
+#: src/Form/ConfigForm.php:128
+msgid ""
+"A prefix before the dot is recommended, for example \"b\" in \"b.rllllk\". "
+"It allows to create parallel series, for example for several libraries or "
+"archive services, and, if the noid database is lost, a new prefix ensures "
+"that the new arks will never be the same than existing ones."
 msgstr ""
 
-#: src/Form/ConfigForm.php:122
-msgid "Mersenne Twister, better random distribution"
+#: src/Form/ConfigForm.php:139
+msgid "Create the noid database with a template without prefix"
 msgstr ""
 
-#: src/Form/ConfigForm.php:123
-msgid "Linear Congruential Generator, better compatibility"
-msgstr ""
-
-#: src/Form/ConfigForm.php:135
-msgid "Qualifier for media"
-msgstr ""
-
-#: src/Form/ConfigForm.php:137
-msgid "Internal media id"
-msgstr ""
-
-#: src/Form/ConfigForm.php:138
-msgid "Position of the media"
+#: src/Form/ConfigForm.php:140
+msgid ""
+"Required to create the database when the template has no prefix: the "
+"template cannot be changed later."
 msgstr ""
 
 #: src/Form/ConfigForm.php:150
+msgid "Random generator for the noid database when template is random"
+msgstr ""
+
+#: src/Form/ConfigForm.php:152
+msgid "Mersenne Twister, better random distribution"
+msgstr ""
+
+#: src/Form/ConfigForm.php:153
+msgid "Linear Congruential Generator, better compatibility"
+msgstr ""
+
+#: src/Form/ConfigForm.php:165
+msgid "Qualifier for media"
+msgstr ""
+
+#: src/Form/ConfigForm.php:167
+msgid "Internal media id"
+msgstr ""
+
+#: src/Form/ConfigForm.php:168
+msgid "Position of the media"
+msgstr ""
+
+#: src/Form/ConfigForm.php:180
 msgid "Format of position for qualifier"
 msgstr ""
 
-#: src/Form/ConfigForm.php:151
+#: src/Form/ConfigForm.php:181
 msgid ""
 "A `sprintf` string that will format the media position. It is recommended to "
 "use a format with a leading letter to avoid confusion with numeric media id. "
@@ -327,26 +537,87 @@ msgid ""
 "Easy Admin to fix positions."
 msgstr ""
 
-#: src/Form/ConfigForm.php:162
+#: src/Form/ConfigForm.php:192
 msgid "Save the ark with qualifier for media"
 msgstr ""
 
-#: src/Form/ConfigForm.php:172
+#: src/Form/ConfigForm.php:202
 msgid "Property where to store the identifier (usually dcterms:identifier)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:173
+#: src/Form/ConfigForm.php:203
 msgid ""
 "If changed, you will need to move all existing identifiers to the new "
 "property via module Bulk Edit."
 msgstr ""
 
-#: src/Form/ConfigForm.php:185
+#: src/Form/ConfigForm.php:215
 msgid "Policy statement"
 msgstr ""
 
-#: src/Form/ConfigForm.php:196
+#: src/Form/ConfigForm.php:226
 msgid "Main policy"
+msgstr ""
+
+#: src/Form/ConfigForm.php:289
+msgid "Migrate the BerkeleyDB database with the extension php-dba"
+msgstr ""
+
+#: src/Form/ConfigForm.php:290
+msgid ""
+"Migrate the BerkeleyDB database with the reader of the module, without "
+"extension"
+msgstr ""
+
+#: src/Form/ConfigForm.php:291
+msgid "Migrate the BerkeleyDB database with the command db_dump"
+msgstr ""
+
+#: src/Form/ConfigForm.php:292
+msgid "Migrate the BerkeleyDB database from the file noid.dump"
+msgstr ""
+
+#: src/Form/ConfigForm.php:293
+msgid "Migrate the BerkeleyDB database from the file noid_data.json"
+msgstr ""
+
+#: src/Form/ConfigForm.php:302
+msgid ""
+"Reserve the arks stored in Omeka that the noid database does not know, so "
+"they will never be issued (the current database is kept as a backup)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:305
+msgid ""
+"Rebuild the noid database from the arks stored in Omeka, in a background job "
+"(the current database is kept as a backup)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:318
+msgid "Margin of identifiers to skip after the last ark when rebuilding"
+msgstr ""
+
+#: src/Form/ConfigForm.php:319
+msgid ""
+"The identifiers of the margin are skipped after the last ark stored in Omeka "
+"and will never be assigned. Resources removed after this ark may have had "
+"arks that cannot be known: the margin ensures that they will not be assigned "
+"again. Set a number greater than the number of resources with an ark that "
+"may have been removed recently. The only cost is a gap in the numbering."
+msgstr ""
+
+#: src/Form/ConfigForm.php:334
+msgid "Maintenance of the noid database"
+msgstr ""
+
+#: src/Form/ConfigForm.php:335
+msgid ""
+"The action is processed when the config is saved. See the state of the "
+"database above."
+msgstr ""
+
+#: src/Form/ConfigForm.php:336
+msgid "No action"
 msgstr ""
 
 #: src/Form/CreateArksForm.php:16
@@ -400,8 +671,33 @@ msgid ""
 "#{media_id}]."
 msgstr ""
 
-#: src/Controller/Admin/ArkController.php:23
+#: src/Controller/Admin/ArkController.php:33
 msgid ""
 "ARK creation started in job {link_job}#{job_id}{link_end} ({link_log}"
 "logs{link_end})."
+msgstr ""
+
+#: src/Stdlib/NoidMaintenance.php:234
+msgid "method"
+msgstr ""
+
+#: src/Stdlib/NoidMaintenance.php:239
+msgid "message"
+msgstr ""
+
+#: src/Stdlib/NoidMaintenance.php:244 src/Stdlib/NoidMaintenance.php:361
+#: src/Stdlib/NoidMaintenance.php:600 src/Stdlib/NoidMaintenance.php:610
+msgid "duration"
+msgstr ""
+
+#: src/Stdlib/NoidMaintenance.php:337 src/Stdlib/NoidMaintenance.php:836
+msgid "count"
+msgstr ""
+
+#: src/Stdlib/NoidMaintenance.php:428
+msgid "total"
+msgstr ""
+
+#: src/Stdlib/NoidMaintenance.php:573
+msgid "store"
 msgstr ""
