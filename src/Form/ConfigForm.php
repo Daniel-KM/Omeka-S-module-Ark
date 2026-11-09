@@ -267,6 +267,10 @@ class ConfigForm extends Form
             }
         }
 
+        if ($this->noidMaintenance->isMigrationNeeded() || !$this->noidMaintenance->isConsistent()) {
+            $actions['rebuild'] = 'Rebuild the noid database from the arks stored in Omeka, in a background job (the current database is kept as a backup)'; // @translate
+        }
+
         if (!$actions) {
             return $this;
         }

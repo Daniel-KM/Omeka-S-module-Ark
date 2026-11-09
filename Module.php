@@ -247,6 +247,25 @@ class Module extends AbstractModule
             }
             // The plugin was built for the previous store.
             $namePlugin = $services->get('Ark\NamePluginManager')->build('noid');
+        } elseif ($action === 'rebuild') {
+            $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\Ark\Job\RebuildNoidDatabase::class);
+            $urlPlugin = $controller->url();
+            $message = new PsrMessage(
+                'The noid database is being rebuilt in job {link_job}#{job_id}{link_end} ({link_log}logs{link_end}). No ark is created until the end.', // @translate
+                [
+                    'link_job' => sprintf('<a href="%s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
+                    'job_id' => $job->getId(),
+                    'link_end' => '</a>',
+                    'link_log' => sprintf('<a href="%s">', htmlspecialchars(class_exists('Log\Module', false)
+                        ? $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])
+                        : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()]))),
+                ]
+            );
+            $message->setEscapeHtml(false);
+            $controller->messenger()->addSuccess($message);
+            // The database is created by the job, and the lock is kept until
+            // the end.
+            return true;
         }
 
         // A new noid database restarts the minting from the beginning, so it

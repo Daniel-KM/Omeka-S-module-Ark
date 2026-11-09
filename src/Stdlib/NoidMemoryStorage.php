@@ -12,6 +12,10 @@ use Noid\Storage\DatabaseInterface;
  * set(), that checks the existence of each key: on xml, that lookup is a xpath
  * on the whole document, so a loop on a big database takes hours. It allows to
  * mint identifiers in memory too.
+ *
+ * The keys of an identifier start with the identifier and a tab, and they are
+ * fetched together on each minting, so they are indexed: a btree database finds
+ * them directly, but a scan of the array would make the minting quadratic.
  */
 class NoidMemoryStorage implements DatabaseInterface
 {
@@ -20,9 +24,19 @@ class NoidMemoryStorage implements DatabaseInterface
      */
     protected $data;
 
+    /**
+     * Keys by identifier, with the tab.
+     *
+     * @var array
+     */
+    protected $index = [];
+
     public function __construct(array $data = [])
     {
         $this->data = $data;
+        foreach (array_keys($data) as $key) {
+            $this->addToIndex((string) $key);
+        }
     }
 
     public function open($settings, $mode)
@@ -41,7 +55,7 @@ class NoidMemoryStorage implements DatabaseInterface
 
     public function import($src_db)
     {
-        $this->data = $src_db->get_range('');
+        $this->__construct($src_db->get_range(''));
         return (bool) $this->data;
     }
 
@@ -52,12 +66,20 @@ class NoidMemoryStorage implements DatabaseInterface
 
     public function set($key, $value)
     {
+        if (!isset($this->data[$key])) {
+            $this->addToIndex((string) $key);
+        }
         $this->data[$key] = $value;
         return true;
     }
 
     public function delete($key)
     {
+        $key = (string) $key;
+        $pos = strpos($key, "\t");
+        if ($pos !== false) {
+            unset($this->index[substr($key, 0, $pos + 1)][$key]);
+        }
         unset($this->data[$key]);
         return true;
     }
@@ -78,13 +100,28 @@ class NoidMemoryStorage implements DatabaseInterface
         }
 
         $result = [];
-        foreach ($this->data as $key => $value) {
-            if ($pattern === '' || strpos((string) $key, $pattern) === 0) {
-                $result[$key] = $value;
+        $pos = strpos($pattern, "\t");
+        if ($pos === strlen($pattern) - 1) {
+            foreach (array_keys($this->index[$pattern] ?? []) as $key) {
+                $result[$key] = $this->data[$key];
+            }
+        } else {
+            foreach ($this->data as $key => $value) {
+                if ($pattern === '' || strpos((string) $key, $pattern) === 0) {
+                    $result[$key] = $value;
+                }
             }
         }
         ksort($result, SORT_STRING);
 
         return $limit > 0 ? array_slice($result, 0, (int) $limit, true) : $result;
+    }
+
+    protected function addToIndex(string $key): void
+    {
+        $pos = strpos($key, "\t");
+        if ($pos !== false) {
+            $this->index[substr($key, 0, $pos + 1)][$key] = true;
+        }
     }
 }

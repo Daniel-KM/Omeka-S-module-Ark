@@ -4,7 +4,10 @@ namespace Ark\Stdlib;
 
 use Common\Stdlib\EasyMeta;
 use Doctrine\DBAL\Connection;
+use Noid\Lib\Db;
 use Noid\Lib\Globals;
+use Noid\Lib\Log;
+use Noid\Noid as NoidLib;
 use Noid\Storage\DatabaseInterface;
 use Omeka\Settings\Settings;
 use Omeka\Stdlib\Cli;
@@ -225,6 +228,242 @@ class NoidMaintenance
         }
 
         throw new \RuntimeException(implode(' ', $errors) ?: 'No backend is available to store the noid database.');
+    }
+
+    /**
+     * Rebuild the database from the arks stored in Omeka.
+     *
+     * A new database is created with the same settings, then the minting is
+     * replayed: the generator is deterministic, so the same identifiers are
+     * issued in the same order, the counters are restored, and the identifiers
+     * of the removed resources are issued too, so they will never be issued
+     * again. Each ark found is bound to its resources. The replay stops when
+     * all the arks are found, or when none is found during a long time: the
+     * remaining arks were not issued by this minter (another template, another
+     * generator, manual input), so they are held to be never issued.
+     *
+     * The replay is done in memory, then written with the import of the store,
+     * that is linear. The previous database is kept as a backup, and restored
+     * when the rebuild fails.
+     *
+     * @param callable|null $shouldStop Return true to stop the process.
+     * @return array With keys "store", "arks", "replayed", "held", "minted" and
+     *   "backups".
+     * @throws \RuntimeException
+     */
+    public function rebuild(?callable $shouldStop = null): array
+    {
+        $store = (string) $this->settings->get('ark_store');
+        $store = $store === 'bdb' || !NoidStore::isAvailable(NoidStore::resolve($store))
+            ? NoidStore::resolve('')
+            : NoidStore::resolve($store);
+        if (!NoidStore::isAvailable($store)) {
+            throw new \RuntimeException(sprintf('The backend "%s" is not available.', $store));
+        }
+
+        $template = (string) $this->settings->get('ark_name_noid_template');
+        if ($template === '') {
+            throw new \RuntimeException('The template of the identifiers is not set.');
+        }
+
+        $naan = (string) $this->settings->get('ark_naan');
+        $naa = (string) $this->settings->get('ark_naa');
+        $subnaa = (string) $this->settings->get('ark_subnaa');
+        $term = $naan && $naa && $subnaa ? 'long' : 'medium';
+        $contact = (string) $this->settings->get('administrator_email', '[Unknown user]');
+        $generator = (string) $this->settings->get('ark_name_noid_generator', 'mt_rand');
+
+        $arks = $this->fetchArks();
+        $settings = $this->storageSettings($store);
+        $settings['generator'] = self::GENERATORS[$generator] ?? 'mt_rand';
+
+        $backups = $this->backupDatabase($store);
+        try {
+            if (!Db::dbcreate($settings, $contact, $template, $term, $naan, $naa, $subnaa)) {
+                throw new \RuntimeException('The database cannot be created: ' . Log::errmsg(null, 1));
+            }
+            $noid = Db::dbopen($settings, DatabaseInterface::DB_WRITE);
+            if (!$noid) {
+                throw new \RuntimeException('The database cannot be opened: ' . Log::errmsg(null, 1));
+            }
+
+            // Mint in memory: the database keeps its handle, only the engine
+            // that reads and writes the keys is replaced.
+            $engine = Db::$engine;
+            $memory = new NoidMemoryStorage($engine->get_range(''));
+            Db::$engine = $memory;
+            try {
+                $result = $this->replay($noid, $contact, $arks, $shouldStop);
+            } finally {
+                Db::$engine = $engine;
+                Db::dbclose($noid, true);
+            }
+
+            $this->importData($memory->get_range(''), $store);
+        } catch (\Throwable $e) {
+            $this->restoreDatabase($store, $backups);
+            throw new \RuntimeException($e->getMessage(), 0, $e);
+        }
+
+        $this->settings->set('ark_store', $store);
+        $this->updateLock();
+
+        return [
+            'store' => $store,
+            'arks' => count($arks),
+            'backups' => array_values($backups),
+        ] + $result;
+    }
+
+    /**
+     * Mint until all the arks are found, then hold the remaining ones.
+     */
+    protected function replay(string $noid, string $contact, array $arks, ?callable $shouldStop): array
+    {
+        // An ark that does not match the template cannot be issued, so it is
+        // held at once instead of being searched.
+        $pending = [];
+        $foreign = [];
+        foreach ($arks as $id => $resourceIds) {
+            $check = NoidLib::validate($noid, '-', [(string) $id]);
+            if ($check && strpos((string) reset($check), 'id: ') === 0) {
+                $pending[$id] = $resourceIds;
+            } else {
+                $foreign[$id] = $resourceIds;
+            }
+        }
+
+        $total = count($pending);
+        // When no ark is found at the beginning, the generator differs, so the
+        // replay is useless.
+        $probe = min(1000, $total);
+        $maxMisses = max(1000, $total);
+        $minted = 0;
+        $replayed = 0;
+        $misses = 0;
+
+        while ($pending) {
+            if ($shouldStop && $minted % 1000 === 0 && $shouldStop()) {
+                throw new \RuntimeException('The rebuild was stopped.');
+            }
+            $id = NoidLib::mint($noid, $contact);
+            if ($id === null || $id === '') {
+                break;
+            }
+            ++$minted;
+            if (isset($pending[$id])) {
+                $this->bindArk($noid, $contact, $id, $pending[$id], true);
+                unset($pending[$id]);
+                ++$replayed;
+                $misses = 0;
+            } elseif ((!$replayed && $minted >= $probe) || ++$misses >= $maxMisses) {
+                break;
+            }
+        }
+
+        // The arks that are not issued by the minter are held, so they cannot
+        // be issued later, whatever their template.
+        $pending += $foreign;
+        foreach ($pending as $id => $resourceIds) {
+            NoidLib::hold_set($noid, (string) $id);
+            $this->bindArk($noid, $contact, (string) $id, $resourceIds, false);
+        }
+
+        return [
+            'replayed' => $replayed,
+            'held' => count($pending),
+            'minted' => $minted,
+        ];
+    }
+
+    /**
+     * Bind an ark to its resources, with the reverse binds used by the module.
+     *
+     * @see \Ark\Name\Plugin\Noid::create()
+     */
+    protected function bindArk(string $noid, string $contact, string $id, array $resourceIds, bool $validate): void
+    {
+        NoidLib::bind($noid, $contact, $validate ? 1 : 0, 'set', $id, 'locations', implode('|', $resourceIds));
+        foreach ($resourceIds as $resourceId) {
+            Log::note($noid, $contact, 'locations/' . $resourceId, $id);
+        }
+    }
+
+    /**
+     * Get the arks that the minter can issue, without "ark:/", with their
+     * resource ids.
+     *
+     * @see self::countArks()
+     */
+    protected function fetchArks(): array
+    {
+        $propertyId = $this->propertyId();
+        if (!$propertyId) {
+            return [];
+        }
+        $base = $this->arkBase();
+        $rows = $this->connection->executeQuery(
+            'SELECT `value`, `resource_id` FROM `value` WHERE `property_id` = :property_id AND `type` = :type AND `value` LIKE :base AND `value` NOT LIKE :qualified ORDER BY `resource_id`',
+            [
+                'property_id' => $propertyId,
+                'type' => 'literal',
+                'base' => $base . '%',
+                'qualified' => $base . '%/%',
+            ]
+        )->fetchAllNumeric();
+        $arks = [];
+        foreach ($rows as [$value, $resourceId]) {
+            $arks[substr($value, 5)][] = (int) $resourceId;
+        }
+        return array_map('array_unique', $arks);
+    }
+
+    /**
+     * Rename the files or the table of a database to keep it as a backup.
+     *
+     * @return array The backups by original name.
+     */
+    protected function backupDatabase(string $store): array
+    {
+        $backups = [];
+        $suffix = date('Ymd-His');
+
+        if ($store === 'pdo') {
+            if ($this->connection->executeQuery('SHOW TABLES LIKE :table', ['table' => 'noid'])->fetchOne()) {
+                $backup = 'noid_' . strtr($suffix, ['-' => '_']);
+                $this->connection->executeStatement('RENAME TABLE `noid` TO `' . $backup . '`');
+                $backups['noid'] = $backup;
+            }
+            return $backups;
+        }
+
+        foreach (NoidStore::files($store, $this->databaseDir) as $file) {
+            if (file_exists($file)) {
+                $backup = $file . '.' . $suffix . '.bak';
+                if (!rename($file, $backup)) {
+                    $this->restoreDatabase($store, $backups);
+                    throw new \RuntimeException(sprintf('The file %s cannot be renamed to keep a backup.', $file));
+                }
+                $backups[$file] = $backup;
+            }
+        }
+        return $backups;
+    }
+
+    protected function restoreDatabase(string $store, array $backups): void
+    {
+        if ($store === 'pdo') {
+            if (isset($backups['noid'])) {
+                $this->connection->executeStatement('DROP TABLE IF EXISTS `noid`');
+                $this->connection->executeStatement('RENAME TABLE `' . $backups['noid'] . '` TO `noid`');
+            }
+            return;
+        }
+
+        $this->removeFiles($store);
+        foreach ($backups as $file => $backup) {
+            rename($backup, $file);
+        }
     }
 
     /**
