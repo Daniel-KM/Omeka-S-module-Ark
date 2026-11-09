@@ -26,7 +26,7 @@ class RebuildNoidDatabase extends AbstractJob
         );
 
         try {
-            $result = $noidMaintenance->rebuild(fn () => $this->shouldStop());
+            $result = $noidMaintenance->rebuild(fn () => $this->shouldStop(), (int) $this->getArg('margin', 0));
         } catch (\RuntimeException $e) {
             $logger->err(
                 'The noid database cannot be rebuilt: {message}', // @translate
@@ -36,9 +36,33 @@ class RebuildNoidDatabase extends AbstractJob
             return;
         }
 
+        // Only the placeholders of each message are passed, else the other
+        // values are appended to the message.
         $logger->notice(
-            'The noid database was rebuilt with the backend {store}: {replayed} arks were issued again in the same order, {held} arks that the minter cannot issue were reserved, and {minted} identifiers were issued in all.', // @translate
-            $result
+            'The noid database was rebuilt with the backend {store} and the generator {generator}, from the {count} arks stored in Omeka.', // @translate
+            ['store' => $result['store'], 'generator' => $result['generator'], 'count' => $result['arks']]
+        );
+        $logger->notice(
+            'Arks stored in Omeka found by the minter in the original order: {count}.', // @translate
+            ['count' => $result['replayed']]
+        );
+        $logger->notice(
+            'Identifiers issued before the last ark, but whose resources were removed from Omeka: {count}. They remain issued, so they will never be issued again.', // @translate
+            ['count' => $result['minted'] - $result['replayed']]
+        );
+        if ($result['held']) {
+            $logger->warn(
+                'Arks stored in Omeka that the minter cannot issue (another template or prefix): {count}. They are reserved.', // @translate
+                ['count' => $result['held']]
+            );
+        }
+        $logger->notice(
+            'Margin of identifiers reserved after the last ark, for the arks of the last removed resources, that cannot be known: {count}.', // @translate
+            ['count' => $result['reserved']]
+        );
+        $logger->notice(
+            'Identifiers known by the noid database, that will never be issued again: {count}. The next ark will be issued after them.', // @translate
+            ['count' => $result['minted'] + $result['reserved'] + $result['held']]
         );
         if ($result['backups']) {
             $logger->notice(
@@ -46,9 +70,5 @@ class RebuildNoidDatabase extends AbstractJob
                 ['backups' => implode(', ', $result['backups'])]
             );
         }
-        // The removed resources that had the last arks cannot be known.
-        $logger->warn(
-            'The identifiers issued after the last ark that is still stored in Omeka cannot be known, so they may be issued again: check it if the last resources with an ark were deleted.' // @translate
-        );
     }
 }

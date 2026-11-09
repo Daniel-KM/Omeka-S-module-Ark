@@ -233,6 +233,10 @@ class ConfigForm extends Form
                 'required' => false,
             ])
             ->add([
+                'name' => 'ark_noid_rebuild_margin',
+                'required' => false,
+            ])
+            ->add([
                 'name' => 'ark_store',
                 'required' => false,
             ])
@@ -267,12 +271,30 @@ class ConfigForm extends Form
             }
         }
 
-        if ($this->noidMaintenance->isMigrationNeeded() || !$this->noidMaintenance->isConsistent()) {
+        $rebuild = $this->noidMaintenance->isMigrationNeeded() || !$this->noidMaintenance->isConsistent();
+        if ($rebuild) {
             $actions['rebuild'] = 'Rebuild the noid database from the arks stored in Omeka, in a background job (the current database is kept as a backup)'; // @translate
         }
 
         if (!$actions) {
             return $this;
+        }
+
+        if ($rebuild) {
+            $this
+                ->add([
+                    'name' => 'ark_noid_rebuild_margin',
+                    'type' => Element\Number::class,
+                    'options' => [
+                        'label' => 'Identifiers to reserve after the last ark when rebuilding', // @translate
+                        'info' => 'The arks of the last removed resources cannot be known, so they may be issued again. The identifiers reserved after the last ark stored in Omeka will never be issued, so set a number greater than the number of resources with an ark that may have been removed recently.', // @translate
+                    ],
+                    'attributes' => [
+                        'id' => 'ark_noid_rebuild_margin',
+                        'min' => 0,
+                        'value' => 0,
+                    ],
+                ]);
         }
 
         $this

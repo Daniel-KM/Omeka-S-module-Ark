@@ -199,6 +199,7 @@ class Module extends AbstractModule
 
         $params = $form->getData();
         $action = (string) ($params['ark_noid_maintenance'] ?? '');
+        $margin = max(0, (int) ($params['ark_noid_rebuild_margin'] ?? 0));
         $defaultSettings = $config['ark']['config'];
         $params = array_intersect_key($params, $defaultSettings);
 
@@ -248,7 +249,7 @@ class Module extends AbstractModule
             // The plugin was built for the previous store.
             $namePlugin = $services->get('Ark\NamePluginManager')->build('noid');
         } elseif ($action === 'rebuild') {
-            $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\Ark\Job\RebuildNoidDatabase::class);
+            $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\Ark\Job\RebuildNoidDatabase::class, ['margin' => $margin]);
             $urlPlugin = $controller->url();
             $message = new PsrMessage(
                 'The noid database is being rebuilt in job {link_job}#{job_id}{link_end} ({link_log}logs{link_end}). No ark is created until the end.', // @translate

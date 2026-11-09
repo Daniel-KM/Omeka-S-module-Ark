@@ -239,19 +239,30 @@ class NoidMaintenance
      * of the removed resources are issued too, so they will never be issued
      * again. Each ark found is bound to its resources. The replay stops when
      * all the arks are found, or when none is found during a long time: the
-     * remaining arks were not issued by this minter (another template, another
-     * generator, manual input), so they are held to be never issued.
+     * remaining arks were not issued by this minter (another template, manual
+     * input), so they are held to be never issued.
+     *
+     * The setting of the generator may differ from the one of the lost
+     * database, for example when it was created by an old version, and another
+     * generator issues the identifiers in another order, so the removed arks
+     * would be issued again. So the replay is done with each generator, and
+     * the one that finds the arks with the less identifiers is kept and saved.
      *
      * The replay is done in memory, then written with the import of the store,
      * that is linear. The previous database is kept as a backup, and restored
      * when the rebuild fails.
      *
+     * The identifiers issued after the last ark still stored in Omeka, for
+     * example the ones of the last resources removed, cannot be known, so a
+     * margin of identifiers is issued after it, so they will never be issued.
+     *
      * @param callable|null $shouldStop Return true to stop the process.
-     * @return array With keys "store", "arks", "replayed", "held", "minted" and
-     *   "backups".
+     * @param int $margin Number of identifiers to issue after the last ark.
+     * @return array With keys "store", "generator", "arks", "replayed",
+     *   "held", "minted", "reserved" and "backups".
      * @throws \RuntimeException
      */
-    public function rebuild(?callable $shouldStop = null): array
+    public function rebuild(?callable $shouldStop = null, int $margin = 0): array
     {
         $store = (string) $this->settings->get('ark_store');
         $store = $store === 'bdb' || !NoidStore::isAvailable(NoidStore::resolve($store))
@@ -274,51 +285,67 @@ class NoidMaintenance
         $generator = (string) $this->settings->get('ark_name_noid_generator', 'mt_rand');
 
         $arks = $this->fetchArks();
-        $settings = $this->storageSettings($store);
-        $settings['generator'] = self::GENERATORS[$generator] ?? 'mt_rand';
+        $generator = self::GENERATORS[$generator] ?? 'mt_rand';
+        $generators = array_unique(array_merge([$generator], array_values(self::GENERATORS)));
 
         $backups = $this->backupDatabase($store);
         try {
-            if (!Db::dbcreate($settings, $contact, $template, $term, $naan, $naa, $subnaa)) {
-                throw new \RuntimeException('The database cannot be created: ' . Log::errmsg(null, 1));
-            }
-            $noid = Db::dbopen($settings, DatabaseInterface::DB_WRITE);
-            if (!$noid) {
-                throw new \RuntimeException('The database cannot be opened: ' . Log::errmsg(null, 1));
+            $best = null;
+            foreach ($generators as $generator) {
+                $settings = $this->storageSettings($store);
+                $settings['generator'] = $generator;
+                if (!Db::dbcreate($settings, $contact, $template, $term, $naan, $naa, $subnaa)) {
+                    throw new \RuntimeException('The database cannot be created: ' . Log::errmsg(null, 1));
+                }
+                $noid = Db::dbopen($settings, DatabaseInterface::DB_WRITE);
+                if (!$noid) {
+                    throw new \RuntimeException('The database cannot be opened: ' . Log::errmsg(null, 1));
+                }
+
+                // Mint in memory: the database keeps its handle, only the
+                // engine that reads and writes the keys is replaced.
+                $engine = Db::$engine;
+                $memory = new NoidMemoryStorage($engine->get_range(''));
+                Db::$engine = $memory;
+                try {
+                    $result = $this->replay($noid, $contact, $arks, $shouldStop, $margin);
+                } finally {
+                    Db::$engine = $engine;
+                    Db::dbclose($noid, true);
+                }
+
+                // Keep the generator that finds most arks with less mintings.
+                if (!$best
+                    || $result['replayed'] > $best['result']['replayed']
+                    || ($result['replayed'] === $best['result']['replayed'] && $result['minted'] < $best['result']['minted'])
+                ) {
+                    $best = ['generator' => $generator, 'memory' => $memory, 'result' => $result];
+                }
+                unset($memory);
             }
 
-            // Mint in memory: the database keeps its handle, only the engine
-            // that reads and writes the keys is replaced.
-            $engine = Db::$engine;
-            $memory = new NoidMemoryStorage($engine->get_range(''));
-            Db::$engine = $memory;
-            try {
-                $result = $this->replay($noid, $contact, $arks, $shouldStop);
-            } finally {
-                Db::$engine = $engine;
-                Db::dbclose($noid, true);
-            }
-
-            $this->importData($memory->get_range(''), $store);
+            $this->importData($best['memory']->get_range(''), $store);
         } catch (\Throwable $e) {
             $this->restoreDatabase($store, $backups);
             throw new \RuntimeException($e->getMessage(), 0, $e);
         }
 
         $this->settings->set('ark_store', $store);
+        $this->settings->set('ark_name_noid_generator', $best['generator']);
         $this->updateLock();
 
         return [
             'store' => $store,
+            'generator' => $best['generator'],
             'arks' => count($arks),
             'backups' => array_values($backups),
-        ] + $result;
+        ] + $best['result'];
     }
 
     /**
      * Mint until all the arks are found, then hold the remaining ones.
      */
-    protected function replay(string $noid, string $contact, array $arks, ?callable $shouldStop): array
+    protected function replay(string $noid, string $contact, array $arks, ?callable $shouldStop, int $margin = 0): array
     {
         // An ark that does not match the template cannot be issued, so it is
         // held at once instead of being searched.
@@ -333,11 +360,10 @@ class NoidMaintenance
             }
         }
 
-        $total = count($pending);
-        // When no ark is found at the beginning, the generator differs, so the
-        // replay is useless.
-        $probe = min(1000, $total);
-        $maxMisses = max(1000, $total);
+        // The first identifiers may belong to removed resources, so the replay
+        // stops only after a long series of identifiers that are not arks of
+        // Omeka.
+        $maxMisses = max(100000, 2 * count($pending));
         $minted = 0;
         $replayed = 0;
         $misses = 0;
@@ -356,9 +382,15 @@ class NoidMaintenance
                 unset($pending[$id]);
                 ++$replayed;
                 $misses = 0;
-            } elseif ((!$replayed && $minted >= $probe) || ++$misses >= $maxMisses) {
+            } elseif (++$misses >= $maxMisses) {
                 break;
             }
+        }
+
+        // Issue the margin, that may include the arks of removed resources.
+        $reserved = 0;
+        while ($reserved < $margin && NoidLib::mint($noid, $contact)) {
+            ++$reserved;
         }
 
         // The arks that are not issued by the minter are held, so they cannot
@@ -373,6 +405,7 @@ class NoidMaintenance
             'replayed' => $replayed,
             'held' => count($pending),
             'minted' => $minted,
+            'reserved' => $reserved,
         ];
     }
 

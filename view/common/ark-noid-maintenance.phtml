@@ -80,4 +80,8 @@ $methods = [
     <?php else: ?>
     <p class="error"><?= $escape($translate('The noid database does not contain all the arks stored in Omeka, so the next arks would be duplicates: no ark will be created until it is restored from a backup or rebuilt from the arks stored in Omeka.')) ?></p>
     <?php endif; ?>
+
+    <?php if ($locked): ?>
+    <p><?= $escape($translate('A backup of the noid database is always better than a rebuild: the identifiers of the resources removed after the last ark stored in Omeka cannot be known, so they may be issued again to new resources. To avoid it, the rebuild can skip a margin of identifiers after the last ark: they will never be assigned. The only cost is a gap in the numbering.')) ?></p>
+    <?php endif; ?>
 </fieldset>
