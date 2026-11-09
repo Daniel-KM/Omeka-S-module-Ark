@@ -22,6 +22,7 @@ class NoidMaintenance
      */
     const MIGRATION_METHODS = [
         'db4',
+        'php',
         'db_dump',
         'dump_file',
         'json',
@@ -171,6 +172,7 @@ class NoidMaintenance
     {
         return [
             'db4' => NoidStore::isAvailable('bdb'),
+            'php' => is_readable($this->getBdbFile()),
             'db_dump' => (bool) $this->dbDumpPath(),
             'dump_file' => is_readable($this->getDumpFile()),
             'json' => is_readable($this->getJsonFile()),
@@ -192,7 +194,8 @@ class NoidMaintenance
     /**
      * Migrate the BerkeleyDB database to lmdb, or xml if not available.
      *
-     * @param string|null $method The first available method by default.
+     * @param string|null $method By default, the available methods are tried
+     *   by order of preference until one reads the database.
      * @return string The backend of the migrated database, that is stored in
      *   the settings.
      * @throws \RuntimeException
@@ -204,18 +207,28 @@ class NoidMaintenance
         }
 
         $methods = array_filter($this->migrationMethods());
-        if ($method === null) {
-            $method = key($methods);
-            if ($method === null) {
-                throw new \RuntimeException('No method is available to read the BerkeleyDB database.');
-            }
-        } elseif (empty($methods[$method])) {
+        if ($method !== null && empty($methods[$method])) {
             throw new \RuntimeException(sprintf('The method "%s" is not available to read the BerkeleyDB database.', $method));
         }
 
-        $data = $this->readBdb($method);
+        $data = [];
+        $errors = [];
+        foreach ($method === null ? array_keys($methods) : [$method] as $method) {
+            try {
+                $data = $this->readBdb($method);
+            } catch (\Throwable $e) {
+                $errors[] = $method . ': ' . $e->getMessage();
+                continue;
+            }
+            if ($data) {
+                break;
+            }
+            $errors[] = $method . ': no data found.';
+        }
         if (!$data) {
-            throw new \RuntimeException('No data found in the BerkeleyDB database.');
+            throw new \RuntimeException($errors
+                ? 'The BerkeleyDB database cannot be read. ' . implode(' ', $errors)
+                : 'No method is available to read the BerkeleyDB database.');
         }
 
         $generatorKey = Globals::_RR . '/generator_random';
@@ -830,6 +843,9 @@ class NoidMaintenance
                 $data = $storage->get_range('');
                 $storage->close();
                 return $data ?: [];
+
+            case 'php':
+                return (new BerkeleyDbReader())->read($this->getBdbFile());
 
             case 'db_dump':
                 $command = sprintf('%s -p %s', escapeshellarg($this->dbDumpPath()), escapeshellarg($this->getBdbFile()));

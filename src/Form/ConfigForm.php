@@ -287,6 +287,7 @@ class ConfigForm extends Form
         if ($this->noidMaintenance->isMigrationNeeded()) {
             $labels = [
                 'db4' => 'Migrate the BerkeleyDB database with the extension php-dba', // @translate
+                'php' => 'Migrate the BerkeleyDB database with the reader of the module, without extension', // @translate
                 'db_dump' => 'Migrate the BerkeleyDB database with the command db_dump', // @translate
                 'dump_file' => 'Migrate the BerkeleyDB database from the file noid.dump', // @translate
                 'json' => 'Migrate the BerkeleyDB database from the file noid_data.json', // @translate
