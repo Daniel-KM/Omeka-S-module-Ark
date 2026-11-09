@@ -12,7 +12,7 @@ $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
 
 $counters = $status['counters'];
-$locked = $status['migration_needed'] || !$status['consistent'];
+$locked = $status['unwritable'] || $status['migration_needed'] || !$status['consistent'];
 
 $methods = [
     'db4' => [
@@ -54,7 +54,9 @@ $methods = [
         <dd><?= (int) $status['arks'] ?></dd>
     </dl>
 
-    <?php if (!$locked): ?>
+    <?php if ($status['unwritable']): ?>
+    <p class="error"><?= $escape(sprintf($translate('The noid database cannot be read and written by the user "%1$s" of the server: %2$s. Fix the owner and the permissions of these files, for example with the owner and the group of the directory "files", then save the config: no ark will be created until then.'), $status['process_user'], implode(', ', $status['unwritable']))) ?></p>
+    <?php elseif (!$locked): ?>
     <p><?= $escape($translate('The noid database is ready.')) ?></p>
 
     <?php elseif ($status['migration_needed']): ?>

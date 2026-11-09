@@ -100,6 +100,38 @@ class NoidStore
     }
 
     /**
+     * Get the paths of a file database that the server cannot read and write.
+     *
+     * Even a read requires to write: lmdb writes its lock file, created in the
+     * directory when missing. It occurs when a job or a command was run by a
+     * user other than the web server one.
+     *
+     * @return string[]
+     */
+    public static function unwritable(string $store, string $databaseDir): array
+    {
+        $files = static::files($store, $databaseDir);
+        if (!$files || !file_exists($files[0])) {
+            return [];
+        }
+        $paths = array_filter($files, 'file_exists');
+        array_unshift($paths, dirname($files[0]));
+        return array_values(array_filter($paths, fn ($path) => !is_readable($path) || !is_writeable($path)));
+    }
+
+    /**
+     * Get the name of the user running the current process.
+     */
+    public static function processUser(): string
+    {
+        if (function_exists('posix_geteuid') && function_exists('posix_getpwuid')) {
+            $user = posix_getpwuid(posix_geteuid());
+            return $user ? (string) $user['name'] : (string) posix_geteuid();
+        }
+        return get_current_user() ?: 'unknown';
+    }
+
+    /**
      * Check if a storage backend is supported by the current php install.
      */
     public static function isAvailable(string $dbType): bool

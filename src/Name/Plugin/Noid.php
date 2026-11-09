@@ -375,6 +375,15 @@ class Noid implements PluginInterface
             return false;
         }
 
+        $unwritable = NoidStore::unwritable($this->dbType, $database);
+        if ($unwritable) {
+            $this->logger->err(
+                'The noid database cannot be read and written by the user "{user}" of the server: {paths}. Fix the owner and the permissions of these files.', // @translate
+                ['user' => NoidStore::processUser(), 'paths' => implode(', ', $unwritable)]
+            );
+            return false;
+        }
+
         $settings = $this->buildSettings();
 
         return Db::dbopen($settings, $mode);

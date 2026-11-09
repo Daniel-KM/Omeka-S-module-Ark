@@ -607,6 +607,9 @@ class NoidMaintenance
         if ($files && !file_exists($files[0])) {
             return null;
         }
+        if (NoidStore::unwritable($store, $this->databaseDir)) {
+            return null;
+        }
 
         $storageClass = Globals::DB_TYPES[$store] ?? null;
         if (!$storageClass || !class_exists($storageClass) || !NoidStore::isAvailable($store)) {
@@ -797,6 +800,16 @@ class NoidMaintenance
      *
      * @return bool True when the minting is locked.
      */
+    /**
+     * Get the paths of the database that the server cannot read and write.
+     *
+     * @return string[]
+     */
+    public function unwritable(): array
+    {
+        return NoidStore::unwritable($this->getStore(), $this->databaseDir);
+    }
+
     public function updateLock(): bool
     {
         $locked = $this->isMigrationNeeded() || !$this->isConsistent();
@@ -815,6 +828,8 @@ class NoidMaintenance
         return [
             'store' => $store,
             'store_available' => NoidStore::isAvailable($store),
+            'unwritable' => NoidStore::unwritable($store, $this->databaseDir),
+            'process_user' => NoidStore::processUser(),
             'counters' => $counters,
             'arks' => $arks,
             'consistent' => !$arks || $this->checkCounters($counters, $arks) || !($unknown = $this->unknownArks()),

@@ -284,6 +284,11 @@ class ConfigForm extends Form
     {
         $actions = [];
 
+        // No action can succeed until the permissions are fixed.
+        if ($this->noidMaintenance->unwritable()) {
+            return $this;
+        }
+
         if ($this->noidMaintenance->isMigrationNeeded()) {
             $labels = [
                 'db4' => 'Migrate the BerkeleyDB database with the extension php-dba', // @translate
