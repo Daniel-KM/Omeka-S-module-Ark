@@ -245,7 +245,7 @@ class NoidMaintenance
 
         $generatorKey = Globals::_RR . '/generator_random';
         if (isset($data[$generatorKey])) {
-            $data[$generatorKey] = self::GENERATORS[$data[$generatorKey]] ?? 'drand48';
+            $data[$generatorKey] = self::GENERATORS[$data[$generatorKey]] ?? NoidLib::DEFAULT_RANDOM_GENERATOR;
         }
 
         $errors = [];
@@ -632,7 +632,7 @@ class NoidMaintenance
         }
         // A random database without generator was created with the default of
         // the library.
-        $generator = self::GENERATORS[$generator] ?? 'drand48';
+        $generator = self::GENERATORS[$generator] ?? NoidLib::DEFAULT_RANDOM_GENERATOR;
         $this->settings->set('ark_name_noid_generator', $generator);
         return $generator;
     }
