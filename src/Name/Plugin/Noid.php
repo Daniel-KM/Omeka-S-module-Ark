@@ -295,6 +295,12 @@ class Noid implements PluginInterface
         }
         // dbcreate() closes the database automatically.
 
+        // Fix the store, so the web server and the command line, that may have
+        // different extensions, use the same database.
+        if ((string) $this->settings->get('ark_store') === '') {
+            $this->settings->set('ark_store', $this->dbType);
+        }
+
         return true;
     }
 

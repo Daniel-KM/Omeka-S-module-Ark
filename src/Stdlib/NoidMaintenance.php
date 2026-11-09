@@ -133,7 +133,7 @@ class NoidMaintenance
      */
     public function getStore(): string
     {
-        return NoidStore::resolve((string) $this->settings->get('ark_store'));
+        return NoidStore::resolve((string) $this->settings->get('ark_store'), $this->databaseDir);
     }
 
     public function hasBdbDatabase(): bool
@@ -601,6 +601,26 @@ class NoidMaintenance
             $this->removeFiles($store);
             throw new \RuntimeException($e->getMessage(), 0, $e);
         }
+    }
+
+    /**
+     * Set the store of the settings to the backend of the existing database.
+     *
+     * @see NoidStore::resolve()
+     * @return string|null The store, or null when there is no database.
+     */
+    public function syncStore(): ?string
+    {
+        if ((string) $this->settings->get('ark_store') !== '') {
+            return (string) $this->settings->get('ark_store');
+        }
+        foreach (['lmdb', 'xml', 'sqlite'] as $format) {
+            if (file_exists(NoidStore::files($format, $this->databaseDir)[0])) {
+                $this->settings->set('ark_store', $format);
+                return $format;
+            }
+        }
+        return null;
     }
 
     /**

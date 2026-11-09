@@ -12,13 +12,13 @@ class NoidFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $name, ?array $options = null)
     {
         $settings = $services->get('Omeka\Settings');
-        $dbType = NoidStore::resolve((string) $settings->get('ark_store', ''));
-
-        $this->checkExtension($dbType);
-
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $databaseDir = $basePath . '/arkandnoid';
+
+        $dbType = NoidStore::resolve((string) $settings->get('ark_store', ''), $databaseDir);
+
+        $this->checkExtension($dbType);
 
         // Get connection config for PDO storage (uses Omeka database).
         $connectionConfig = [];
