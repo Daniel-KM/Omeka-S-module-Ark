@@ -566,9 +566,10 @@ class NoidMaintenance
             if (!$storage->isOpen()) {
                 throw new \RuntimeException('The database cannot be created.');
             }
-            if ($store === 'xml') {
-                // A write in xml looks for the key in the whole document, so
-                // the import of the storage, that writes directly, is used.
+            if ($store === 'xml' || $store === 'pdo') {
+                // A write in xml looks for the key in the whole document, and a
+                // write in pdo is a transaction, so the import of the storage,
+                // that writes all keys at once, is used.
                 $imported = $storage->import(new NoidMemoryStorage($data));
             } else {
                 // The database is created empty, so the keys are written one by
