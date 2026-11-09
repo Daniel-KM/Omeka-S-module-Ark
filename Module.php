@@ -200,6 +200,7 @@ class Module extends AbstractModule
         $params = $form->getData();
         $action = (string) ($params['ark_noid_maintenance'] ?? '');
         $margin = max(0, (int) ($params['ark_noid_rebuild_margin'] ?? 0));
+        $noPrefix = !empty($params['ark_noid_no_prefix']);
         $defaultSettings = $config['ark']['config'];
         $params = array_intersect_key($params, $defaultSettings);
 
@@ -276,6 +277,12 @@ class Module extends AbstractModule
             if ($noidMaintenance->isMigrationNeeded() || $noidMaintenance->countArks()) {
                 $controller->messenger()->addWarning(new PsrMessage(
                     'The noid database was not created, because arks are already stored in Omeka or a BerkeleyDB database should be migrated: a new database would issue duplicates. Use the maintenance of the noid database below.' // @translate
+                ));
+            } elseif (strpos((string) $settings->get('ark_name_noid_template'), '.') === 0 && !$noPrefix) {
+                // The template cannot be changed once the database is created.
+                $controller->messenger()->addWarning(new PsrMessage(
+                    'The template "{template}" has no prefix, so the noid database was not created. A prefix is recommended: it allows to create parallel series, for example for several libraries or archive services, and, if the noid database is lost, a new prefix ensures that the new arks will never be the same than existing ones. Set a prefix, or confirm the creation without prefix.', // @translate
+                    ['template' => (string) $settings->get('ark_name_noid_template')]
                 ));
             } else {
                 $namePlugin->createDatabase();

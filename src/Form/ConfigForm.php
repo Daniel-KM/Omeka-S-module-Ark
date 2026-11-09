@@ -121,10 +121,22 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Noid Template', // @translate
+                    'info' => $databaseCreated ? null : 'A prefix before the dot is recommended, for example "b" in "b.rllllk". It allows to create parallel series, for example for several libraries or archive services, and, if the noid database is lost, a new prefix ensures that the new arks will never be the same than existing ones.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'ark_name_noid_template',
                     'disabled' => $databaseCreated,
+                ],
+            ])
+            ->add([
+                'name' => 'ark_noid_no_prefix',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Create the noid database with a template without prefix', // @translate
+                    'info' => 'Required to create the database when the template has no prefix: the template cannot be changed later.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'ark_noid_no_prefix',
                 ],
             ])
             ->add([
@@ -227,6 +239,11 @@ class ConfigForm extends Form
             ])
         ;
 
+        // The confirmation is useless once the template is fixed.
+        if ($databaseCreated || !$isNoid) {
+            $this->remove('ark_noid_no_prefix');
+        }
+
         $this->getInputFilter()
             ->add([
                 'name' => 'ark_noid_maintenance',
@@ -234,6 +251,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'ark_noid_rebuild_margin',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'ark_noid_no_prefix',
                 'required' => false,
             ])
             ->add([
