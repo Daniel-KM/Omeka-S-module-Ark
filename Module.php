@@ -96,11 +96,29 @@ class Module extends AbstractModule
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
+        $this->checkPhpVersion();
+
         // Check if dba is installed (lmdb is available by default in that case).
         if (!extension_loaded('dba')) {
             $messenger->addWarning(new PsrMessage(
                 'If extension dba is installed, you may store noid inside a lmdb database. For now, you can use omeka database, sqlite or xml.' // @translate
             ));
+        }
+    }
+
+    /**
+     * The size of a database lmdb can be set since php 8.2, else it is 1 MB.
+     */
+    protected function checkPhpVersion(): void
+    {
+        if (version_compare(PHP_VERSION, '8.2', '<')) {
+            $translator = $this->getServiceLocator()->get('MvcTranslator');
+            $message = new \Omeka\Stdlib\Message(
+                $translator->translate('The module %1$s requires PHP %2$s or higher.'), // @translate
+                'Ark',
+                '8.2'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
     }
 

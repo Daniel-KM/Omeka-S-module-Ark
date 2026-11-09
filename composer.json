@@ -27,7 +27,8 @@
         "daniel-km/omeka-s-module-common": "*"
     },
     "require": {
-        "daniel-km/noid": "^1.4"
+        "php": "^8.2",
+        "daniel-km/noid": "^1.4.4"
     },
     "suggest": {
         "ext-dba": "Required for LMDB (default) or BerkeleyDB storage backend",

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "36ca9bd0d8b8da40d9da2f8b47ab6b54",
+    "content-hash": "e824dcc868dd9bbe530cf583e64f0a33",
     "packages": [
         {
             "name": "daniel-km/noid",
-            "version": "1.4.0",
+            "version": "1.4.4",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/Daniel-KM/Noid4Php.git",
-                "reference": "09422b8377794bd8dd812da3a574a54951d692b8"
+                "reference": "dab7b707e8f0ad0eb5929500a0021a4d341b7c71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/Daniel-KM%2FNoid4php/repository/archive.zip?sha=09422b8377794bd8dd812da3a574a54951d692b8",
-                "reference": "09422b8377794bd8dd812da3a574a54951d692b8",
+                "url": "https://gitlab.com/api/v4/projects/Daniel-KM%2FNoid4php/repository/archive.zip?sha=dab7b707e8f0ad0eb5929500a0021a4d341b7c71",
+                "reference": "dab7b707e8f0ad0eb5929500a0021a4d341b7c71",
                 "shasum": ""
             },
             "require": {
@@ -76,9 +76,9 @@
             ],
             "support": {
                 "issues": "https://gitlab.com/Daniel-KM/Noid4Php/-/issues",
-                "source": "https://gitlab.com/Daniel-KM/Noid4Php/-/tree/1.4.0"
+                "source": "https://gitlab.com/Daniel-KM/Noid4Php/-/tree/1.4.4"
             },
-            "time": "2024-07-15T00:00:00+00:00"
+            "time": "2026-11-09T00:00:00+00:00"
         }
     ],
     "packages-dev": [],
@@ -87,7 +87,9 @@
     "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": {},
+    "platform": {
+        "php": "^8.2"
+    },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

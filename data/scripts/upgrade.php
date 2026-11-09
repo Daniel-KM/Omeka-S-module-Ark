@@ -47,6 +47,8 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
     throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
 }
 
+$this->checkPhpVersion();
+
 if (version_compare($oldVersion, '3.5.7', '<')) {
     $settings->delete('ark_use_admin');
     $settings->delete('ark_use_public');
