@@ -47,11 +47,23 @@ class NoidStore
 
     /**
      * Get the backend of a store, the default one being lmdb if available.
+     *
+     * When the store is not set, an existing database is used, whatever the
+     * extensions of the current php: the web server and the command line, that
+     * runs the jobs, may have different extensions, so they would use two
+     * databases with the same template, and issue the same arks.
      */
-    public static function resolve(string $store): string
+    public static function resolve(string $store, ?string $databaseDir = null): string
     {
         if ($store !== '') {
             return $store;
+        }
+        if ($databaseDir !== null) {
+            foreach (['lmdb', 'xml', 'sqlite'] as $format) {
+                if (file_exists(static::files($format, $databaseDir)[0])) {
+                    return $format;
+                }
+            }
         }
         return static::isAvailable('lmdb') ? 'lmdb' : 'xml';
     }
