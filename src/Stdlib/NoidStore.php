@@ -36,6 +36,70 @@ class NoidStore
     ];
 
     /**
+     * Files of the file backends, the first one being the database itself.
+     */
+    const FILES = [
+        'bdb' => ['noid.bdb'],
+        'lmdb' => ['noid.lmdb', 'noid.lmdb-lock'],
+        'sqlite' => ['noid.sqlite'],
+        'xml' => ['noid.xml'],
+    ];
+
+    /**
+     * Get the backend of a store, the default one being lmdb if available.
+     */
+    public static function resolve(string $store): string
+    {
+        if ($store !== '') {
+            return $store;
+        }
+        return static::isAvailable('lmdb') ? 'lmdb' : 'xml';
+    }
+
+    /**
+     * Get the settings of the noid library to open a store.
+     *
+     * The backend "pdo" uses the Omeka database. The driver is hard coded,
+     * since Omeka supports only MySQL/MariaDB.
+     */
+    public static function settings(string $store, string $databaseDir, array $connection = []): array
+    {
+        $storageConfig = [
+            'data_dir' => $databaseDir,
+            'db_name' => 'NOID',
+        ];
+
+        if ($store === 'pdo' && $connection) {
+            $storageConfig = array_merge($storageConfig, [
+                'driver' => 'mysql',
+                'host' => $connection['host'] ?? 'localhost',
+                'user' => $connection['user'] ?? '',
+                'password' => $connection['password'] ?? '',
+                'db_name' => $connection['dbname'] ?? '',
+                'table_name' => 'noid',
+            ]);
+        }
+
+        return [
+            'db_type' => $store,
+            'storage' => [
+                $store => $storageConfig,
+            ],
+        ];
+    }
+
+    /**
+     * Get the paths of the files of a store, or nothing for a sql database.
+     */
+    public static function files(string $store, string $databaseDir): array
+    {
+        return array_map(
+            fn ($file) => $databaseDir . '/NOID/' . $file,
+            static::FILES[$store] ?? []
+        );
+    }
+
+    /**
      * Check if a storage backend is supported by the current php install.
      */
     public static function isAvailable(string $dbType): bool

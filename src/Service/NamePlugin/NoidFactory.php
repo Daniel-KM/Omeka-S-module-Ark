@@ -12,12 +12,7 @@ class NoidFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $name, ?array $options = null)
     {
         $settings = $services->get('Omeka\Settings');
-        $dbType = $settings->get('ark_store', '');
-
-        // Determine default storage: lmdb if available, else xml.
-        if ($dbType === '') {
-            $dbType = $this->hasLmdbSupport() ? 'lmdb' : 'xml';
-        }
+        $dbType = NoidStore::resolve((string) $settings->get('ark_store', ''));
 
         $this->checkExtension($dbType);
 
@@ -38,18 +33,6 @@ class NoidFactory implements FactoryInterface
             $dbType,
             $connectionConfig
         );
-    }
-
-    /**
-     * Check if php-dba with lmdb handler is available.
-     */
-    protected function hasLmdbSupport(): bool
-    {
-        if (!extension_loaded('dba')) {
-            return false;
-        }
-        $handlers = dba_handlers();
-        return in_array('lmdb', $handlers);
     }
 
     /**

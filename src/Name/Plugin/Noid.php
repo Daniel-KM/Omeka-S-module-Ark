@@ -2,6 +2,7 @@
 
 namespace Ark\Name\Plugin;
 
+use Ark\Stdlib\NoidStore;
 use Laminas\Log\Logger;
 use Noid\Lib\Db;
 use Noid\Lib\Log;
@@ -347,31 +348,7 @@ class Noid implements PluginInterface
      */
     protected function buildSettings(bool $forCreation = false): array
     {
-        $dataDir = $this->getDatabaseDir();
-        $storageConfig = [
-            'data_dir' => $dataDir,
-            'db_name' => 'NOID',
-        ];
-
-        // Add PDO-specific configuration (uses Omeka database). The driver is
-        // hard coded, since Omeka supports only MySQL/MariaDB.
-        if ($this->dbType === 'pdo' && !empty($this->connectionConfig)) {
-            $storageConfig = array_merge($storageConfig, [
-                'driver' => 'mysql',
-                'host' => $this->connectionConfig['host'] ?? 'localhost',
-                'user' => $this->connectionConfig['user'] ?? '',
-                'password' => $this->connectionConfig['password'] ?? '',
-                'db_name' => $this->connectionConfig['dbname'] ?? '',
-                'table_name' => 'noid',
-            ]);
-        }
-
-        $settings = [
-            'db_type' => $this->dbType,
-            'storage' => [
-                $this->dbType => $storageConfig,
-            ],
-        ];
+        $settings = NoidStore::settings($this->dbType, $this->getDatabaseDir(), $this->connectionConfig);
 
         // Only set generator when creating new databases.
         if ($forCreation) {

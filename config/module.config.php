@@ -11,6 +11,7 @@ return [
             'Ark\ArkManager' => Service\ArkManagerFactory::class,
             'Ark\QualifierPluginManager' => Service\QualifierPluginManagerFactory::class,
             'Ark\NamePluginManager' => Service\NamePluginManagerFactory::class,
+            'Ark\NoidMaintenance' => Service\NoidMaintenanceFactory::class,
         ],
     ],
     'listeners' => [
