@@ -221,6 +221,7 @@ class NoidMaintenance
             try {
                 $this->importData($data, $store);
                 $this->settings->set('ark_store', $store);
+                $this->syncGenerator();
                 return $store;
             } catch (\Throwable $e) {
                 $errors[] = $store . ': ' . $e->getMessage();
@@ -535,6 +536,40 @@ class NoidMaintenance
             $this->removeFiles($store);
             throw new \RuntimeException($e->getMessage(), 0, $e);
         }
+    }
+
+    /**
+     * Set the generator of the settings to the one of the database.
+     *
+     * The setting was added in version 3.5.16 with the default "mt_rand", but
+     * the older databases use the default of the library, "drand48". The
+     * minting uses the generator of the database, so the setting is only
+     * informative, but it should not be misleading.
+     *
+     * @return string|null The generator, or null when there is no database or
+     *   when the generator is not random.
+     */
+    public function syncGenerator(): ?string
+    {
+        $store = $this->getStore();
+        if ($this->counters($store) === null) {
+            return null;
+        }
+        $storageClass = Globals::DB_TYPES[$store];
+        /** @var \Noid\Storage\DatabaseInterface $storage */
+        $storage = new $storageClass();
+        $storage->open($this->storageSettings($store), DatabaseInterface::DB_RDONLY);
+        $type = $storage->get(Globals::_RR . '/generator_type');
+        $generator = $storage->get(Globals::_RR . '/generator_random');
+        $storage->close();
+        if ($type !== 'random') {
+            return null;
+        }
+        // A random database without generator was created with the default of
+        // the library.
+        $generator = self::GENERATORS[$generator] ?? 'drand48';
+        $this->settings->set('ark_name_noid_generator', $generator);
+        return $generator;
     }
 
     /**
