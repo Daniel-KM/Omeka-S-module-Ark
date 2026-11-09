@@ -3,6 +3,8 @@
 namespace Ark\Form;
 
 use Ark\ArkManager;
+use Ark\Name\Plugin\Noid;
+use Ark\Stdlib\NoidMaintenance;
 use Ark\Stdlib\NoidStore;
 use Omeka\Form\Element as OmekaElement;
 use Laminas\Form\Element;
@@ -15,10 +17,22 @@ class ConfigForm extends Form
      */
     protected $arkManager;
 
+    /**
+     * @var NoidMaintenance
+     */
+    protected $noidMaintenance;
+
     public function init(): void
     {
         $arkNamePlugin = $this->arkManager->getArkNamePlugin();
-        $databaseCreated = $arkNamePlugin->isDatabaseCreated();
+        $isNoid = $arkNamePlugin instanceof Noid;
+        // The settings of a BerkeleyDB database to migrate are kept too.
+        $databaseCreated = $arkNamePlugin->isDatabaseCreated()
+            || ($isNoid && $this->noidMaintenance->isMigrationNeeded());
+
+        if ($isNoid) {
+            $this->addNoidMaintenance();
+        }
 
         $storeOptions = [
             '' => 'Default (lmdb if available, else xml)', // @translate
@@ -215,6 +229,10 @@ class ConfigForm extends Form
 
         $this->getInputFilter()
             ->add([
+                'name' => 'ark_noid_maintenance',
+                'required' => false,
+            ])
+            ->add([
                 'name' => 'ark_store',
                 'required' => false,
             ])
@@ -226,6 +244,55 @@ class ConfigForm extends Form
                 'name' => 'ark_qualifier',
                 'required' => false,
             ]);
+    }
+
+    /**
+     * Add the actions to repair the noid database, if needed.
+     *
+     * The action is not a setting: it is processed on save.
+     */
+    protected function addNoidMaintenance(): self
+    {
+        $actions = [];
+
+        if ($this->noidMaintenance->isMigrationNeeded()) {
+            $labels = [
+                'db4' => 'Migrate the BerkeleyDB database with the extension php-dba', // @translate
+                'db_dump' => 'Migrate the BerkeleyDB database with the command db_dump', // @translate
+                'dump_file' => 'Migrate the BerkeleyDB database from the file noid.dump', // @translate
+                'json' => 'Migrate the BerkeleyDB database from the file noid_data.json', // @translate
+            ];
+            foreach (array_filter($this->noidMaintenance->migrationMethods()) as $method => $available) {
+                $actions['migrate_' . $method] = $labels[$method];
+            }
+        }
+
+        if (!$actions) {
+            return $this;
+        }
+
+        $this
+            ->add([
+                'name' => 'ark_noid_maintenance',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Maintenance of the noid database', // @translate
+                    'info' => 'The action is processed when the config is saved. See the state of the database above.', // @translate
+                    'value_options' => ['' => 'No action'] + $actions, // @translate
+                ],
+                'attributes' => [
+                    'id' => 'ark_noid_maintenance',
+                    'value' => '',
+                ],
+            ]);
+
+        return $this;
+    }
+
+    public function setNoidMaintenance(NoidMaintenance $noidMaintenance): self
+    {
+        $this->noidMaintenance = $noidMaintenance;
+        return $this;
     }
 
     public function setArkManager(ArkManager $arkManager)

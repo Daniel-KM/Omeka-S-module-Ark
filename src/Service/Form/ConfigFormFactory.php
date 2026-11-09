@@ -12,6 +12,7 @@ class ConfigFormFactory implements FactoryInterface
     {
         $configForm = new ConfigForm(null, $options ?? []);
         return $configForm
-            ->setArkManager($services->get('Ark\ArkManager'));
+            ->setArkManager($services->get('Ark\ArkManager'))
+            ->setNoidMaintenance($services->get('Ark\NoidMaintenance'));
     }
 }

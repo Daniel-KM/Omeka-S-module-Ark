@@ -1,0 +1,83 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array $status
+ * @var string $naan
+ * @var string $dumpFile
+ * @var string $jsonFile
+ */
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+
+$counters = $status['counters'];
+$locked = $status['migration_needed'] || !$status['consistent'];
+
+$methods = [
+    'db4' => [
+        'label' => $translate('Extension php-dba with the handler db4'),
+        'help' => $translate('Install the package php-dba of the distribution, that includes the handler db4 on Debian and Ubuntu.'),
+    ],
+    'db_dump' => [
+        'label' => $translate('Command db_dump of BerkeleyDB'),
+        'help' => $translate('Install the package db-util on Debian and Ubuntu, or libdb-utils on RedHat and Fedora.'),
+    ],
+    'dump_file' => [
+        'label' => $translate('Dump of the database created with db_dump'),
+        'help' => sprintf($translate('On any server with the command db_dump, run "db_dump -p noid.bdb > noid.dump", then copy the file to %s.'), $dumpFile),
+    ],
+    'json' => [
+        'label' => $translate('Export of the database in json'),
+        'help' => sprintf($translate('On any server with BerkeleyDB for Perl or Python, run the script export_bdb_to_json.pl or export_bdb_to_json.py of the noid library, then copy the file to %s.'), $jsonFile),
+    ],
+];
+?>
+
+<fieldset id="ark-noid-maintenance" class="ark-noid-maintenance">
+    <legend><?= $escape($translate('Noid database')) ?></legend>
+
+    <dl>
+        <dt><?= $escape($translate('Storage backend')) ?></dt>
+        <dd><?= $escape($status['store']) ?><?= $status['store_available'] ? '' : ' — ' . $escape($translate('not available on this server')) ?></dd>
+
+        <dt><?= $escape($translate('Identifiers known by the database')) ?></dt>
+        <dd><?= $counters === null
+            ? $escape($translate('No database'))
+            : $escape(sprintf($translate('%1$d issued, %2$d that will never be issued again'), $counters['minted'], $counters['known'])) ?></dd>
+
+        <dt><?= $escape(sprintf($translate('Arks with the naan "%s" stored in Omeka'), $naan)) ?></dt>
+        <dd><?= (int) $status['arks'] ?></dd>
+    </dl>
+
+    <?php if (!$locked): ?>
+    <p><?= $escape($translate('The noid database is ready.')) ?></p>
+
+    <?php elseif ($status['migration_needed']): ?>
+    <p class="error"><?= $escape($translate('A BerkeleyDB database should be migrated: no ark will be created until then. Use one of the available methods with the action below.')) ?></p>
+    <table class="tablesaw">
+        <thead>
+            <tr>
+                <th><?= $escape($translate('Method to read the BerkeleyDB database')) ?></th>
+                <th><?= $escape($translate('Available')) ?></th>
+                <th><?= $escape($translate('How to make it available')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($methods as $method => $data): ?>
+            <tr>
+                <td><?= $escape($data['label']) ?></td>
+                <td><?= $escape($status['migration_methods'][$method] ? $translate('Yes') : $translate('No')) ?></td>
+                <td><?= $status['migration_methods'][$method] ? '' : $escape($data['help']) ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php if (!array_filter($status['migration_methods'])): ?>
+    <p><?= $escape($translate('If the BerkeleyDB database cannot be read at all, it can be rebuilt from the arks stored in Omeka.')) ?></p>
+    <?php endif; ?>
+
+    <?php else: ?>
+    <p class="error"><?= $escape($translate('The noid database does not contain all the arks stored in Omeka, so the next arks would be duplicates: no ark will be created until it is restored from a backup or rebuilt from the arks stored in Omeka.')) ?></p>
+    <?php endif; ?>
+</fieldset>

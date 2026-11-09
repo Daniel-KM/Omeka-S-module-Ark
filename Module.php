@@ -123,9 +123,9 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $arkManager = $services->get('Ark\ArkManager');
         $name = $arkManager->getArkNamePlugin();
+        $settings = $services->get('Omeka\Settings');
         $info = $name->isDatabaseCreated() ? $name->infoDatabase('meta') : '';
         if (is_array($info)) {
-            $settings = $services->get('Omeka\Settings');
             $arkNaan = $settings->get('ark_naan');
             $arkNaa = $settings->get('ark_naa');
             $arkSubnaa = $settings->get('ark_subnaa');
@@ -161,6 +161,19 @@ class Module extends AbstractModule
             }
         }
 
+        if ($settings->get('ark_name') === 'noid') {
+            /** @var \Ark\Stdlib\NoidMaintenance $noidMaintenance */
+            $noidMaintenance = $services->get('Ark\NoidMaintenance');
+            // Update the lock in case the database was repaired manually.
+            $noidMaintenance->updateLock();
+            $html .= $view->partial('common/ark-noid-maintenance', [
+                'status' => $noidMaintenance->status(),
+                'naan' => (string) $settings->get('ark_naan'),
+                'dumpFile' => $noidMaintenance->getDumpFile(),
+                'jsonFile' => $noidMaintenance->getJsonFile(),
+            ]);
+        }
+
         return $html
             . $this->getConfigFormAuto($view);
     }
@@ -185,13 +198,20 @@ class Module extends AbstractModule
         }
 
         $params = $form->getData();
+        $action = (string) ($params['ark_noid_maintenance'] ?? '');
         $defaultSettings = $config['ark']['config'];
         $params = array_intersect_key($params, $defaultSettings);
 
-        // Avoid to reset existing settings from the disabled fields.
+        /** @var \Ark\Stdlib\NoidMaintenance $noidMaintenance */
+        $noidMaintenance = $services->get('Ark\NoidMaintenance');
+
+        // Avoid to reset existing settings from the disabled fields, in
+        // particular the ones of a BerkeleyDB database to migrate.
         /** @var \Ark\Name\Plugin\Internal|\Ark\Name\Plugin\Noid $namePlugin */
         $namePlugin = $arkManager->getArkNamePlugin();
-        if ($namePlugin->isDatabaseCreated()) {
+        if ($namePlugin->isDatabaseCreated()
+            || ($settings->get('ark_name') === 'noid' && $noidMaintenance->isMigrationNeeded())
+        ) {
             unset(
                 $params['ark_store'],
                 $params['ark_naan'],
@@ -212,11 +232,26 @@ class Module extends AbstractModule
             return true;
         }
 
+        if (strpos($action, 'migrate_') === 0) {
+            try {
+                $store = $noidMaintenance->migrate(substr($action, 8));
+                $controller->messenger()->addSuccess(new PsrMessage(
+                    'The Noid database has been migrated from BerkeleyDB to {format}.', // @translate
+                    ['format' => strtoupper($store)]
+                ));
+            } catch (\RuntimeException $e) {
+                $controller->messenger()->addError(new PsrMessage(
+                    'Migration from BerkeleyDB failed: {error}', // @translate
+                    ['error' => $e->getMessage()]
+                ));
+            }
+            // The plugin was built for the previous store.
+            $namePlugin = $services->get('Ark\NamePluginManager')->build('noid');
+        }
+
         // A new noid database restarts the minting from the beginning, so it
         // cannot be created when arks are already stored, else the next arks
         // would be duplicates of existing ones.
-        /** @var \Ark\Stdlib\NoidMaintenance $noidMaintenance */
-        $noidMaintenance = $services->get('Ark\NoidMaintenance');
         if (!$namePlugin->isDatabaseCreated()) {
             if ($noidMaintenance->isMigrationNeeded() || $noidMaintenance->countArks()) {
                 $controller->messenger()->addWarning(new PsrMessage(
