@@ -155,7 +155,8 @@ Installation
 
 See general end user documentation for [installing a module].
 
-This module requires the module [Common], that should be installed first.
+This module requires the module [Common], that should be installed first, and
+php 8.2 or higher.
 
 The module uses an external library to create the list of identifiers, [Noid4php],
 so use the release zip to install it, or use and init the source.
@@ -203,20 +204,59 @@ install the module "php-bcmath", or don't use this format.
 The Noid database can be stored in different formats. The module will
 automatically select the best available backend:
 
-| Backend    | Extension Required        | Notes                                                                                              |
-|------------|---------------------------|----------------------------------------------------------------------------------------------------|
-| LMDB       | php-dba with lmdb handler | Default if available. Fast, recommended for large collections. Available by default on Debian 10+. |
-| XML        | php-xml                   | Fallback default. Portable, human-readable.                                                        |
-| SQLite     | php-sqlite3               | Portable, single file.                                                                             |
-| PDO        | php-pdo                   | Uses the Omeka database. Simpler setup, no separate file.                                          |
-| BerkeleyDB | php-dba with db4 handler  | Deprecated. Unavailable on recent systems (RHEL 9+, Debian 12+).                                   |
+| Backend    | Extension Required        | Notes                                                                                          |
+|------------|---------------------------|------------------------------------------------------------------------------------------------|
+| LMDB       | php-dba with lmdb handler | Default if available (Debian: package php-dba). Fast to read, but each write is a transaction. |
+| XML        | php-xml                   | Fallback default. Portable, human-readable. Loaded in memory.                                  |
+| SQLite     | php-sqlite3               | Portable, single file.                                                                         |
+| PDO        | php-pdo                   | Uses the Omeka database. Simpler setup, no separate file.                                      |
+| BerkeleyDB | php-dba with db4 handler  | Deprecated, not available on some systems (RHEL 9+).                                           |
 
 The storage backend is configured in module settings. If not specified, LMDB
-is used when php-dba with lmdb handler is available, otherwise XML is used.
+is used when php-dba with lmdb handler is available, otherwise XML is used. It
+is recommended to set it explicitly, because the extensions of the web server
+and of the command line, used by the jobs, may differ.
 
-**Note**: BerkeleyDB (bdb) is deprecated and no longer available on recent Linux
-distributions. Existing bdb databases are automatically converted to LMDB during
-module upgrade.
+The size of a LMDB database is limited to 1 MB by the extension dba, that is
+less than 2000 identifiers, unless the size is set, that is possible since php
+8.2 and done by the library Noid4Php since version 1.4.3.
+
+**Note**: BerkeleyDB (bdb) is deprecated and no longer available on some Linux
+distributions. Existing bdb databases are converted to LMDB, or XML, during the
+upgrade of the module, even without the extension dba, since the database is
+read with a reader in pure php. When it cannot be read, the config form lists
+the other methods: a dump created by `db_dump -p noid.bdb > noid.dump` on any
+server, then copied to `files/arkandnoid/NOID/noid.dump`, or a json export
+created with the scripts of the library.
+
+### Maintenance of the noid database
+
+The noid database stores the counter of the minter, so it must be saved with
+the files. The config form displays its state: backend, identifiers known by
+the database, and arks stored in Omeka.
+
+When the database does not know an ark stored in Omeka that the minter can
+issue, for example after a restoration of an older backup or a failed
+migration, the next arks would be duplicates, so the creation of arks is locked
+until the database is repaired from the config form:
+
+- reserve the unknown arks, when the database works and these arks were
+  imported from another system with the same naan and template;
+- rebuild the database from the arks stored in Omeka, in a background job: the
+  minting is replayed with the same template and generator, so the same
+  identifiers are issued in the same order, including the ones of the removed
+  resources. Then a margin of identifiers, none by default, can be skipped after
+  the last ark stored in Omeka: they will never be assigned, so the arks of
+  resources removed after this ark, that cannot be known, will not be assigned
+  again. The only cost is a gap in the numbering.
+
+The list of the identifiers issued without resource (arks of removed resources
+and margin) can be downloaded from the config form.
+
+A backup of the database is always better than a rebuild. A prefix in the
+template (for example "b" in "b.rllllk") is recommended: if the database is
+lost, a new prefix ensures that new arks will never be the same than existing
+ones, and it allows to create parallel series.
 
 ### Random Generator
 
@@ -239,8 +279,7 @@ The output of perl (release 5.20 and greater) and php (before and since release
 algorithm), are the same for integers at least until 32 bits (perl limit, namely
 more than 4 000 000 000 identifiers).
 
-Anyway, it is recommended to use php 7.1 or higher, since previous versions of
-php are no more supported.
+Anyway, the module requires php 8.2 or higher.
 
 ### Automatic test
 
@@ -294,6 +333,9 @@ TODO
 - [ ] Manage deleted items, where the ark should output something about deletion.
 - [x] Integrate the new composer package to create noids with xml or sql.
 - [ ] Allow to use external sql database, not only the omeka one.
+- [ ] Manage multiple series, for example for differents item sets or sites.
+- [ ] Manage redirection, deletion and merging.
+- [ ] Find available prefixes for second series when the first one started with zek.
 
 
 Warning
