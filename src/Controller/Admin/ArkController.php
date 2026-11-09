@@ -3,12 +3,22 @@
 namespace Ark\Controller\Admin;
 
 use Ark\Form\CreateArksForm;
+use Ark\Stdlib\NoidMaintenance;
 use Common\Stdlib\PsrMessage;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\ViewModel;
 
 class ArkController extends AbstractActionController
 {
+    /**
+     * @var \Ark\Stdlib\NoidMaintenance
+     */
+    protected $noidMaintenance;
+
+    public function __construct(NoidMaintenance $noidMaintenance)
+    {
+        $this->noidMaintenance = $noidMaintenance;
+    }
     public function indexAction()
     {
         $form = $this->getForm(CreateArksForm::class);
@@ -42,5 +52,36 @@ class ArkController extends AbstractActionController
         return new ViewModel([
             'form' => $form,
         ]);
+    }
+
+    /**
+     * Download the identifiers issued without resource: removed resources and
+     * margin of a rebuild.
+     */
+    public function unboundAction()
+    {
+        if (!$this->userIsAllowed(\Omeka\Module\Manager::class, 'configure')) {
+            throw new \Omeka\Mvc\Exception\PermissionDeniedException(
+                $this->translate('Only the administrators can download the identifiers issued without resource.') // @translate
+            );
+        }
+
+        // The date is the one of the database: after a rebuild, it is the date
+        // of the rebuild, not the original one.
+        $stream = fopen('php://temp', 'w+');
+        fputcsv($stream, ['ark', 'rank', 'issued_in_database', 'former_resources', 'type'], ',', '"', '\\');
+        foreach ($this->noidMaintenance->identifiersWithoutResource() as $row) {
+            fputcsv($stream, ['ark:/' . $row['ark'], $row['position'], $row['date'], $row['resources'], $row['type']], ',', '"', '\\');
+        }
+        rewind($stream);
+        $csv = stream_get_contents($stream);
+        fclose($stream);
+
+        $response = $this->getResponse();
+        $response->getHeaders()
+            ->addHeaderLine('Content-Type', 'text/csv; charset=utf-8')
+            ->addHeaderLine('Content-Disposition', 'attachment; filename="ark-unbound-' . date('Ymd-His') . '.csv"');
+        $response->setContent($csv);
+        return $response;
     }
 }
