@@ -293,6 +293,9 @@ class ConfigForm extends Form
         }
 
         $rebuild = $this->noidMaintenance->isMigrationNeeded() || !$this->noidMaintenance->isConsistent();
+        if ($rebuild && !$this->noidMaintenance->isMigrationNeeded() && $this->noidMaintenance->counters() !== null) {
+            $actions['reserve'] = 'Reserve the arks stored in Omeka that the noid database does not know, so they will never be issued (the current database is kept as a backup)'; // @translate
+        }
         if ($rebuild) {
             $actions['rebuild'] = 'Rebuild the noid database from the arks stored in Omeka, in a background job (the current database is kept as a backup)'; // @translate
         }

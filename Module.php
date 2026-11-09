@@ -249,6 +249,19 @@ class Module extends AbstractModule
             }
             // The plugin was built for the previous store.
             $namePlugin = $services->get('Ark\NamePluginManager')->build('noid');
+        } elseif ($action === 'reserve') {
+            try {
+                $result = $noidMaintenance->reserveUnknownArks();
+                $controller->messenger()->addSuccess(new PsrMessage(
+                    '{count} arks unknown to the noid database were reserved, so they will never be issued.', // @translate
+                    ['count' => $result['reserved']]
+                ));
+            } catch (\RuntimeException $e) {
+                $controller->messenger()->addError(new PsrMessage(
+                    'The unknown arks cannot be reserved: {error}', // @translate
+                    ['error' => $e->getMessage()]
+                ));
+            }
         } elseif ($action === 'rebuild') {
             $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\Ark\Job\RebuildNoidDatabase::class, ['margin' => $margin]);
             $urlPlugin = $controller->url();

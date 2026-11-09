@@ -78,7 +78,8 @@ $methods = [
     <?php endif; ?>
 
     <?php else: ?>
-    <p class="error"><?= $escape($translate('The noid database does not contain all the arks stored in Omeka, so the next arks would be duplicates: no ark will be created until it is restored from a backup or rebuilt from the arks stored in Omeka.')) ?></p>
+    <p class="error"><?= $escape(sprintf($translate('The noid database does not know %d arks stored in Omeka that the minter can issue, so the next arks may be duplicates: no ark will be created until they are reserved, or the database is restored from a backup or rebuilt from the arks stored in Omeka.'), $status['unknown_arks'])) ?></p>
+    <p><?= $escape($translate('When the database works and these arks were imported from another system, reserve them. When the database was replaced by an older backup, rebuild it.')) ?></p>
     <?php endif; ?>
 
     <?php if ($locked): ?>

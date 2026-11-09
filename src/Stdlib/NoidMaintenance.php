@@ -615,16 +615,125 @@ class NoidMaintenance
     }
 
     /**
-     * Check if the database contains all the arks stored in Omeka.
+     * Check if the minter cannot issue an ark already stored in Omeka.
      *
-     * Each issued or held identifier is counted, so a database that knows less
-     * identifiers than the arks of Omeka was reset or replaced, and the next
-     * arks would be duplicates of existing ones.
+     * When the database knows as many identifiers as the arks of Omeka, it is
+     * consistent. Else, each ark is checked, because some arks may have been
+     * imported from another system with the same naan: they are a risk only
+     * if the minter can issue them.
      */
     public function isConsistent(): bool
     {
         $arks = $this->countArks();
-        return !$arks || $this->checkCounters($this->counters(), $arks);
+        return !$arks
+            || $this->checkCounters($this->counters(), $arks)
+            || !$this->unknownArks();
+    }
+
+    /**
+     * Get the arks of Omeka unknown to the database that the minter can issue.
+     *
+     * An ark is known when it was issued or held. An unknown ark that does not
+     * match the template cannot be issued, so it is not a duplicate to come.
+     * When there is no database, all the arks are unknown.
+     *
+     * @return string[] The arks without "ark:/".
+     */
+    public function unknownArks(): array
+    {
+        $arks = array_map('strval', array_keys($this->fetchArks()));
+        $store = $this->getStore();
+        if (!$arks || $this->counters($store) === null) {
+            return $arks;
+        }
+
+        $settings = $this->storageSettings($store);
+        $storageClass = Globals::DB_TYPES[$store];
+        /** @var \Noid\Storage\DatabaseInterface $storage */
+        $storage = new $storageClass();
+        $storage->open($settings, DatabaseInterface::DB_RDONLY);
+        // The whole database is read once, since a lookup is slow on xml.
+        $keys = $storage->get_range('');
+        $storage->close();
+
+        // An ark without the naan and the prefix of the minter cannot be issued.
+        $firstPart = (string) ($keys[Globals::_RR . '/firstpart'] ?? '');
+        $unknown = array_filter($arks, fn ($id) => strpos($id, $firstPart) === 0
+            && !isset($keys[$id . "\t" . Globals::_RR . '/c'])
+            && !isset($keys[$id . "\t" . Globals::_RR . '/h']));
+        if (!$unknown) {
+            return [];
+        }
+
+        $noid = Db::dbopen($settings, DatabaseInterface::DB_RDONLY);
+        if (!$noid) {
+            return array_values($unknown);
+        }
+        try {
+            return array_values(array_filter($unknown, function ($id) use ($noid) {
+                $check = NoidLib::validate($noid, '-', [$id]);
+                return $check && strpos((string) reset($check), 'id: ') === 0;
+            }));
+        } finally {
+            Db::dbclose($noid, true);
+        }
+    }
+
+    /**
+     * Hold the arks of Omeka unknown to the database, so they are never issued.
+     *
+     * The arks are bound to their resources too. It is lighter than a rebuild
+     * for a working database, for example when arks were imported from another
+     * system with the same naan and template. The previous database is kept as
+     * a backup.
+     *
+     * @return array With keys "reserved" and "backups".
+     * @throws \RuntimeException
+     */
+    public function reserveUnknownArks(): array
+    {
+        $unknown = array_flip($this->unknownArks());
+        $store = $this->getStore();
+        if (!$unknown || $this->counters($store) === null) {
+            throw new \RuntimeException('There is no database or no unknown ark to reserve.');
+        }
+
+        $arks = array_intersect_key($this->fetchArks(), $unknown);
+        $contact = (string) $this->settings->get('administrator_email', '[Unknown user]');
+        $settings = $this->storageSettings($store);
+
+        // Update in memory, then write the database with a backup.
+        $noid = Db::dbopen($settings, DatabaseInterface::DB_RDONLY);
+        if (!$noid) {
+            throw new \RuntimeException('The database cannot be opened: ' . Log::errmsg(null, 1));
+        }
+        $engine = Db::$engine;
+        $memory = new NoidMemoryStorage($engine->get_range(''));
+        Db::$engine = $memory;
+        try {
+            foreach ($arks as $id => $resourceIds) {
+                NoidLib::hold_set($noid, (string) $id);
+                $this->bindArk($noid, $contact, (string) $id, $resourceIds, false);
+            }
+        } finally {
+            Db::$engine = $engine;
+            Db::dbclose($noid, true);
+        }
+
+        $backups = $this->backupDatabase($store);
+        try {
+            $this->importData($memory->get_range(''), $store);
+        } catch (\Throwable $e) {
+            $this->restoreDatabase($store, $backups);
+            throw new \RuntimeException($e->getMessage(), 0, $e);
+        }
+
+        $this->updateLock();
+
+        return [
+            'reserved' => count($arks),
+            'backups' => array_values($backups),
+        ];
     }
 
     /**
@@ -653,7 +762,8 @@ class NoidMaintenance
             'store_available' => NoidStore::isAvailable($store),
             'counters' => $counters,
             'arks' => $arks,
-            'consistent' => !$arks || $this->checkCounters($counters, $arks),
+            'consistent' => !$arks || $this->checkCounters($counters, $arks) || !($unknown = $this->unknownArks()),
+            'unknown_arks' => count($unknown ?? []),
             'bdb' => $this->hasBdbDatabase(),
             'migration_needed' => $this->isMigrationNeeded(),
             'migration_methods' => $this->migrationMethods(),
