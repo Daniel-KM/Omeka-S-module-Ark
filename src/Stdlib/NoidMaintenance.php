@@ -121,7 +121,8 @@ class NoidMaintenance
     }
 
     /**
-     * File created by "db_dump -p noid.bdb > noid.dump", maybe on another server.
+     * File created by "db_dump -p noid.bdb > noid.dump", maybe on another
+     * server.
      */
     public function getDumpFile(): string
     {

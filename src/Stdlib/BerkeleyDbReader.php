@@ -5,9 +5,9 @@ namespace Ark\Stdlib;
 /**
  * Read a BerkeleyDB btree database in pure php, without the extension dba.
  *
- * Only the format of the noid databases is managed: a btree database (version
- * 8 or 9, BerkeleyDB 4.2 to 6.x), without encryption, checksum, duplicates or
- * sub-databases, in any byte order.
+ * Only the format of the noid databases is managed: a btree database, version 8
+ * (BerkeleyDB 3.x and 4.0) or 9 (BerkeleyDB 4.1 and later), without encryption,
+ * checksum, duplicates or sub-databases, in any byte order.
  *
  * Page 0 is the meta page, that contains the page size and the root. Each page
  * starts with a header of 26 bytes, followed by the offsets of its items. The
