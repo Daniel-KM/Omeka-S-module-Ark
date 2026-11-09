@@ -31,7 +31,8 @@ class NoidFactory implements FactoryInterface
             $settings,
             $databaseDir,
             $dbType,
-            $connectionConfig
+            $connectionConfig,
+            $services->get('Common\DirectoryManager')
         );
     }
 
