@@ -2,6 +2,7 @@
 
 namespace Ark\Stdlib;
 
+use Common\Stdlib\DirectoryManager;
 use Common\Stdlib\EasyMeta;
 use Doctrine\DBAL\Connection;
 use Laminas\Log\LoggerInterface;
@@ -84,6 +85,11 @@ class NoidMaintenance
      */
     protected $logger;
 
+    /**
+     * @var \Common\Stdlib\DirectoryManager|null
+     */
+    protected $directoryManager;
+
     public function __construct(
         Connection $connection,
         EasyMeta $easyMeta,
@@ -91,7 +97,8 @@ class NoidMaintenance
         ?Cli $cli,
         string $databaseDir,
         array $connectionConfig = [],
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?DirectoryManager $directoryManager = null
     ) {
         $this->connection = $connection;
         $this->easyMeta = $easyMeta;
@@ -100,6 +107,7 @@ class NoidMaintenance
         $this->databaseDir = $databaseDir;
         $this->connectionConfig = $connectionConfig;
         $this->logger = $logger;
+        $this->directoryManager = $directoryManager;
     }
 
     public function getDatabaseDir(): string
@@ -553,6 +561,11 @@ class NoidMaintenance
         $storageClass = Globals::DB_TYPES[$store] ?? null;
         if (!$storageClass || !class_exists($storageClass) || !NoidStore::isAvailable($store)) {
             throw new \RuntimeException(sprintf('The backend "%s" is not available.', $store));
+        }
+
+        // The directory is inside "files", that is served by the web server.
+        if ($this->directoryManager) {
+            $this->directoryManager->checkDestinationDir($this->databaseDir, true);
         }
 
         $total = count($data);

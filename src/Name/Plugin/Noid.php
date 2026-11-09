@@ -3,6 +3,7 @@
 namespace Ark\Name\Plugin;
 
 use Ark\Stdlib\NoidStore;
+use Common\Stdlib\DirectoryManager;
 use Laminas\Log\Logger;
 use Noid\Lib\Db;
 use Noid\Lib\Log;
@@ -45,18 +46,25 @@ class Noid implements PluginInterface
      */
     protected $connectionConfig = [];
 
+    /**
+     * @var \Common\Stdlib\DirectoryManager|null
+     */
+    protected $directoryManager;
+
     public function __construct(
         Logger $logger,
         Settings $settings,
         string $databaseDir,
         string $dbType = 'xml',
-        array $connectionConfig = []
+        array $connectionConfig = [],
+        ?DirectoryManager $directoryManager = null
     ) {
         $this->logger = $logger;
         $this->settings = $settings;
         $this->databaseDir = $databaseDir;
         $this->dbType = $dbType;
         $this->connectionConfig = $connectionConfig;
+        $this->directoryManager = $directoryManager;
     }
 
     public function isFullArk(): bool
@@ -287,6 +295,11 @@ class Noid implements PluginInterface
         $subnaa = $this->settings->get('ark_subnaa');
 
         $term = ($naan && $naa && $subnaa) ? 'long' : 'medium';
+
+        // The directory is inside "files", that is served by the web server.
+        if ($this->directoryManager) {
+            $this->directoryManager->checkDestinationDir($this->getDatabaseDir(), true);
+        }
 
         $erc = Db::dbcreate($settings, $contact, $template, $term, $naan, $naa, $subnaa);
 
