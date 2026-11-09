@@ -19,7 +19,7 @@ if (!defined('COMMON_PSR4_FALLBACK')) {
         if (file_exists($commonSrc . '/TraitModule.php')) {
             define('COMMON_PSR4_FALLBACK', $commonSrc);
             spl_autoload_register(static function ($class): void {
-                if (str_starts_with($class, 'Common\\')) {
+                if (strpos($class, 'Common\\') === 0) {
                     $file = COMMON_PSR4_FALLBACK . '/' . strtr(substr($class, 7), '\\', '/') . '.php';
                     if (file_exists($file)) {
                         require_once $file;
@@ -376,7 +376,8 @@ class Module extends AbstractModule
         // example the validation of a contribution by module Contribute), else
         // an identifier would be consumed and the entity manager flushed for a
         // resource that is not persisted.
-        if ($event->getParam('request')?->getOption('validateOnly')) {
+        $request = $event->getParam('request');
+        if ($request && $request->getOption('validateOnly')) {
             return;
         }
 
